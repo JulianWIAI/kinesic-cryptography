@@ -7,10 +7,10 @@ A research tool that translates alphanumeric text into a visual dashboard of **f
 ## Screenshots
 
 ### Decode View
-<!-- Insert screenshot of the Grid/Word Stream/Narrative view here -->
+![Decode View](https://raw.githubusercontent.com/JulianWIAI/kinesic-cryptography/main/screenshots/decode-view.png)
 
 ### Comparison Mode
-<!-- Insert screenshot of the Comparison Mode here -->
+![Comparison Mode](https://raw.githubusercontent.com/JulianWIAI/kinesic-cryptography/main/screenshots/comparison-mode.png)
 
 ---
 
