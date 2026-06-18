@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Somatic Cipher Decoder</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="header-brand">
+        <span class="brand-prefix" aria-hidden="true">//&nbsp;</span>
+        <h1 class="site-title">Somatic Cipher Decoder</h1>
+      </div>
+      <p class="site-subtitle">Kinesthetic Signal Analysis &mdash; Facial &amp; Postural Stream Decoder</p>
+    </div>
+    <div class="header-status" aria-hidden="true">
+      <span class="status-dot"></span>
+      <span class="status-label">SYSTEM ONLINE</span>
+    </div>
+  </header>
+
+  <main class="main-content" id="main-content">
+
+    <!-- ── Single input (default) ───────────────────────── -->
+    <section class="input-section" id="input-section-single" aria-label="Signal input">
+      <div class="input-panel">
+        <label for="cipher-input" class="input-label">SIGNAL INPUT</label>
+        <div class="input-row">
+          <input
+            type="text"
+            id="cipher-input"
+            class="cipher-input"
+            placeholder="Enter text or numbers to decode..."
+            autocomplete="off"
+            spellcheck="false"
+            aria-describedby="input-hint"
+          >
+          <button id="decode-btn" class="decode-btn" type="button">
+            <span class="btn-label">DECODE</span>
+            <span class="btn-icon" aria-hidden="true">&#9654;</span>
+          </button>
+        </div>
+        <p id="input-hint" class="input-hint">Alphanumeric only &mdash; spaces and special characters are discarded.</p>
+      </div>
+    </section>
+
+    <!-- ── Comparison input (hidden until Comparison Mode) ── -->
+    <section class="input-section input-section--comparison" id="input-section-comparison" aria-label="Comparison input" hidden>
+      <div class="comparison-inputs">
+        <div class="comparison-input-group">
+          <label for="cipher-input-a" class="input-label input-label--a">WORD A</label>
+          <input
+            type="text"
+            id="cipher-input-a"
+            class="cipher-input cipher-input--a"
+            placeholder="First word or phrase..."
+            autocomplete="off"
+            spellcheck="false"
+          >
+        </div>
+        <div class="comparison-vs" aria-hidden="true">VS</div>
+        <div class="comparison-input-group">
+          <label for="cipher-input-b" class="input-label input-label--b">WORD B</label>
+          <input
+            type="text"
+            id="cipher-input-b"
+            class="cipher-input cipher-input--b"
+            placeholder="Second word or phrase..."
+            autocomplete="off"
+            spellcheck="false"
+          >
+        </div>
+      </div>
+      <div class="comparison-actions">
+        <button id="decode-btn-comparison" class="decode-btn" type="button">
+          <span class="btn-label">DECODE BOTH</span>
+          <span class="btn-icon" aria-hidden="true">&#9654;&#9654;</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ── Controls bar ──────────────────────────────────── -->
+    <div class="controls-bar" role="toolbar" aria-label="View controls">
+
+      <div class="view-toggles" id="view-toggles" role="group" aria-label="View mode">
+        <span class="controls-section-label" aria-hidden="true">VIEW</span>
+        <button id="btn-grid-view" class="view-toggle view-toggle--active" data-view="grid" aria-pressed="true">
+          <span class="toggle-icon" aria-hidden="true">&#8862;</span>
+          Grid
+        </button>
+        <button id="btn-narrative-view" class="view-toggle" data-view="narrative" aria-pressed="false">
+          <span class="toggle-icon" aria-hidden="true">&#8594;</span>
+          Narrative
+        </button>
+        <button id="btn-stream-view" class="view-toggle" data-view="stream" aria-pressed="false">
+          <span class="toggle-icon" aria-hidden="true">&#9776;</span>
+          Word Stream
+        </button>
+      </div>
+
+      <div class="controls-divider" aria-hidden="true"></div>
+
+      <button id="btn-comparison-mode" class="comparison-toggle" aria-pressed="false">
+        <span class="toggle-icon" aria-hidden="true">&#8942;</span>
+        Comparison Mode
+      </button>
+
+    </div>
+
+    <!-- ── Output section ────────────────────────────────── -->
+    <section class="output-section" aria-label="Decoded output">
+
+      <div id="output-header" class="output-header" hidden>
+        <span class="output-label">DECODED STREAM</span>
+        <span id="char-count" class="char-count"></span>
+      </div>
+
+      <!-- Grid view output -->
+      <div id="output-grid" class="output-grid" role="list" aria-live="polite" aria-label="Character analysis cards" hidden></div>
+
+      <!-- Narrative view output -->
+      <div id="narrative-container" class="narrative-container" hidden>
+        <div id="narrative-timeline" class="narrative-timeline" role="list" aria-live="polite" aria-label="Narrative timeline"></div>
+      </div>
+
+      <!-- Word Stream view output -->
+      <div id="word-stream-container" class="word-stream-container" hidden></div>
+
+      <!-- Comparison view output -->
+      <div id="comparison-container" class="comparison-container" hidden></div>
+
+      <!-- Empty state -->
+      <div id="empty-state" class="empty-state" aria-live="polite">
+        <div class="empty-glyph" aria-hidden="true">[ &#8212; ]</div>
+        <p>No signal decoded. Enter text above to begin analysis.</p>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- ── Synthesis Panel (fixed bottom) ───────────────────── -->
+  <aside class="synthesis-panel" id="synthesis-panel" hidden aria-label="Contextual synthesis">
+    <div class="synthesis-header" id="synthesis-header">
+      <div class="synthesis-title">
+        <span class="synthesis-dot" aria-hidden="true"></span>
+        CONTEXTUAL SYNTHESIS
+      </div>
+      <button id="synthesis-toggle" class="synthesis-toggle-btn" aria-expanded="true" aria-controls="synthesis-body" aria-label="Collapse synthesis panel">&#9660;</button>
+    </div>
+    <div class="synthesis-body" id="synthesis-body" role="region" aria-label="Synthesized narrative">
+      <div id="synthesis-text" class="synthesis-text"></div>
+    </div>
+  </aside>
+
+  <footer class="site-footer">
+    <span>SOMATIC CIPHER DECODER &mdash; v2.0</span>
+  </footer>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
