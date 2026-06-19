@@ -9,6 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/diagnostic.css">
 </head>
 <body>
 
@@ -37,7 +38,7 @@
             type="text"
             id="cipher-input"
             class="cipher-input"
-            placeholder="Enter text or numbers to decode..."
+            placeholder="Enter text to decode — e.g. WIRTSCHAFT, GLÜCK…"
             autocomplete="off"
             spellcheck="false"
             aria-describedby="input-hint"
@@ -47,7 +48,7 @@
             <span class="btn-icon" aria-hidden="true">&#9654;</span>
           </button>
         </div>
-        <p id="input-hint" class="input-hint">Alphanumeric only &mdash; spaces and special characters are discarded.</p>
+        <p id="input-hint" class="input-hint">Letters (A–Z, Ä Ö Ü) and digits accepted &mdash; spaces and punctuation are discarded.</p>
       </div>
     </section>
 
@@ -60,7 +61,7 @@
             type="text"
             id="cipher-input-a"
             class="cipher-input cipher-input--a"
-            placeholder="First word or phrase..."
+            placeholder="First word or phrase…"
             autocomplete="off"
             spellcheck="false"
           >
@@ -72,7 +73,7 @@
             type="text"
             id="cipher-input-b"
             class="cipher-input cipher-input--b"
-            placeholder="Second word or phrase..."
+            placeholder="Second word or phrase…"
             autocomplete="off"
             spellcheck="false"
           >
@@ -114,6 +115,37 @@
 
     </div>
 
+    <!-- ── Wavelength Telemetry Panel ───────────────────── -->
+    <section
+      id="waveform-panel"
+      class="waveform-panel"
+      hidden
+      aria-label="Wavelength Telemetry — Linguistic Waveform"
+    >
+      <div class="waveform-header">
+        <div class="waveform-title">
+          <span class="waveform-dot" aria-hidden="true"></span>
+          WAVELENGTH TELEMETRY
+        </div>
+        <span class="waveform-status" aria-live="polite" id="waveform-status">SCANNING&hellip;</span>
+      </div>
+      <div class="waveform-body">
+        <div class="waveform-canvas-wrap">
+          <canvas id="waveform-canvas" aria-label="Linguistic waveform chart"></canvas>
+        </div>
+        <div class="waveform-legend" aria-label="Waveform key">
+          <div class="waveform-legend-item waveform-legend--somatic">
+            <span class="waveform-legend-icon" aria-hidden="true">&#8776;</span>
+            <span>Smooth / Flat Oscillations &mdash; High Somatic Resonance</span>
+          </div>
+          <div class="waveform-legend-item waveform-legend--state">
+            <span class="waveform-legend-icon" aria-hidden="true">&#9889;</span>
+            <span>Erratic / Jagged Spikes &mdash; High-Load State / System Text</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- ── Output section ────────────────────────────────── -->
     <section class="output-section" aria-label="Decoded output">
 
@@ -138,10 +170,57 @@
 
       <!-- Empty state -->
       <div id="empty-state" class="empty-state" aria-live="polite">
-        <div class="empty-glyph" aria-hidden="true">[ &#8212; ]</div>
+        <div class="empty-glyph" aria-hidden="true">[ &mdash; ]</div>
         <p>No signal decoded. Enter text above to begin analysis.</p>
       </div>
 
+    </section>
+
+    <!-- ── Psycholinguistic Diagnostic Engine Panel ───────── -->
+    <section
+      id="diagnostic-panel"
+      class="diagnostic-panel"
+      hidden
+      aria-label="Psycholinguistic Diagnostic Engine"
+    >
+      <div class="diagnostic-header">
+        <div class="diagnostic-title">
+          <span class="diagnostic-dot" aria-hidden="true"></span>
+          PSYCHOLINGUISTIC DIAGNOSTIC ENGINE
+        </div>
+        <button
+          id="diagnostic-toggle"
+          class="diagnostic-toggle-btn"
+          aria-expanded="true"
+          aria-controls="diagnostic-body"
+          aria-label="Collapse diagnostic panel"
+        >▼</button>
+      </div>
+
+      <div class="diagnostic-body" id="diagnostic-body">
+
+        <!-- Metric tiles (Quersumme, Word Sum, σ, Tier) -->
+        <div id="diagnostic-metrics" class="diag-metrics-grid"></div>
+
+        <!-- Category distribution bars -->
+        <div id="diagnostic-category-bar"></div>
+
+        <!-- Sovereignty / Somatic / Resonant scores -->
+        <div id="diagnostic-scores"></div>
+
+        <!-- Charts row -->
+        <div class="diag-charts-row">
+          <div class="diag-chart-box">
+            <div class="diag-chart-title">Archetypal Radar &mdash; Category Profile</div>
+            <canvas id="diagnostic-radar"></canvas>
+          </div>
+          <div class="diag-chart-box">
+            <div class="diag-chart-title">Complexity Scatter &mdash; Letter Values by Position</div>
+            <canvas id="diagnostic-scatter"></canvas>
+          </div>
+        </div>
+
+      </div>
     </section>
 
   </main>
@@ -161,8 +240,11 @@
   </aside>
 
   <footer class="site-footer">
-    <span>SOMATIC CIPHER DECODER &mdash; v2.0</span>
+    <span>SOMATIC CIPHER DECODER &mdash; v3.0</span>
   </footer>
+
+  <!-- Chart.js v4 — loaded as a non-module global so ES6 modules can access window.Chart -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 
   <script type="module" src="js/main.js"></script>
 </body>

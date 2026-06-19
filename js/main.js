@@ -1,15 +1,18 @@
 /**
- * SOMATIC CIPHER DECODER — Entry Point v2
+ * SOMATIC CIPHER DECODER — Entry Point v3
  *
  * Features: Grid View, Narrative View, Comparison Engine,
- *           Contextual Synthesis Panel, Category-based theming.
+ *           Contextual Synthesis Panel, Category-based theming,
+ *           Psycholinguistic Diagnostic Engine.
  */
 
-import { decodeText } from './decoder.js';
+import { decodeText }                              from './decoder.js';
+import { renderDiagnostic, hideDiagnosticPanel }   from './diagnosticPanel.js';
+import { updateWaveform, destroyWaveform }          from './waveform.js';
 
 // ── App State ─────────────────────────────────────────────
 const state = {
-  view:          'grid',  // 'grid' | 'narrative'
+  view:          'grid',  // 'grid' | 'narrative' | 'stream'
   comparison:    false,
   synthesisOpen: true,
   decoded:       [],      // single-mode results
@@ -60,14 +63,26 @@ const synthesisToggleBtn  = document.getElementById('synthesis-toggle');
 const synthesisBody       = document.getElementById('synthesis-body');
 const synthesisText       = document.getElementById('synthesis-text');
 
+// Wavelength telemetry panel
+const waveformPanel       = document.getElementById('waveform-panel');
+const waveformCanvas      = /** @type {HTMLCanvasElement} */ (document.getElementById('waveform-canvas'));
+const waveformStatusEl    = document.getElementById('waveform-status');
+
 // ── Event Listeners ───────────────────────────────────────
 
 decodeBtn.addEventListener('click', handleDecodeSingle);
 inputEl.addEventListener('keydown', e => { if (e.key === 'Enter') handleDecodeSingle(); });
 
+// Real-time waveform — fires on every keystroke in single mode
+inputEl.addEventListener('input', handleWaveformSingle);
+
 decodeBtnComp.addEventListener('click', handleDecodeComparison);
 inputElA.addEventListener('keydown', e => { if (e.key === 'Enter') handleDecodeComparison(); });
 inputElB.addEventListener('keydown', e => { if (e.key === 'Enter') handleDecodeComparison(); });
+
+// Real-time waveform — fires on every keystroke in comparison mode
+inputElA.addEventListener('input', handleWaveformComparison);
+inputElB.addEventListener('input', handleWaveformComparison);
 
 btnGridView.addEventListener('click', () => setView('grid'));
 btnNarrView.addEventListener('click', () => setView('narrative'));
@@ -80,12 +95,53 @@ synthesisToggleBtn.addEventListener('click', toggleSynthesisCollapse);
 function handleDecodeSingle() {
   state.decoded = decodeText(inputEl.value);
   renderSingle();
+  renderDiagnostic(inputEl.value, null);
 }
 
 function handleDecodeComparison() {
   state.decodedA = decodeText(inputElA.value);
   state.decodedB = decodeText(inputElB.value);
   renderComparison();
+  renderDiagnostic(inputElA.value, inputElB.value);
+}
+
+// ── Waveform Handlers (real-time) ─────────────────────────
+
+/**
+ * Updates the waveform for single-input mode.
+ * Fires on every `input` event so the chart tracks the user's typing live.
+ */
+function handleWaveformSingle() {
+  const visible = updateWaveform(waveformCanvas, [
+    { label: 'SIGNAL', text: inputEl.value },
+  ]);
+  setWaveformPanelVisible(visible);
+}
+
+/**
+ * Updates the waveform for comparison mode — overlays both waveforms on one chart.
+ */
+function handleWaveformComparison() {
+  const visible = updateWaveform(waveformCanvas, [
+    { label: 'WORD A', text: inputElA.value },
+    { label: 'WORD B', text: inputElB.value },
+  ]);
+  setWaveformPanelVisible(visible);
+}
+
+/**
+ * Shows or hides the waveform panel and updates the status label.
+ * @param {boolean} visible
+ */
+function setWaveformPanelVisible(visible) {
+  if (!waveformPanel) return;
+  if (visible) {
+    waveformPanel.removeAttribute('hidden');
+    if (waveformStatusEl) waveformStatusEl.textContent = 'LIVE';
+  } else {
+    waveformPanel.setAttribute('hidden', '');
+    if (waveformStatusEl) waveformStatusEl.textContent = 'SCANNING\u2026';
+  }
 }
 
 // ── Single-mode Renderer ──────────────────────────────────
@@ -181,6 +237,9 @@ function toggleComparisonMode() {
   clearAllOutputs();
   showEmptyState();
   hideSynthesisPanel();
+  // Reset waveform when switching modes — chart dataset count may change
+  destroyWaveform();
+  setWaveformPanelVisible(false);
 }
 
 // ── Card Factory (Grid View) ──────────────────────────────
@@ -343,7 +402,8 @@ function buildComparisonRow(label, rawInput, decoded) {
 
   const rowWord = document.createElement('span');
   rowWord.className = 'comparison-row-word';
-  rowWord.textContent = rawInput.toLowerCase().replace(/[^a-z0-9]/g, '') || '—';
+  // Preserve letters a–z, umlauts ä ö ü, and digits
+  rowWord.textContent = rawInput.toLowerCase().replace(/[^a-z0-9äöü]/g, '') || '—';
 
   rowHeader.appendChild(rowLabel);
   rowHeader.appendChild(rowWord);
@@ -466,7 +526,7 @@ function populateSynthesis(primaryDecoded, secondaryDecoded) {
       if (!story) return null;
       const p = document.createElement('p');
       const strong = document.createElement('strong');
-      strong.textContent = `WORD ${label}`;
+      strong.textContent = `WORD ${label}: `;
       p.appendChild(strong);
       p.appendChild(document.createTextNode(story));
       return p;
@@ -500,7 +560,6 @@ function toggleSynthesisCollapse() {
 
 function updateBodyPadding() {
   if (!synthesisPanel.hidden) {
-    // Use rAF so the panel has rendered before we measure its height
     requestAnimationFrame(() => {
       document.body.style.paddingBottom = synthesisPanel.offsetHeight + 16 + 'px';
     });
@@ -520,6 +579,9 @@ function clearAllOutputs() {
   wordStreamContainer.setAttribute('hidden', '');
   comparisonContainer.setAttribute('hidden', '');
   outputHeader.setAttribute('hidden', '');
+
+  // Also reset the diagnostic panel
+  hideDiagnosticPanel();
 }
 
 function showEmptyState()  { emptyState.removeAttribute('hidden'); }
@@ -527,7 +589,8 @@ function hideEmptyState()  { emptyState.setAttribute('hidden', ''); }
 
 function updateOutputHeader(decoded, raw) {
   outputHeader.removeAttribute('hidden');
-  const unique = new Set(raw.toLowerCase().replace(/[^a-z0-9]/g, '')).size;
+  // Count unique characters — include letters, digits, and umlauts
+  const unique = new Set([...raw.toLowerCase()].filter(c => /^[a-z0-9äöü]$/.test(c))).size;
   charCountEl.textContent = `${decoded.length} character${decoded.length !== 1 ? 's' : ''} decoded — ${unique} unique`;
 }
 
