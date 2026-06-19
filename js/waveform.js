@@ -15,7 +15,8 @@
  * Requires Chart.js v4 loaded as a global (window.Chart) via CDN.
  */
 
-import { LETTER_MAP } from './letterMap.js';
+import { LETTER_MAP }       from './letterMap.js';
+import { CLUSTER_COLORS }   from './palette.js';
 
 // Singleton Chart.js instance — updated in place on each keystroke
 let waveformInstance = null;
@@ -106,17 +107,11 @@ function buildChart(canvas, telemetry) {
   const ctx    = canvas.getContext('2d');
   const height = canvas.parentElement?.offsetHeight || 180;
 
-  // Series colour palette: accent cyan (face stream) + violet (body stream)
-  const SERIES = [
-    { line: '#00c8ff', gradientStart: 'rgba(0, 200, 255, 0.22)', gradientEnd: 'rgba(0, 200, 255, 0)' },
-    { line: '#a78bfa', gradientStart: 'rgba(167, 139, 250, 0.20)', gradientEnd: 'rgba(167, 139, 250, 0)' },
-  ];
-
   const chartDatasets = telemetry.map((t, i) => {
-    const s        = SERIES[i % SERIES.length];
+    const s        = CLUSTER_COLORS[i % CLUSTER_COLORS.length];
     const gradient = ctx.createLinearGradient(0, 0, 0, height);
-    gradient.addColorStop(0, s.gradientStart);
-    gradient.addColorStop(1, s.gradientEnd);
+    gradient.addColorStop(0, s.gradStart);
+    gradient.addColorStop(1, s.gradEnd);
 
     return {
       label:              t.label,
@@ -142,7 +137,7 @@ function buildChart(canvas, telemetry) {
       animation:           false,   // disable all animation for true real-time feel
       plugins: {
         legend: {
-          display: telemetry.length > 1,  // only show legend in comparison mode
+          display: telemetry.length > 1,  // show legend when multiple words present
           labels:  { color: '#5a6a82', font: { family: 'Space Mono, monospace', size: 10 } },
         },
         tooltip: {

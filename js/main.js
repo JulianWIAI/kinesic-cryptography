@@ -6,9 +6,26 @@
  *           Psycholinguistic Diagnostic Engine.
  */
 
-import { decodeText }                              from './decoder.js';
-import { renderDiagnostic, hideDiagnosticPanel }   from './diagnosticPanel.js';
+import { decodeText }                                              from './decoder.js';
+import { renderDiagnostic, hideDiagnosticPanel,
+         renderDiagnosticCluster }                                from './diagnosticPanel.js';
 import { updateWaveform, destroyWaveform }          from './waveform.js';
+import {
+  getMicroOscilloscope,
+  getGlobalEnvelope,
+  runSpectralAnalysis,
+  aggregateWindow,
+  analyzeWord,
+}                                                  from './physics.js';
+import { ARCHETYPE_NAMES }                         from './classifier.js';
+import {
+  renderGlobalEnvelopeChart,
+  renderMicroWaveChart,
+  renderWordScatterChart,
+  destroySpectralCharts,
+  renderClusterScatterChart,
+  destroyClusterChart,
+}                                                  from './charts.js';
 
 // ── App State ─────────────────────────────────────────────
 const state = {
@@ -16,8 +33,7 @@ const state = {
   comparison:    false,
   synthesisOpen: true,
   decoded:       [],      // single-mode results
-  decodedA:      [],      // comparison Word A
-  decodedB:      [],      // comparison Word B
+  cluster:       [],      // cluster-mode results: Array<{ word, decoded, analysis }>
 };
 
 // ── Category → CSS class map ─────────────────────────────
@@ -34,10 +50,9 @@ const inputSectionSingle  = document.getElementById('input-section-single');
 const inputEl             = document.getElementById('cipher-input');
 const decodeBtn           = document.getElementById('decode-btn');
 
-// Comparison input
+// Cluster input
 const inputSectionComp    = document.getElementById('input-section-comparison');
-const inputElA            = document.getElementById('cipher-input-a');
-const inputElB            = document.getElementById('cipher-input-b');
+const clusterInputEl      = /** @type {HTMLTextAreaElement} */ (document.getElementById('cluster-input'));
 const decodeBtnComp       = document.getElementById('decode-btn-comparison');
 
 // Controls
@@ -68,6 +83,17 @@ const waveformPanel       = document.getElementById('waveform-panel');
 const waveformCanvas      = /** @type {HTMLCanvasElement} */ (document.getElementById('waveform-canvas'));
 const waveformStatusEl    = document.getElementById('waveform-status');
 
+// ── Spectral Analysis Engine DOM refs ──────────────────────
+const spectralCollapseBtn   = document.getElementById('spectral-collapse-btn');
+const spectralBodyEl        = document.getElementById('spectral-body');
+const spectralOscSection    = document.getElementById('spectral-osc-section');
+const spectralResultsEl     = document.getElementById('spectral-analysis-results');
+const spectralWindowMetrics = document.getElementById('spectral-window-metrics');
+const spectralHarmonicTiles = document.getElementById('spectral-harmonic-tiles');
+const oscGlobalCanvas       = /** @type {HTMLCanvasElement} */ (document.getElementById('osc-global-canvas'));
+const oscMicroCanvas        = /** @type {HTMLCanvasElement} */ (document.getElementById('osc-micro-canvas'));
+const spectralScatterCanvas = /** @type {HTMLCanvasElement} */ (document.getElementById('spectral-scatter-canvas'));
+
 // ── Event Listeners ───────────────────────────────────────
 
 decodeBtn.addEventListener('click', handleDecodeSingle);
@@ -76,13 +102,10 @@ inputEl.addEventListener('keydown', e => { if (e.key === 'Enter') handleDecodeSi
 // Real-time waveform — fires on every keystroke in single mode
 inputEl.addEventListener('input', handleWaveformSingle);
 
-decodeBtnComp.addEventListener('click', handleDecodeComparison);
-inputElA.addEventListener('keydown', e => { if (e.key === 'Enter') handleDecodeComparison(); });
-inputElB.addEventListener('keydown', e => { if (e.key === 'Enter') handleDecodeComparison(); });
+decodeBtnComp.addEventListener('click', handleDecodeCluster);
 
-// Real-time waveform — fires on every keystroke in comparison mode
-inputElA.addEventListener('input', handleWaveformComparison);
-inputElB.addEventListener('input', handleWaveformComparison);
+// Real-time waveform — fires on every keystroke in cluster mode (uses first two words)
+clusterInputEl.addEventListener('input', handleWaveformCluster);
 
 btnGridView.addEventListener('click', () => setView('grid'));
 btnNarrView.addEventListener('click', () => setView('narrative'));
@@ -90,19 +113,45 @@ btnStreamView.addEventListener('click', () => setView('stream'));
 btnCompMode.addEventListener('click', toggleComparisonMode);
 synthesisToggleBtn.addEventListener('click', toggleSynthesisCollapse);
 
+// ── Helpers ───────────────────────────────────────────────
+
+/**
+ * Parses a comma-separated cluster input string into trimmed, non-empty word tokens.
+ * @param {string} raw
+ * @returns {string[]}
+ */
+function parseClusterInput(raw) {
+  return raw
+    .split(',')
+    .map(w => w.trim())
+    .filter(w => w.length > 0);
+}
+
 // ── Decode Handlers ───────────────────────────────────────
 
 function handleDecodeSingle() {
   state.decoded = decodeText(inputEl.value);
   renderSingle();
   renderDiagnostic(inputEl.value, null);
+  runDeepSpectralAnalysis(inputEl.value);
 }
 
-function handleDecodeComparison() {
-  state.decodedA = decodeText(inputElA.value);
-  state.decodedB = decodeText(inputElB.value);
-  renderComparison();
-  renderDiagnostic(inputElA.value, inputElB.value);
+function handleDecodeCluster() {
+  const words = parseClusterInput(clusterInputEl.value);
+  if (words.length === 0) {
+    clearAllOutputs();
+    showEmptyState();
+    hideSynthesisPanel();
+    return;
+  }
+  state.cluster = words.map(word => ({
+    word,
+    decoded:  decodeText(word),
+    analysis: analyzeWord(word),
+  }));
+  renderCluster();
+  renderDiagnosticCluster(words);
+  runDeepSpectralAnalysis(words.join(' '));
 }
 
 // ── Waveform Handlers (real-time) ─────────────────────────
@@ -112,21 +161,24 @@ function handleDecodeComparison() {
  * Fires on every `input` event so the chart tracks the user's typing live.
  */
 function handleWaveformSingle() {
-  const visible = updateWaveform(waveformCanvas, [
-    { label: 'SIGNAL', text: inputEl.value },
-  ]);
-  setWaveformPanelVisible(visible);
+  const datasets = [{ label: 'SIGNAL', text: inputEl.value }];
+  setWaveformPanelVisible(updateWaveform(waveformCanvas, datasets));
+  updateSpectralOscilloscopes(datasets);
 }
 
 /**
- * Updates the waveform for comparison mode — overlays both waveforms on one chart.
+ * Updates the waveform for cluster mode — overlays the first two words as coloured lines.
+ * Also drives the Spectral Engine oscilloscopes.
  */
-function handleWaveformComparison() {
-  const visible = updateWaveform(waveformCanvas, [
-    { label: 'WORD A', text: inputElA.value },
-    { label: 'WORD B', text: inputElB.value },
-  ]);
-  setWaveformPanelVisible(visible);
+function handleWaveformCluster() {
+  const words = parseClusterInput(clusterInputEl.value);
+  if (words.length === 0) {
+    setWaveformPanelVisible(false);
+    return;
+  }
+  const datasets = words.map((w, i) => ({ label: w.toUpperCase() || `W${i + 1}`, text: w }));
+  setWaveformPanelVisible(updateWaveform(waveformCanvas, datasets));
+  updateSpectralOscilloscopes(datasets);
 }
 
 /**
@@ -178,12 +230,12 @@ function renderSingle() {
   populateSynthesis(state.decoded, null);
 }
 
-// ── Comparison Renderer ───────────────────────────────────
+// ── Cluster Renderer ──────────────────────────────────────
 
-function renderComparison() {
+function renderCluster() {
   clearAllOutputs();
 
-  if (state.decodedA.length === 0 && state.decodedB.length === 0) {
+  if (state.cluster.length === 0) {
     showEmptyState();
     hideSynthesisPanel();
     return;
@@ -191,15 +243,87 @@ function renderComparison() {
 
   hideEmptyState();
   comparisonContainer.removeAttribute('hidden');
-  comparisonContainer.appendChild(buildComparisonRow('a', inputElA.value, state.decodedA));
 
-  const divider = document.createElement('div');
-  divider.className = 'comparison-divider';
-  comparisonContainer.appendChild(divider);
+  // ── Center of Gravity metrics ─────────────────────────
+  const validWords = state.cluster.filter(c => c.analysis !== null);
+  const avgSum     = validWords.length
+    ? validWords.reduce((s, c) => s + c.analysis.wordSum, 0) / validWords.length
+    : 0;
+  const avgSigma   = validWords.length
+    ? validWords.reduce((s, c) => s + c.analysis.sigma, 0) / validWords.length
+    : 0;
 
-  comparisonContainer.appendChild(buildComparisonRow('b', inputElB.value, state.decodedB));
+  const gravityEl = document.createElement('div');
+  gravityEl.className = 'cluster-gravity';
+  gravityEl.innerHTML = `
+    <div class="cluster-gravity-title">
+      <span class="cluster-gravity-dot" aria-hidden="true"></span>
+      CLUSTER CENTER OF GRAVITY &mdash; ${validWords.length} word${validWords.length !== 1 ? 's' : ''}
+    </div>
+    <div class="cluster-gravity-metrics">
+      <div class="cluster-metric-tile">
+        <span class="cluster-metric-label">AVG WORD SUM (&Sigma;)</span>
+        <span class="cluster-metric-value">${avgSum.toFixed(1)}</span>
+      </div>
+      <div class="cluster-metric-tile">
+        <span class="cluster-metric-label">AVG &sigma;</span>
+        <span class="cluster-metric-value">${avgSigma.toFixed(2)}</span>
+      </div>
+      <div class="cluster-metric-tile">
+        <span class="cluster-metric-label">WORD COUNT</span>
+        <span class="cluster-metric-value">${validWords.length}</span>
+      </div>
+    </div>
+  `;
+  comparisonContainer.appendChild(gravityEl);
 
-  populateSynthesis(state.decodedA, state.decodedB);
+  // ── Word metrics table ────────────────────────────────
+  const tableEl = document.createElement('div');
+  tableEl.className = 'cluster-table';
+  tableEl.innerHTML = `
+    <div class="cluster-table-header">
+      <span>WORD</span><span>&Sigma;</span><span>&sigma;</span><span>TIER</span><span>ARCHETYPE</span>
+    </div>
+    ${state.cluster.map(c => {
+      const a = c.analysis;
+      if (!a) return `<div class="cluster-table-row cluster-table-row--empty"><span>${c.word.toUpperCase()}</span><span colspan="4">—</span></div>`;
+      const tier = a.sigma < 2.0 ? 'T1' : a.sigma < 5.0 ? 'T2' : 'T3';
+      return `<div class="cluster-table-row cluster-table-row--${tier.toLowerCase()}">
+        <span class="cluster-table-word">${c.word.toUpperCase()}</span>
+        <span>${a.wordSum}</span>
+        <span>${a.sigma.toFixed(2)}</span>
+        <span class="cluster-tier-badge cluster-tier-badge--${tier.toLowerCase()}">${tier}</span>
+        <span>${a.quersumme} &mdash; ${ARCHETYPE_NAMES[a.quersumme] ?? '—'}</span>
+      </div>`;
+    }).join('')}
+  `;
+  comparisonContainer.appendChild(tableEl);
+
+  // ── Scatter canvas ─────────────────────────────────────
+  const scatterWrap = document.createElement('div');
+  scatterWrap.className = 'cluster-scatter-wrap';
+  const scatterTitle = document.createElement('div');
+  scatterTitle.className = 'cluster-scatter-title';
+  scatterTitle.textContent = 'CLUSTER SCATTER — Word Sum (Σ) × σ';
+  const scatterBg = document.createElement('div');
+  scatterBg.className = 'cluster-scatter-bg';
+  const canvas = document.createElement('canvas');
+  canvas.id = 'cluster-scatter-canvas';
+  canvas.setAttribute('aria-label', 'Semantic cluster scatter plot');
+  scatterBg.appendChild(canvas);
+  scatterWrap.appendChild(scatterTitle);
+  scatterWrap.appendChild(scatterBg);
+  comparisonContainer.appendChild(scatterWrap);
+
+  // Render the chart
+  const scatterData = state.cluster
+    .filter(c => c.analysis !== null)
+    .map(c => ({ word: c.word, wordSum: c.analysis.wordSum, sigma: c.analysis.sigma }));
+  renderClusterScatterChart(canvas, scatterData);
+
+  // ── Synthesis ─────────────────────────────────────────
+  const allDecoded = state.cluster.flatMap(c => c.decoded);
+  populateSynthesis(allDecoded, null);
 }
 
 // ── View Toggle ───────────────────────────────────────────
@@ -237,9 +361,12 @@ function toggleComparisonMode() {
   clearAllOutputs();
   showEmptyState();
   hideSynthesisPanel();
-  // Reset waveform when switching modes — chart dataset count may change
+  // Reset waveform, spectral and cluster charts — dataset count may change between modes
   destroyWaveform();
   setWaveformPanelVisible(false);
+  destroySpectralCharts();
+  spectralOscSection?.setAttribute('hidden', '');
+  state.cluster = [];
 }
 
 // ── Card Factory (Grid View) ──────────────────────────────
@@ -580,8 +707,10 @@ function clearAllOutputs() {
   comparisonContainer.setAttribute('hidden', '');
   outputHeader.setAttribute('hidden', '');
 
-  // Also reset the diagnostic panel
+  // Also reset the diagnostic panel, spectral deep-analysis results, and cluster chart
   hideDiagnosticPanel();
+  spectralResultsEl?.setAttribute('hidden', '');
+  destroyClusterChart();
 }
 
 function showEmptyState()  { emptyState.removeAttribute('hidden'); }
@@ -662,4 +791,123 @@ function createWordStreamNode(decoded, index, type) {
   node.appendChild(imgWrap);
   node.appendChild(categoryEl);
   return node;
+}
+
+// ── Spectral Analysis Engine ──────────────────────────────
+
+let spectralPanelOpen = true;
+
+/**
+ * Updates both oscilloscope charts from the current input stream(s).
+ * Called from handleWaveformSingle / handleWaveformComparison on every keystroke.
+ *
+ * @param {Array<{ label: string, text: string }>} datasets
+ */
+function updateSpectralOscilloscopes(datasets) {
+  const hasLetters = datasets.some(d =>
+    [...d.text.toLowerCase()].some(c => /[a-zäöü]/.test(c))
+  );
+
+  if (!hasLetters) {
+    spectralOscSection?.setAttribute('hidden', '');
+    destroySpectralCharts();
+    return;
+  }
+
+  spectralOscSection?.removeAttribute('hidden');
+
+  renderGlobalEnvelopeChart(
+    oscGlobalCanvas,
+    datasets.map(d => ({ label: d.label, data: getGlobalEnvelope(d.text) }))
+  );
+  renderMicroWaveChart(
+    oscMicroCanvas,
+    datasets.map(d => ({ label: d.label, data: getMicroOscilloscope(d.text) }))
+  );
+}
+
+/**
+ * Runs FFT + window aggregation + scatter on the given text.
+ * Called from handleDecodeSingle / handleDecodeComparison after a decode.
+ *
+ * @param {string} text — primary word / phrase to analyse
+ */
+function runDeepSpectralAnalysis(text) {
+  if (!text.trim()) return;
+
+  const spectral  = runSpectralAnalysis(text);
+  const aggregate = aggregateWindow(text);
+  if (!aggregate) return;
+
+  _renderWindowMetrics(aggregate);
+  _renderHarmonicTiles(spectral.topHarmonics, spectral.powerSpectrum);
+  renderWordScatterChart(spectralScatterCanvas, aggregate.word_scatter_data);
+  spectralResultsEl?.removeAttribute('hidden');
+}
+
+function _renderWindowMetrics(agg) {
+  if (!spectralWindowMetrics) return;
+  const archetypeName = ARCHETYPE_NAMES[agg.dominant_quersumme] ?? '—';
+
+  spectralWindowMetrics.innerHTML = `
+    <div class="spectral-metric-grid">
+      <div class="spectral-metric-tile">
+        <span class="spectral-metric-label">AVG WORD &sigma;</span>
+        <span class="spectral-metric-value">${agg.avg_word_sigma.toFixed(3)}</span>
+        <span class="spectral-metric-sub">Window spread</span>
+      </div>
+      <div class="spectral-metric-tile">
+        <span class="spectral-metric-label">DOM. QUERSUMME</span>
+        <span class="spectral-metric-value spectral-metric-value--quersumme">${agg.dominant_quersumme}</span>
+        <span class="spectral-metric-sub">${archetypeName}</span>
+      </div>
+      <div class="spectral-metric-tile">
+        <span class="spectral-metric-label">SOVEREIGNTY</span>
+        <span class="spectral-metric-value spectral-metric-value--sovereign">${agg.sovereignty_score.toFixed(1)}%</span>
+        <span class="spectral-metric-sub">Sovereign letters</span>
+      </div>
+      <div class="spectral-metric-tile">
+        <span class="spectral-metric-label">SOMATIC</span>
+        <span class="spectral-metric-value spectral-metric-value--somatic">${agg.somatic_score.toFixed(1)}%</span>
+        <span class="spectral-metric-sub">Kin + Liminal</span>
+      </div>
+      <div class="spectral-metric-tile">
+        <span class="spectral-metric-label">WORD COUNT</span>
+        <span class="spectral-metric-value">${agg.wordCount.toLocaleString()}</span>
+        <span class="spectral-metric-sub">Valid tokens</span>
+      </div>
+    </div>
+  `;
+}
+
+function _renderHarmonicTiles(harmonics, fullSpectrum) {
+  if (!spectralHarmonicTiles) return;
+  const maxPower = Math.max(1, ...fullSpectrum.slice(1).map(h => h.power));
+
+  spectralHarmonicTiles.innerHTML = harmonics.map((h, i) => {
+    const pct = (h.power / maxPower * 100).toFixed(1);
+    return `
+      <div class="spectral-harmonic-tile">
+        <div class="spectral-harmonic-rank">H${i + 1}</div>
+        <div class="spectral-harmonic-freq">${h.label}</div>
+        <div class="spectral-harmonic-bar-wrap">
+          <div class="spectral-harmonic-bar" style="width:${pct}%"></div>
+        </div>
+        <div class="spectral-harmonic-power">${pct}%</div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ── Spectral panel collapse toggle ────────────────────────
+
+if (spectralCollapseBtn && spectralBodyEl) {
+  spectralCollapseBtn.addEventListener('click', () => {
+    spectralPanelOpen = !spectralPanelOpen;
+    spectralBodyEl.classList.toggle('spectral-body--collapsed', !spectralPanelOpen);
+    spectralCollapseBtn.textContent = spectralPanelOpen ? '▼' : '▲';
+    spectralCollapseBtn.setAttribute('aria-expanded', String(spectralPanelOpen));
+    spectralCollapseBtn.setAttribute('aria-label',
+      spectralPanelOpen ? 'Collapse spectral panel' : 'Expand spectral panel');
+  });
 }

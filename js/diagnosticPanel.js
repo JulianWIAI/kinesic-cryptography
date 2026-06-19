@@ -16,10 +16,12 @@
  * section element and stylesheet (css/diagnostic.css).
  */
 
-import { calculateDigitalRoot, getArchetype }                    from './quersumme.js';
-import { analyzeComplexity }                                      from './complexity.js';
-import { analyzeCategorical }                                     from './categoricalAnalysis.js';
-import { renderRadarChart, renderScatterChart, destroyCharts }    from './charts.js';
+import { calculateDigitalRoot, getArchetype }                                      from './quersumme.js';
+import { analyzeComplexity }                                                        from './complexity.js';
+import { analyzeCategorical }                                                        from './categoricalAnalysis.js';
+import { renderRadarChart, renderScatterChart, destroyCharts,
+         renderClusterBarChart, destroyClusterBarChart }                            from './charts.js';
+import { CLUSTER_COLORS }                                                            from './palette.js';
 
 // ── DOM references ────────────────────────────────────────
 const panelEl       = document.getElementById('diagnostic-panel');
@@ -30,6 +32,9 @@ const categoryBars  = document.getElementById('diagnostic-category-bar');
 const scoresEl      = document.getElementById('diagnostic-scores');
 const radarCanvas   = /** @type {HTMLCanvasElement} */ (document.getElementById('diagnostic-radar'));
 const scatterCanvas = /** @type {HTMLCanvasElement} */ (document.getElementById('diagnostic-scatter'));
+const scatterBoxEl  = document.getElementById('diagnostic-scatter-box');
+const barBoxEl      = document.getElementById('diagnostic-bar-box');
+const barCanvas     = /** @type {HTMLCanvasElement} */ (document.getElementById('diagnostic-bar'));
 
 // ── Collapse toggle ───────────────────────────────────────
 let panelOpen = true;
@@ -51,6 +56,7 @@ if (toggleBtn) {
 export function hideDiagnosticPanel() {
   panelEl?.setAttribute('hidden', '');
   destroyCharts();
+  destroyClusterBarChart();
 }
 
 /**
@@ -88,6 +94,11 @@ export function renderDiagnostic(wordA, wordB = null) {
 
   // ── Charts ───────────────────────────────────────────────
   destroyCharts();
+  destroyClusterBarChart();
+
+  // Restore scatter box, hide bar chart (cluster-only)
+  scatterBoxEl?.removeAttribute('hidden');
+  barBoxEl?.setAttribute('hidden', '');
 
   const radarSets = [{ label: cleanA.toUpperCase(), radarValues: catA.radarValues }];
   if (catB) radarSets.push({ label: cleanB.toUpperCase(), radarValues: catB.radarValues });
@@ -142,6 +153,11 @@ function buildMetricColumn(word, comp, root, archetype) {
         <span class="diag-tile-label">COMPLEXITY TIER</span>
         <span class="diag-tile-value">T${comp.tier}</span>
         <span class="diag-tile-sub">${comp.tierLabel}</span>
+      </div>
+      <div class="diag-metric-tile diag-tile--count">
+        <span class="diag-tile-label">LETTERS</span>
+        <span class="diag-tile-value">${comp.values.length}</span>
+        <span class="diag-tile-sub">Valid chars</span>
       </div>
     </div>
     <div class="diag-archetype-desc">${archetype.description}</div>
@@ -265,4 +281,126 @@ function buildScoreItem(value, label, colorClass) {
   `;
 
   return item;
+}
+
+// ── Cluster Diagnostic (N-word mode) ─────────────────────
+
+/**
+ * Renders the full diagnostic panel for a cluster of N words.
+ * Each word gets its own color from the CLUSTER_COLORS palette.
+ * Shows per-word metric rows, category bars, score table,
+ * multi-word radar chart, and Balkendiagramm.
+ *
+ * @param {string[]} words — array of raw word strings
+ */
+export function renderDiagnosticCluster(words) {
+  if (!panelEl || !words || words.length === 0) { hideDiagnosticPanel(); return; }
+
+  // Build per-word analysis entries, skip words with no valid letters
+  const entries = words
+    .map((word, i) => {
+      const w    = word.trim();
+      const comp = analyzeComplexity(w);
+      if (comp.values.length === 0) return null;
+      const cat       = analyzeCategorical(w);
+      const root      = calculateDigitalRoot(comp.wordSum);
+      const archetype = getArchetype(root);
+      const color     = CLUSTER_COLORS[i % CLUSTER_COLORS.length];
+      return { word: w, comp, cat, root, archetype, color, index: i };
+    })
+    .filter(Boolean);
+
+  if (entries.length === 0) { hideDiagnosticPanel(); return; }
+
+  // ── Metric rows ─────────────────────────────────────────
+  if (metricsGrid) {
+    metricsGrid.style.gridTemplateColumns = '1fr';
+    metricsGrid.innerHTML = entries.map(e => {
+      const sumDisplay = e.comp.wordSum % 1 === 0
+        ? String(e.comp.wordSum) : e.comp.wordSum.toFixed(1);
+      const tier = `T${e.comp.tier}`;
+      return `
+        <div class="diag-cluster-row" style="--word-color:${e.color.line}">
+          <div class="diag-cluster-word-name">${e.word.toUpperCase()}</div>
+          <div class="diag-cluster-tiles">
+            <div class="diag-cluster-tile">
+              <span class="diag-tile-label">LETTERS</span>
+              <span class="diag-cluster-tile-val">${e.comp.values.length}</span>
+            </div>
+            <div class="diag-cluster-tile">
+              <span class="diag-tile-label">WORD SUM Σ</span>
+              <span class="diag-cluster-tile-val">${sumDisplay}</span>
+            </div>
+            <div class="diag-cluster-tile">
+              <span class="diag-tile-label">σ SIGMA</span>
+              <span class="diag-cluster-tile-val">${e.comp.sigma.toFixed(2)}</span>
+            </div>
+            <div class="diag-cluster-tile">
+              <span class="diag-tile-label">TIER</span>
+              <span class="diag-cluster-tile-val diag-cluster-tier-badge diag-cluster-tier-badge--${tier.toLowerCase()}">${tier}</span>
+            </div>
+            <div class="diag-cluster-tile">
+              <span class="diag-tile-label">QUERSUMME</span>
+              <span class="diag-cluster-tile-val">${e.root} &mdash; ${e.archetype.name}</span>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // ── Category bars ────────────────────────────────────────
+  if (categoryBars) {
+    categoryBars.innerHTML = '';
+    entries.forEach(e => {
+      const block = buildCategoryBar(e.cat, e.word);
+      block.style.setProperty('--word-color', e.color.line);
+      block.querySelector('.diag-cat-title').style.color = e.color.line;
+      categoryBars.appendChild(block);
+    });
+  }
+
+  // ── Scores table ─────────────────────────────────────────
+  if (scoresEl) {
+    scoresEl.innerHTML = `
+      <div class="diag-cluster-score-table">
+        <div class="diag-cluster-score-header">
+          <span>WORD</span>
+          <span>SOVEREIGNTY</span>
+          <span>SOMATIC</span>
+          <span>RESONANT</span>
+        </div>
+        ${entries.map(e => `
+          <div class="diag-cluster-score-row">
+            <span class="diag-cluster-score-word" style="color:${e.color.line}">${e.word.toUpperCase()}</span>
+            <span>${e.cat.sovereigntyScore.toFixed(1)}%</span>
+            <span>${e.cat.somaticScore.toFixed(1)}%</span>
+            <span>${e.cat.resonantScore.toFixed(1)}%</span>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+
+  // ── Charts ───────────────────────────────────────────────
+  destroyCharts();
+  destroyClusterBarChart();
+
+  // Multi-word radar (all words, one dataset per word)
+  renderRadarChart(radarCanvas, entries.map(e => ({
+    label:       e.word.toUpperCase(),
+    radarValues: e.cat.radarValues,
+  })));
+
+  // Hide letter-position scatter (not meaningful for multi-word); show Balkendiagramm
+  scatterBoxEl?.setAttribute('hidden', '');
+  barBoxEl?.removeAttribute('hidden');
+
+  renderClusterBarChart(barCanvas, entries.map(e => ({
+    word:    e.word,
+    wordSum: e.comp.wordSum,
+    sigma:   e.comp.sigma,
+  })));
+
+  panelEl.removeAttribute('hidden');
 }

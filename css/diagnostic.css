@@ -105,7 +105,7 @@
 
 .diag-metric-row {
   display:               grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   gap:                   var(--space-3);
 }
 
@@ -153,6 +153,10 @@
 
 .diag-tile--sigma                  { border-left-color: #f97316; }
 .diag-tile--sigma .diag-tile-value { color: #f97316; }
+
+/* Letter count tile */
+.diag-tile--count                    { border-left-color: #64748b; }
+.diag-tile--count .diag-tile-value   { color: #94a3b8; }
 
 /* Complexity tier accent */
 .diag-tier--1                      { border-left-color: var(--clr-success); }
@@ -329,16 +333,156 @@
   width:      100% !important;
 }
 
+/* ── Cluster Diagnostic — per-word metric rows ────────────── */
+.diag-cluster-row {
+  display:        flex;
+  align-items:    center;
+  gap:            var(--space-4);
+  padding:        var(--space-3) var(--space-4);
+  background:     var(--clr-surface);
+  border:         1px solid var(--clr-border);
+  border-left:    3px solid var(--word-color, #64748b);
+  border-radius:  var(--radius-md);
+  margin-bottom:  var(--space-2);
+}
+
+.diag-cluster-row:last-child { margin-bottom: 0; }
+
+.diag-cluster-word-name {
+  font-family:    var(--font-mono);
+  font-size:      var(--text-sm);
+  font-weight:    700;
+  color:          var(--word-color, #8899aa);
+  letter-spacing: 0.1em;
+  min-width:      90px;
+  flex-shrink:    0;
+}
+
+.diag-cluster-tiles {
+  display:  flex;
+  flex-wrap: wrap;
+  gap:      var(--space-2);
+  flex:     1;
+}
+
+.diag-cluster-tile {
+  display:        flex;
+  flex-direction: column;
+  align-items:    center;
+  background:     var(--clr-bg);
+  border:         1px solid var(--clr-border);
+  border-radius:  var(--radius-sm);
+  padding:        var(--space-1) var(--space-3);
+  min-width:      56px;
+  text-align:     center;
+}
+
+.diag-cluster-tile-val {
+  font-family: var(--font-mono);
+  font-size:   var(--text-sm);
+  font-weight: 700;
+  color:       var(--word-color, var(--clr-text));
+  white-space: nowrap;
+}
+
+/* Tier badges within cluster rows */
+.diag-cluster-tier-badge {
+  padding:       1px 5px;
+  border-radius: 3px;
+  font-size:     var(--text-xs);
+}
+
+.diag-cluster-tier-badge--t1 {
+  background: rgba( 34, 211, 160, 0.18);
+  color:      rgba( 34, 211, 160, 1);
+}
+
+.diag-cluster-tier-badge--t2 {
+  background: rgba(245, 158,  11, 0.18);
+  color:      rgba(245, 158,  11, 1);
+}
+
+.diag-cluster-tier-badge--t3 {
+  background: rgba(239,  68,  68, 0.18);
+  color:      rgba(239,  68,  68, 1);
+}
+
+/* ── Cluster score table ──────────────────────────────────── */
+.diag-cluster-score-table {
+  font-family:   var(--font-mono);
+  font-size:     var(--text-xs);
+  border:        1px solid var(--clr-border);
+  border-radius: var(--radius-md);
+  overflow:      hidden;
+}
+
+.diag-cluster-score-header,
+.diag-cluster-score-row {
+  display:     grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap:         var(--space-2);
+  padding:     var(--space-2) var(--space-4);
+  align-items: center;
+}
+
+.diag-cluster-score-header {
+  background:     rgba(148,163,184,0.06);
+  border-bottom:  1px solid var(--clr-border);
+  color:          var(--clr-text-muted);
+  font-size:      9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.diag-cluster-score-row {
+  border-bottom: 1px solid rgba(148,163,184,0.06);
+  color:         var(--clr-text);
+}
+
+.diag-cluster-score-row:last-child { border-bottom: none; }
+.diag-cluster-score-row:hover      { background: rgba(255,255,255,0.02); }
+
+.diag-cluster-score-word {
+  font-weight:    700;
+  letter-spacing: 0.06em;
+}
+
+/* ── Cluster Balkendiagramm chart box ─────────────────────── */
+.diag-chart-box--bar {
+  grid-column: 1 / -1;   /* span full width in grid context */
+  margin-top:  var(--space-5);
+}
+
+.diag-bar-canvas-wrap {
+  background:    var(--clr-bg);
+  border:        1px solid var(--clr-border);
+  border-radius: var(--radius-sm);
+  position:      relative;
+  /* height is set dynamically by renderClusterBarChart */
+  min-height:    120px;
+}
+
+.diag-bar-canvas-wrap canvas {
+  width:   100% !important;
+  height:  100% !important;
+  display: block;
+}
+
 /* ── Responsive ───────────────────────────────────────────── */
 @media (max-width: 900px) {
-  .diag-metric-row { grid-template-columns: 1fr 1fr; }
-  .diag-charts-row { grid-template-columns: 1fr; }
-  .diag-score-row  { grid-template-columns: 1fr; }
+  .diag-metric-row             { grid-template-columns: repeat(3, 1fr); }
+  .diag-charts-row             { grid-template-columns: 1fr; }
+  .diag-score-row              { grid-template-columns: 1fr; }
+  .diag-cluster-score-header,
+  .diag-cluster-score-row      { grid-template-columns: 2fr 1fr 1fr; }
+  .diag-cluster-score-row > span:last-child { display: none; }
 }
 
 @media (max-width: 600px) {
-  .diag-metric-row { grid-template-columns: 1fr 1fr; }
-  .diagnostic-body { padding: var(--space-4); }
+  .diag-metric-row             { grid-template-columns: 1fr 1fr; }
+  .diagnostic-body             { padding: var(--space-4); }
+  .diag-cluster-row            { flex-direction: column; align-items: flex-start; gap: var(--space-2); }
+  .diag-cluster-word-name      { min-width: unset; }
 }
 
 
@@ -468,4 +612,626 @@
 @media (max-width: 600px) {
   .waveform-canvas-wrap { height: 120px; }
   .waveform-legend      { flex-direction: column; gap: var(--space-2); }
+}
+
+
+/* ============================================================
+   SPECTRAL ANALYSIS ENGINE — Styles
+   Independent section below the diagnostic panel.
+   Accent: cyan (--clr-accent) to mirror the oscilloscope theme.
+   ============================================================ */
+
+/* ── Panel container ──────────────────────────────────────── */
+.spectral-panel {
+  background:    var(--clr-surface-2);
+  border:        1px solid var(--clr-border);
+  border-radius: var(--radius-lg);
+  margin:        var(--space-8) var(--space-4);
+  overflow:      hidden;
+}
+
+/* ── Panel header ─────────────────────────────────────────── */
+.spectral-header {
+  display:         flex;
+  align-items:     center;
+  justify-content: space-between;
+  padding:         var(--space-3) var(--space-6);
+  background:      rgba(0, 200, 255, 0.04);
+  border-bottom:   1px solid rgba(0, 200, 255, 0.14);
+}
+
+.spectral-title {
+  display:        flex;
+  align-items:    center;
+  gap:            var(--space-2);
+  font-family:    var(--font-mono);
+  font-size:      var(--text-xs);
+  font-weight:    700;
+  letter-spacing: 0.1em;
+  color:          var(--clr-accent);
+  text-transform: uppercase;
+}
+
+.spectral-dot {
+  width:         7px;
+  height:        7px;
+  border-radius: 50%;
+  background:    var(--clr-accent);
+  flex-shrink:   0;
+  animation:     spectral-pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes spectral-pulse {
+  0%, 100% { opacity: 1;   box-shadow: 0 0 0   0 rgba(0, 200, 255, 0.5); }
+  50%       { opacity: 0.6; box-shadow: 0 0 0 6px rgba(0, 200, 255, 0);   }
+}
+
+.spectral-collapse-btn {
+  background:    none;
+  border:        1px solid var(--clr-border-soft);
+  color:         var(--clr-text-muted);
+  cursor:        pointer;
+  padding:       var(--space-1) var(--space-2);
+  font-size:     var(--text-sm);
+  border-radius: var(--radius-sm);
+  line-height:   1;
+  transition:    color 0.15s, border-color 0.15s;
+}
+.spectral-collapse-btn:hover {
+  color:        var(--clr-text);
+  border-color: rgba(0, 200, 255, 0.5);
+}
+
+/* ── Panel body ───────────────────────────────────────────── */
+.spectral-body {
+  padding:    var(--space-6);
+  transition: max-height 0.3s ease, opacity 0.3s ease, padding 0.3s ease;
+  overflow:   hidden;
+}
+
+.spectral-body--collapsed {
+  max-height:     0 !important;
+  padding-top:    0;
+  padding-bottom: 0;
+  opacity:        0;
+}
+
+/* ── Corpus input area ────────────────────────────────────── */
+.spectral-corpus-header {
+  display:         flex;
+  align-items:     baseline;
+  justify-content: space-between;
+  margin-bottom:   var(--space-2);
+  flex-wrap:       wrap;
+  gap:             var(--space-2);
+}
+
+.spectral-corpus-label {
+  font-family:    var(--font-mono);
+  font-size:      var(--text-xs);
+  font-weight:    700;
+  letter-spacing: 0.08em;
+  color:          var(--clr-text-muted);
+  text-transform: uppercase;
+}
+
+.spectral-corpus-hint {
+  font-family: var(--font-sans);
+  font-size:   0.62rem;
+  color:       var(--clr-text-faint);
+  font-style:  italic;
+}
+
+.spectral-corpus-input {
+  display:       block;
+  width:         100%;
+  min-height:    120px;
+  background:    var(--clr-surface);
+  border:        1px solid var(--clr-border);
+  border-radius: var(--radius-md);
+  color:         var(--clr-text);
+  font-family:   var(--font-mono);
+  font-size:     var(--text-sm);
+  line-height:   1.6;
+  padding:       var(--space-3) var(--space-4);
+  resize:        vertical;
+  transition:    border-color 0.15s;
+  box-sizing:    border-box;
+}
+.spectral-corpus-input::placeholder { color: var(--clr-text-faint); }
+.spectral-corpus-input:focus {
+  outline:      none;
+  border-color: var(--clr-accent-dim);
+  box-shadow:   0 0 0 2px var(--clr-accent-glow);
+}
+
+.spectral-corpus-actions {
+  display:         flex;
+  align-items:     center;
+  justify-content: space-between;
+  margin-top:      var(--space-3);
+  flex-wrap:       wrap;
+  gap:             var(--space-2);
+}
+
+.spectral-corpus-count {
+  font-family:    var(--font-mono);
+  font-size:      0.6rem;
+  letter-spacing: 0.04em;
+  color:          var(--clr-text-faint);
+}
+
+.spectral-analyze-btn {
+  display:        inline-flex;
+  align-items:    center;
+  gap:            var(--space-2);
+  background:     rgba(0, 200, 255, 0.07);
+  border:         1px solid rgba(0, 200, 255, 0.28);
+  border-radius:  var(--radius-sm);
+  color:          var(--clr-accent);
+  cursor:         pointer;
+  font-family:    var(--font-mono);
+  font-size:      var(--text-xs);
+  font-weight:    700;
+  letter-spacing: 0.08em;
+  padding:        var(--space-2) var(--space-5);
+  text-transform: uppercase;
+  transition:     background 0.15s, border-color 0.15s, color 0.15s, box-shadow 0.15s;
+}
+.spectral-analyze-btn:hover {
+  background:   rgba(0, 200, 255, 0.14);
+  border-color: var(--clr-accent);
+  color:        #fff;
+  box-shadow:   0 0 10px rgba(0, 200, 255, 0.15);
+}
+.spectral-analyze-btn:active {
+  background: rgba(0, 200, 255, 0.22);
+}
+
+/* ── Section label ────────────────────────────────────────── */
+.spectral-section-title {
+  font-family:    var(--font-mono);
+  font-size:      0.58rem;
+  letter-spacing: 0.08em;
+  color:          var(--clr-text-muted);
+  text-transform: uppercase;
+  margin-bottom:  var(--space-3);
+  padding-bottom: var(--space-2);
+  border-bottom:  1px solid var(--clr-border);
+}
+
+/* ── Oscilloscope Deck ────────────────────────────────────── */
+.spectral-osc-section {
+  margin-top: var(--space-6);
+}
+
+.spectral-osc-deck {
+  display:        flex;
+  flex-direction: column;
+  gap:            var(--space-4);
+}
+
+.osc-chart-block {
+  display:        flex;
+  flex-direction: column;
+  gap:            var(--space-2);
+}
+
+.osc-chart-label {
+  display:        flex;
+  align-items:    center;
+  gap:            var(--space-2);
+  font-family:    var(--font-mono);
+  font-size:      0.55rem;
+  letter-spacing: 0.06em;
+  color:          var(--clr-text-muted);
+  text-transform: uppercase;
+}
+
+.osc-chart-label-letter {
+  display:         inline-flex;
+  align-items:     center;
+  justify-content: center;
+  width:           18px;
+  height:          18px;
+  background:      rgba(0, 200, 255, 0.1);
+  border:          1px solid rgba(0, 200, 255, 0.3);
+  border-radius:   3px;
+  color:           var(--clr-accent);
+  font-weight:     700;
+  font-size:       0.62rem;
+  flex-shrink:     0;
+  line-height:     1;
+}
+
+/* CRT / oscilloscope canvas background — scanline overlay */
+.osc-canvas-bg {
+  position:      relative;
+  height:        170px;
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      transparent,
+      transparent 3px,
+      rgba(0, 0, 0, 0.06) 3px,
+      rgba(0, 0, 0, 0.06) 4px
+    ),
+    var(--clr-bg);
+  border-radius: var(--radius-sm);
+  border:        1px solid var(--clr-border);
+  overflow:      hidden;
+}
+
+.osc-canvas-bg canvas {
+  display: block;
+  width:   100% !important;
+  height:  100% !important;
+}
+
+/* ── Deep Analysis Results container ─────────────────────── */
+.spectral-analysis-results {
+  display:        flex;
+  flex-direction: column;
+  gap:            var(--space-6);
+  margin-top:     var(--space-6);
+  padding-top:    var(--space-6);
+  border-top:     1px solid var(--clr-border);
+}
+
+.spectral-section {
+  display:        flex;
+  flex-direction: column;
+}
+
+/* ── Window aggregation metric grid ──────────────────────── */
+.spectral-metric-grid {
+  display:               grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap:                   var(--space-3);
+}
+
+.spectral-metric-tile {
+  background:     var(--clr-surface);
+  border:         1px solid var(--clr-border);
+  border-left:    3px solid var(--clr-accent);
+  border-radius:  var(--radius-md);
+  padding:        var(--space-3) var(--space-4);
+  display:        flex;
+  flex-direction: column;
+  gap:            0.2rem;
+}
+
+.spectral-metric-label {
+  font-family:    var(--font-mono);
+  font-size:      0.52rem;
+  letter-spacing: 0.06em;
+  color:          var(--clr-text-muted);
+  text-transform: uppercase;
+}
+
+.spectral-metric-value {
+  font-family: var(--font-mono);
+  font-size:   1.4rem;
+  font-weight: 700;
+  line-height: 1;
+  color:       var(--clr-accent);
+}
+.spectral-metric-value--quersumme { color: #a855f7; }
+.spectral-metric-value--sovereign { color: #3b82f6; }
+.spectral-metric-value--somatic   { color: #ef4444; }
+
+.spectral-metric-sub {
+  font-family: var(--font-sans);
+  font-size:   0.58rem;
+  color:       var(--clr-text-faint);
+  line-height: 1.4;
+}
+
+/* ── FFT harmonic tiles ───────────────────────────────────── */
+.spectral-harmonic-tiles {
+  display:        flex;
+  flex-direction: column;
+  gap:            var(--space-2);
+}
+
+.spectral-harmonic-tile {
+  display:               grid;
+  grid-template-columns: 2.5rem 1fr 120px 3.5rem;
+  align-items:           center;
+  gap:                   var(--space-3);
+  background:            var(--clr-surface);
+  border:                1px solid var(--clr-border);
+  border-radius:         var(--radius-sm);
+  padding:               var(--space-2) var(--space-4);
+}
+
+.spectral-harmonic-rank {
+  font-family: var(--font-mono);
+  font-size:   var(--text-xs);
+  font-weight: 700;
+  color:       var(--clr-accent);
+}
+
+.spectral-harmonic-freq {
+  font-family:    var(--font-mono);
+  font-size:      0.58rem;
+  letter-spacing: 0.03em;
+  color:          var(--clr-text-muted);
+  overflow:       hidden;
+  text-overflow:  ellipsis;
+  white-space:    nowrap;
+}
+
+.spectral-harmonic-bar-wrap {
+  height:        5px;
+  background:    rgba(0, 200, 255, 0.08);
+  border-radius: 3px;
+  overflow:      hidden;
+}
+
+.spectral-harmonic-bar {
+  height:        100%;
+  background:    linear-gradient(90deg, rgba(0, 200, 255, 0.35), var(--clr-accent));
+  border-radius: 3px;
+  transition:    width 0.5s ease;
+}
+
+.spectral-harmonic-power {
+  font-family: var(--font-mono);
+  font-size:   var(--text-xs);
+  color:       var(--clr-text);
+  text-align:  right;
+}
+
+/* ── Complexity Scatter ───────────────────────────────────── */
+.spectral-scatter-bg {
+  position:      relative;
+  height:        340px;
+  background:    var(--clr-surface);
+  border:        1px solid var(--clr-border);
+  border-radius: var(--radius-md);
+  overflow:      hidden;
+  padding:       var(--space-2);
+  box-sizing:    border-box;
+}
+
+.spectral-scatter-bg canvas {
+  display: block;
+  width:   100% !important;
+  height:  100% !important;
+}
+
+/* ── Responsive ───────────────────────────────────────────── */
+@media (max-width: 1024px) {
+  .spectral-metric-grid      { grid-template-columns: repeat(3, 1fr); }
+  .spectral-harmonic-tile    { grid-template-columns: 2.5rem 1fr 80px 3rem; }
+}
+
+@media (max-width: 700px) {
+  .spectral-metric-grid      { grid-template-columns: 1fr 1fr; }
+  .spectral-body             { padding: var(--space-4); }
+  .osc-canvas-bg             { height: 120px; }
+  .spectral-scatter-bg       { height: 240px; }
+  .spectral-harmonic-tile    { grid-template-columns: 2rem 1fr 3rem; }
+  .spectral-harmonic-bar-wrap { display: none; }
+}
+
+/* ============================================================
+   SEMANTIC CLUSTER ANALYZER — Styles
+   ============================================================ */
+
+/* ── Cluster textarea input ───────────────────────────────── */
+.cluster-input-wrap {
+  display:        flex;
+  flex-direction: column;
+  gap:            var(--space-3);
+  padding:        var(--space-6);
+  background:     var(--clr-surface-2);
+  border:         1px solid var(--clr-border);
+  border-radius:  var(--radius-lg);
+}
+
+.cluster-input {
+  width:          100%;
+  min-height:     80px;
+  resize:         vertical;
+  background:     var(--clr-bg);
+  color:          var(--clr-text);
+  border:         1px solid var(--clr-border);
+  border-radius:  var(--radius-md);
+  padding:        var(--space-3) var(--space-4);
+  font-family:    var(--font-mono);
+  font-size:      var(--text-sm);
+  line-height:    1.6;
+  outline:        none;
+  transition:     border-color 0.2s;
+  box-sizing:     border-box;
+}
+
+.cluster-input:focus {
+  border-color: var(--clr-accent);
+}
+
+.cluster-actions {
+  display:         flex;
+  justify-content: flex-end;
+}
+
+/* ── Center of Gravity block ──────────────────────────────── */
+.cluster-gravity {
+  background:     var(--clr-surface-2);
+  border:         1px solid rgba(0, 200, 255, 0.18);
+  border-radius:  var(--radius-lg);
+  padding:        var(--space-5) var(--space-6);
+  margin-bottom:  var(--space-5);
+}
+
+.cluster-gravity-title {
+  display:         flex;
+  align-items:     center;
+  gap:             var(--space-2);
+  font-family:     var(--font-mono);
+  font-size:       var(--text-xs);
+  font-weight:     700;
+  letter-spacing:  0.1em;
+  color:           #00c8ff;
+  text-transform:  uppercase;
+  margin-bottom:   var(--space-4);
+}
+
+.cluster-gravity-dot {
+  width:         7px;
+  height:        7px;
+  border-radius: 50%;
+  background:    #00c8ff;
+  flex-shrink:   0;
+  animation:     diag-pulse 2s ease-in-out infinite;
+}
+
+.cluster-gravity-metrics {
+  display:               grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap:                   var(--space-4);
+}
+
+.cluster-metric-tile {
+  display:         flex;
+  flex-direction:  column;
+  align-items:     center;
+  background:      var(--clr-bg);
+  border:          1px solid var(--clr-border);
+  border-radius:   var(--radius-md);
+  padding:         var(--space-4) var(--space-3);
+  text-align:      center;
+  gap:             var(--space-1);
+}
+
+.cluster-metric-label {
+  font-family:    var(--font-mono);
+  font-size:      9px;
+  letter-spacing: 0.08em;
+  color:          var(--clr-text-muted);
+  text-transform: uppercase;
+}
+
+.cluster-metric-value {
+  font-family: var(--font-mono);
+  font-size:   var(--text-xl);
+  font-weight: 700;
+  color:       #00c8ff;
+  line-height: 1;
+}
+
+/* ── Word metrics table ───────────────────────────────────── */
+.cluster-table {
+  background:     var(--clr-surface-2);
+  border:         1px solid var(--clr-border);
+  border-radius:  var(--radius-lg);
+  overflow:       hidden;
+  margin-bottom:  var(--space-5);
+  font-family:    var(--font-mono);
+  font-size:      var(--text-xs);
+}
+
+.cluster-table-header,
+.cluster-table-row {
+  display:     grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr 2fr;
+  gap:         var(--space-2);
+  padding:     var(--space-2) var(--space-4);
+  align-items: center;
+}
+
+.cluster-table-header {
+  background:     rgba(148, 163, 184, 0.06);
+  border-bottom:  1px solid var(--clr-border);
+  color:          var(--clr-text-muted);
+  font-size:      9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.cluster-table-row {
+  border-bottom:  1px solid rgba(148, 163, 184, 0.06);
+  color:          var(--clr-text);
+  transition:     background 0.15s;
+}
+
+.cluster-table-row:last-child { border-bottom: none; }
+.cluster-table-row:hover      { background: rgba(255,255,255,0.03); }
+
+.cluster-table-word {
+  font-weight: 700;
+  color:       var(--clr-text);
+  letter-spacing: 0.06em;
+}
+
+.cluster-table-row--empty { color: var(--clr-text-muted); font-style: italic; }
+
+/* ── Tier badges ──────────────────────────────────────────── */
+.cluster-tier-badge {
+  display:       inline-block;
+  padding:       2px 6px;
+  border-radius: 3px;
+  font-size:     9px;
+  font-weight:   700;
+  letter-spacing: 0.06em;
+  text-align:    center;
+}
+
+.cluster-tier-badge--t1 {
+  background: rgba( 34, 211, 160, 0.18);
+  color:      rgba( 34, 211, 160, 1);
+  border:     1px solid rgba( 34, 211, 160, 0.35);
+}
+
+.cluster-tier-badge--t2 {
+  background: rgba(245, 158,  11, 0.18);
+  color:      rgba(245, 158,  11, 1);
+  border:     1px solid rgba(245, 158,  11, 0.35);
+}
+
+.cluster-tier-badge--t3 {
+  background: rgba(239,  68,  68, 0.18);
+  color:      rgba(239,  68,  68, 1);
+  border:     1px solid rgba(239,  68,  68, 0.35);
+}
+
+/* ── Cluster scatter ──────────────────────────────────────── */
+.cluster-scatter-wrap {
+  background:    var(--clr-surface-2);
+  border:        1px solid var(--clr-border);
+  border-radius: var(--radius-lg);
+  padding:       var(--space-5) var(--space-6);
+}
+
+.cluster-scatter-title {
+  font-family:    var(--font-mono);
+  font-size:      var(--text-xs);
+  font-weight:    700;
+  letter-spacing: 0.08em;
+  color:          var(--clr-text-muted);
+  text-transform: uppercase;
+  margin-bottom:  var(--space-4);
+}
+
+.cluster-scatter-bg {
+  background:    var(--clr-bg);
+  border:        1px solid var(--clr-border);
+  border-radius: var(--radius-md);
+  height:        320px;
+  position:      relative;
+}
+
+.cluster-scatter-bg canvas {
+  width:   100% !important;
+  height:  100% !important;
+}
+
+@media (max-width: 700px) {
+  .cluster-gravity-metrics { grid-template-columns: 1fr 1fr; }
+  .cluster-table-header,
+  .cluster-table-row       { grid-template-columns: 2fr 1fr 1fr 1fr; }
+  .cluster-table-row > span:last-child { display: none; }
+  .cluster-scatter-bg      { height: 240px; }
 }

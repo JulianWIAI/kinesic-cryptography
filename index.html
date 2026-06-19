@@ -52,38 +52,24 @@
       </div>
     </section>
 
-    <!-- ── Comparison input (hidden until Comparison Mode) ── -->
-    <section class="input-section input-section--comparison" id="input-section-comparison" aria-label="Comparison input" hidden>
-      <div class="comparison-inputs">
-        <div class="comparison-input-group">
-          <label for="cipher-input-a" class="input-label input-label--a">WORD A</label>
-          <input
-            type="text"
-            id="cipher-input-a"
-            class="cipher-input cipher-input--a"
-            placeholder="First word or phrase…"
-            autocomplete="off"
-            spellcheck="false"
-          >
+    <!-- ── Cluster input (hidden until Cluster Mode) ── -->
+    <section class="input-section input-section--cluster" id="input-section-comparison" aria-label="Cluster input" hidden>
+      <div class="cluster-input-wrap">
+        <label for="cluster-input" class="input-label">CLUSTER INPUT &mdash; comma-separated words</label>
+        <textarea
+          id="cluster-input"
+          class="cluster-input"
+          placeholder="ring, marriage, couple, children, family…"
+          autocomplete="off"
+          spellcheck="false"
+          rows="3"
+        ></textarea>
+        <div class="cluster-actions">
+          <button id="decode-btn-comparison" class="decode-btn" type="button">
+            <span class="btn-label">ANALYZE CLUSTER</span>
+            <span class="btn-icon" aria-hidden="true">&#9654;&#9654;</span>
+          </button>
         </div>
-        <div class="comparison-vs" aria-hidden="true">VS</div>
-        <div class="comparison-input-group">
-          <label for="cipher-input-b" class="input-label input-label--b">WORD B</label>
-          <input
-            type="text"
-            id="cipher-input-b"
-            class="cipher-input cipher-input--b"
-            placeholder="Second word or phrase…"
-            autocomplete="off"
-            spellcheck="false"
-          >
-        </div>
-      </div>
-      <div class="comparison-actions">
-        <button id="decode-btn-comparison" class="decode-btn" type="button">
-          <span class="btn-label">DECODE BOTH</span>
-          <span class="btn-icon" aria-hidden="true">&#9654;&#9654;</span>
-        </button>
       </div>
     </section>
 
@@ -109,8 +95,8 @@
       <div class="controls-divider" aria-hidden="true"></div>
 
       <button id="btn-comparison-mode" class="comparison-toggle" aria-pressed="false">
-        <span class="toggle-icon" aria-hidden="true">&#8942;</span>
-        Comparison Mode
+        <span class="toggle-icon" aria-hidden="true">&#10752;</span>
+        Cluster Mode
       </button>
 
     </div>
@@ -214,12 +200,98 @@
             <div class="diag-chart-title">Archetypal Radar &mdash; Category Profile</div>
             <canvas id="diagnostic-radar"></canvas>
           </div>
-          <div class="diag-chart-box">
+          <div class="diag-chart-box" id="diagnostic-scatter-box">
             <div class="diag-chart-title">Complexity Scatter &mdash; Letter Values by Position</div>
             <canvas id="diagnostic-scatter"></canvas>
           </div>
         </div>
 
+        <!-- Cluster Balkendiagramm (shown in cluster mode only) -->
+        <div class="diag-chart-box diag-chart-box--bar" id="diagnostic-bar-box" hidden>
+          <div class="diag-chart-title">Cluster Balkendiagramm &mdash; Word Sum (&Sigma;) per Word</div>
+          <div class="diag-bar-canvas-wrap">
+            <canvas id="diagnostic-bar" aria-label="Cluster bar chart comparing word sums"></canvas>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ── Spectral Analysis Engine ─────────────────────────── -->
+    <section
+      id="spectral-panel"
+      class="spectral-panel"
+      aria-label="Spectral Analysis Engine"
+    >
+      <div class="spectral-header">
+        <div class="spectral-title">
+          <span class="spectral-dot" aria-hidden="true"></span>
+          SPECTRAL ANALYSIS ENGINE &mdash; Live from Signal Input
+        </div>
+        <button
+          id="spectral-collapse-btn"
+          class="spectral-collapse-btn"
+          aria-expanded="true"
+          aria-controls="spectral-body"
+          aria-label="Collapse spectral panel"
+        >&#9660;</button>
+      </div>
+
+      <div class="spectral-body" id="spectral-body">
+
+        <!-- ── Oscilloscope Deck (live — driven by SIGNAL INPUT above) ─ -->
+        <div id="spectral-osc-section" class="spectral-osc-section" hidden>
+          <div class="spectral-section-title">OSCILLOSCOPE DECK &mdash; Live per keystroke &middot; Comparison mode overlays two signals</div>
+          <div class="spectral-osc-deck">
+
+            <div class="osc-chart-block">
+              <div class="osc-chart-label">
+                <span class="osc-chart-label-letter">A</span>
+                GLOBAL ENVELOPE &mdash; 100-pt Macro Signal &middot; Smooth Bezier Curve
+              </div>
+              <div class="osc-canvas-bg">
+                <canvas id="osc-global-canvas" aria-label="Global envelope waveform"></canvas>
+              </div>
+            </div>
+
+            <div class="osc-chart-block">
+              <div class="osc-chart-label">
+                <span class="osc-chart-label-letter">B</span>
+                MICRO WAVELENGTH &mdash; 256-pt Raw Letter Array &middot; High-Frequency Jaggedness
+              </div>
+              <div class="osc-canvas-bg">
+                <canvas id="osc-micro-canvas" aria-label="Micro wavelength waveform"></canvas>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- ── Deep analysis results (visible after DECODE) ── -->
+        <div id="spectral-analysis-results" class="spectral-analysis-results" hidden>
+
+          <div class="spectral-section">
+            <div class="spectral-section-title">WINDOW AGGREGATION METRICS</div>
+            <div id="spectral-window-metrics" class="spectral-window-metrics"></div>
+          </div>
+
+          <div class="spectral-section">
+            <div class="spectral-section-title">
+              DOMINANT FFT HARMONIC FREQUENCIES &mdash; Artificial Rhythm Detector
+            </div>
+            <div id="spectral-harmonic-tiles" class="spectral-harmonic-tiles"></div>
+          </div>
+
+          <div class="spectral-section">
+            <div class="spectral-section-title">
+              COMPLEXITY SCATTER &mdash; Word Sum (&Sigma;) &times; &sigma; (Standard Deviation)
+            </div>
+            <div class="spectral-scatter-bg">
+              <canvas id="spectral-scatter-canvas" aria-label="Word complexity scatter plot"></canvas>
+            </div>
+          </div>
+
+        </div>
       </div>
     </section>
 
