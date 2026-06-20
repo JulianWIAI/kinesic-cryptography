@@ -671,3 +671,365 @@
   text-align: center;
   min-height: 1em;
 }
+
+/* ── Egyptian glyph in Word Stream nodes ─────────────────── */
+.word-stream-node-glyph {
+  font-size: 4rem;
+  line-height: 1;
+  color: #e8b84b;
+  text-shadow: 0 0 16px rgba(232,184,75,0.5), 0 0 32px rgba(232,184,75,0.2);
+  text-align: center;
+  padding: var(--space-3) 0;
+}
+
+/* ── Egyptian Word Stream Row ────────────────────────────── */
+.word-stream-row--egyptian .word-stream-row-dot {
+  background-color: #e8b84b;
+  box-shadow: 0 0 6px #e8b84b;
+}
+.word-stream-row--egyptian .word-stream-row-title { color: #e8b84b; }
+
+/* ============================================================
+   EGYPTIAN ETYMOLOGY STREAM — Card Grid (Row 3, full width)
+   ============================================================ */
+
+.stream--egyptian {
+  border-top: 1px solid var(--clr-border);
+  background: linear-gradient(180deg, rgba(232,184,75,0.06) 0%, transparent 50%);
+}
+
+.stream-dot--egyptian {
+  background-color: #e8b84b;
+  box-shadow: 0 0 6px #e8b84b;
+}
+
+.stream-title--egyptian,
+.stream--egyptian .stream-title { color: #e8b84b !important; }
+
+.card-egyptian-glyph {
+  font-size: 4rem;
+  line-height: 1;
+  color: #e8b84b;
+  text-shadow: 0 0 20px rgba(232,184,75,0.4), 0 0 40px rgba(232,184,75,0.2);
+  text-align: center;
+  width: 100%;
+  padding: var(--space-2) 0;
+}
+
+/* Category-coloured variants of the Egyptian strip */
+.char-card.category-physical .stream--egyptian {
+  background: linear-gradient(180deg, rgba(232,184,75,0.05) 0%, #0f3464 50%) !important;
+}
+.char-card.category-emotional .stream--egyptian {
+  background: linear-gradient(180deg, rgba(232,184,75,0.05) 0%, #4a1800 50%) !important;
+}
+.char-card.category-intellectual .stream--egyptian {
+  background: linear-gradient(180deg, rgba(232,184,75,0.05) 0%, #1e2c42 50%) !important;
+}
+
+/* ── Hieroglyph in Narrative Nodes ──────────────────────── */
+.node-hieroglyph-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 2rem;
+}
+
+.node-hieroglyph {
+  font-size: 2.5rem;
+  line-height: 1;
+  color: #e8b84b;
+  text-shadow: 0 0 12px rgba(232,184,75,0.5);
+  text-align: center;
+}
+
+/* ============================================================
+   STREAM SELECTOR BAR
+   ============================================================ */
+
+.stream-selector-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-5);
+  padding: var(--space-3) var(--space-6);
+  background-color: var(--clr-surface);
+  border: 1px solid var(--clr-border);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.stream-selector-label {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--clr-text-faint);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.stream-selector-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-5);
+}
+
+.stream-check-label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  user-select: none;
+}
+
+.stream-check {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.stream-check-box {
+  width: 14px;
+  height: 14px;
+  border: 1px solid var(--clr-border-soft);
+  border-radius: 2px;
+  background-color: var(--clr-surface-2);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.stream-check:checked + .stream-check-box::after {
+  content: '✓';
+  font-size: 9px;
+  color: #000;
+  line-height: 1;
+  font-weight: 700;
+}
+
+.stream-check-label--face .stream-check:checked + .stream-check-box {
+  background-color: var(--clr-face);
+  border-color: var(--clr-face);
+}
+.stream-check-label--body .stream-check:checked + .stream-check-box {
+  background-color: var(--clr-body);
+  border-color: var(--clr-body);
+}
+.stream-check-label--egyptian .stream-check:checked + .stream-check-box {
+  background-color: #e8b84b;
+  border-color: #e8b84b;
+}
+
+.stream-check-label--face    .stream-check-text { color: var(--clr-face); }
+.stream-check-label--body    .stream-check-text { color: var(--clr-body); }
+.stream-check-label--egyptian .stream-check-text { color: #e8b84b; }
+
+/* ============================================================
+   STREAM VISIBILITY — body class toggles (instant, no re-render)
+   ============================================================ */
+
+/* Face */
+body.hide-face .stream--face           { display: none !important; }
+body.hide-face .node-image-wrap--face  { display: none !important; }
+body.hide-face .word-stream-row--face  { display: none !important; }
+body.hide-face .card-streams           { grid-template-columns: 1fr !important; }
+
+/* Body */
+body.hide-body .stream--body           { display: none !important; }
+body.hide-body .node-image-wrap--body  { display: none !important; }
+body.hide-body .word-stream-row--body  { display: none !important; }
+body.hide-body .card-streams           { grid-template-columns: 1fr !important; }
+
+/* Egyptian */
+body.hide-egyptian .stream--egyptian        { display: none !important; }
+body.hide-egyptian .node-hieroglyph-wrap    { display: none !important; }
+body.hide-egyptian .word-stream-row--egyptian { display: none !important; }
+
+/* Greek */
+body.hide-greek .stream--greek              { display: none !important; }
+body.hide-greek .node-greek-wrap            { display: none !important; }
+body.hide-greek .word-stream-row--greek     { display: none !important; }
+
+/* ── Greek checkbox colour ───────────────────────────────── */
+.stream-check-label--greek .stream-check:checked + .stream-check-box {
+  background-color: #7dd3fc;
+  border-color: #7dd3fc;
+}
+.stream-check-label--greek .stream-check-text { color: #7dd3fc; }
+
+/* ============================================================
+   GREEK PHYSICS LAYER — Card Grid (Row 4, full width)
+   ============================================================ */
+
+.stream--greek {
+  border-top: 1px solid var(--clr-border);
+  background: linear-gradient(180deg, rgba(125,211,252,0.06) 0%, transparent 50%);
+}
+
+.stream-dot--greek {
+  background-color: #7dd3fc;
+  box-shadow: 0 0 6px #7dd3fc;
+}
+
+.stream-title--greek,
+.stream--greek .stream-title { color: #7dd3fc !important; }
+
+.card-greek-glyph {
+  font-size: 4rem;
+  line-height: 1;
+  color: #7dd3fc;
+  text-shadow: 0 0 20px rgba(125,211,252,0.4), 0 0 40px rgba(125,211,252,0.2);
+  text-align: center;
+  width: 100%;
+  padding: var(--space-2) 0;
+}
+
+/* Category-coloured variants */
+.char-card.category-physical .stream--greek {
+  background: linear-gradient(180deg, rgba(125,211,252,0.05) 0%, #0f3464 50%) !important;
+}
+.char-card.category-emotional .stream--greek {
+  background: linear-gradient(180deg, rgba(125,211,252,0.05) 0%, #4a1800 50%) !important;
+}
+.char-card.category-intellectual .stream--greek {
+  background: linear-gradient(180deg, rgba(125,211,252,0.05) 0%, #1e2c42 50%) !important;
+}
+
+/* ── Greek glyph in Narrative Nodes ──────────────────────── */
+.node-greek-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 2rem;
+}
+
+.node-greek {
+  font-size: 2.5rem;
+  line-height: 1;
+  color: #7dd3fc;
+  text-shadow: 0 0 12px rgba(125,211,252,0.5);
+  text-align: center;
+}
+
+/* ── Greek Word Stream Row ───────────────────────────────── */
+.word-stream-row--greek .word-stream-row-dot {
+  background-color: #7dd3fc;
+  box-shadow: 0 0 6px #7dd3fc;
+}
+.word-stream-row--greek .word-stream-row-title { color: #7dd3fc; }
+
+/* ── Greek glyph in Word Stream nodes ───────────────────── */
+.word-stream-node-greek-glyph {
+  font-size: 4rem;
+  line-height: 1;
+  color: #7dd3fc;
+  text-shadow: 0 0 16px rgba(125,211,252,0.5), 0 0 32px rgba(125,211,252,0.2);
+  text-align: center;
+  padding: var(--space-3) 0;
+}
+
+/* ============================================================
+   INTERCEPTED WAVE EQUATION BOX
+   ============================================================ */
+
+.wave-eq-box {
+  background-color: var(--clr-surface);
+  border: 1px solid #7dd3fc;
+  border-radius: var(--radius-md);
+  padding: var(--space-5) var(--space-6);
+  margin-bottom: var(--space-5);
+  box-shadow: 0 0 0 1px rgba(125,211,252,0.1), 0 0 24px rgba(125,211,252,0.06);
+}
+
+.wave-eq-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+.wave-eq-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background-color: #7dd3fc;
+  box-shadow: 0 0 8px #7dd3fc;
+}
+
+.wave-eq-label {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #7dd3fc;
+}
+
+.wave-eq-line {
+  font-family: var(--font-mono);
+  font-size: var(--text-lg);
+  font-weight: 700;
+  color: var(--clr-text);
+  letter-spacing: 0.08em;
+  padding: var(--space-1) 0;
+  line-height: 1.6;
+}
+
+.wave-eq-line .wave-eq-func { color: #7dd3fc; }
+.wave-eq-line .wave-eq-word { color: var(--clr-accent); }
+.wave-eq-line .wave-eq-terms { color: var(--clr-text); }
+
+/* ============================================================
+   SIGINT DOSSIER EXPORT BUTTON
+   ============================================================ */
+
+.export-bar {
+  display: flex;
+  justify-content: center;
+  padding: var(--space-4) 0 var(--space-2);
+  margin-bottom: var(--space-5);
+}
+
+.export-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-8);
+  background-color: transparent;
+  border: 2px solid var(--clr-text-muted);
+  border-radius: var(--radius-md);
+  color: var(--clr-text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: border-color var(--transition-base), color var(--transition-base),
+              background-color var(--transition-base), box-shadow var(--transition-base);
+}
+
+.export-btn:hover {
+  border-color: var(--clr-text);
+  color: var(--clr-text);
+  background-color: rgba(255,255,255,0.04);
+  box-shadow: 0 0 20px rgba(255,255,255,0.06);
+}
+
+.export-btn:active {
+  background-color: rgba(255,255,255,0.08);
+}
+
+.export-btn-icon {
+  font-size: 0.6rem;
+  opacity: 0.7;
+}

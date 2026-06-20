@@ -1,5 +1,5 @@
 /**
- * SOMATIC CIPHER DECODER — Data Ledger v3
+ * SOMATIC CIPHER DECODER — Data Ledger v5
  *
  * Structure per entry:
  *   category         — 'Physical' | 'Emotional' | 'Intellectual'  (somatic stream)
@@ -7,6 +7,8 @@
  *   body             — Somatic posture description
  *   value            — Numeric letter value (A=1 … Z=26; Ä=1.5, Ö=15.5, Ü=21.5; null for digits)
  *   archetypeCategory — Psycholinguistic category: Origin | Kinetic | Sovereign | Liminal | Resonant | null
+ *   egyptian         — { unicode, description } — Egyptian hieroglyph and its archetypal meaning
+ *   greek            — { unicode, description } — Greek physics variable and wave-mechanics role
  */
 
 export const SOMATIC_DICTIONARY = {
@@ -19,6 +21,8 @@ export const SOMATIC_DICTIONARY = {
     body: 'A person walking, distinctly showing two legs.',
     value: 1,
     archetypeCategory: 'Origin',
+    egyptian: { unicode: '𓄿', description: 'Egyptian Vulture. The primal cry/origin.' },
+    greek:    { unicode: 'α', description: 'Alpha: The fine-structure constant / origin point.' },
   },
   'ä': {
     category: 'Physical',
@@ -26,6 +30,8 @@ export const SOMATIC_DICTIONARY = {
     body: 'A person mid-step, weight shifting — the liminal moment between stances.',
     value: 1.5,
     archetypeCategory: 'Liminal',
+    egyptian: { unicode: '𓄿', description: 'Egyptian Vulture. The primal cry/origin.' },
+    greek:    { unicode: 'α', description: 'Alpha: The fine-structure constant / origin point.' },
   },
   'b': {
     category: 'Physical',
@@ -33,6 +39,8 @@ export const SOMATIC_DICTIONARY = {
     body: 'Two eyes looking forward, or a rounded profile.',
     value: 2,
     archetypeCategory: 'Kinetic',
+    egyptian: { unicode: '𓃀', description: 'Foot and Leg. Grounding and forward kinetic motion.' },
+    greek:    { unicode: 'β', description: 'Beta: Velocity and kinetic decay.' },
   },
   'c': {
     category: 'Emotional',
@@ -40,6 +48,8 @@ export const SOMATIC_DICTIONARY = {
     body: 'A human body curling into a fetal or bending position.',
     value: 3,
     archetypeCategory: 'Resonant',
+    egyptian: { unicode: '𓎡', description: 'Basket with handle. Containment and excess.' },
+    greek:    { unicode: 'γ', description: 'Gamma: High-frequency resonant radiation.' },
   },
   'd': {
     category: 'Physical',
@@ -47,6 +57,8 @@ export const SOMATIC_DICTIONARY = {
     body: 'A person standing tall holding a curved bow.',
     value: 4,
     archetypeCategory: 'Sovereign',
+    egyptian: { unicode: '𓂧', description: 'Human Hand. Action, giving, and structural command.' },
+    greek:    { unicode: 'Δ', description: 'Delta: Macroscopic change and structural difference.' },
   },
   'e': {
     category: 'Intellectual',
@@ -54,6 +66,8 @@ export const SOMATIC_DICTIONARY = {
     body: 'A human being displaying feet, hands, and face clearly.',
     value: 5,
     archetypeCategory: 'Kinetic',
+    egyptian: { unicode: '𓇋', description: 'Single Reed Leaf. Human manifestation in the environment.' },
+    greek:    { unicode: 'ε', description: 'Epsilon: Permittivity and environmental manifestation.' },
   },
   'f': {
     category: 'Physical',
@@ -61,6 +75,8 @@ export const SOMATIC_DICTIONARY = {
     body: 'A person standing upright with arms pointing forward.',
     value: 6,
     archetypeCategory: 'Kinetic',
+    egyptian: { unicode: '𓆑', description: 'Horned Viper. Focused, striking resistance.' },
+    greek:    { unicode: 'Φ', description: 'Phi: Magnetic flux and focused resistance.' },
   },
   'g': {
     category: 'Physical',
@@ -68,6 +84,8 @@ export const SOMATIC_DICTIONARY = {
     body: 'A crouching or grounded posture.',
     value: 7,
     archetypeCategory: 'Liminal',
+    egyptian: { unicode: '𓎼', description: 'Jar Stand. Deep grounding and visceral base.' },
+    greek:    { unicode: 'Γ', description: 'Gamma (Cap): Grounding torque and circulation.' },
   },
   'h': {
     category: 'Emotional',
@@ -75,6 +93,8 @@ export const SOMATIC_DICTIONARY = {
     body: 'Two humans connecting or holding hands.',
     value: 8,
     archetypeCategory: 'Resonant',
+    egyptian: { unicode: '𓎛', description: 'Twisted Flax. Woven human connection and harmony.' },
+    greek:    { unicode: 'η', description: 'Eta: Efficiency and connected harmony.' },
   },
   'i': {
     category: 'Intellectual',
@@ -82,6 +102,8 @@ export const SOMATIC_DICTIONARY = {
     body: 'An upright human, focus entirely on the head/intellect.',
     value: 9,
     archetypeCategory: 'Sovereign',
+    egyptian: { unicode: '𓇌', description: 'Double Reeds. Singular insight and duality.' },
+    greek:    { unicode: 'ι', description: 'Iota: The infinitesimal singular insight.' },
   },
   'j': {
     category: 'Physical',
@@ -89,6 +111,8 @@ export const SOMATIC_DICTIONARY = {
     body: 'A person swinging a leg downward.',
     value: 10,
     archetypeCategory: 'Kinetic',
+    egyptian: { unicode: '𓆓', description: 'Cobra. Joyful, downward-plunging energy.' },
+    greek:    { unicode: 'θ', description: 'Theta: Angular kinetic plunging.' },
   },
   'k': {
     category: 'Intellectual',
@@ -96,6 +120,8 @@ export const SOMATIC_DICTIONARY = {
     body: 'A person kicking an arm and leg outward.',
     value: 11,
     archetypeCategory: 'Sovereign',
+    egyptian: { unicode: '𓎡', description: 'Basket. Constructive capital of the soul.' },
+    greek:    { unicode: 'κ', description: 'Kappa: Constructive coupling and spring constant.' },
   },
   'l': {
     category: 'Physical',
@@ -103,6 +129,8 @@ export const SOMATIC_DICTIONARY = {
     body: 'A person sitting on the ground with legs straight out.',
     value: 12,
     archetypeCategory: 'Resonant',
+    egyptian: { unicode: '𓃭', description: 'Lion. Calmness, sovereign education, and power.' },
+    greek:    { unicode: 'λ', description: 'Lambda: Smooth wavelength and sovereign calmness.' },
   },
   'm': {
     category: 'Emotional',
@@ -110,6 +138,8 @@ export const SOMATIC_DICTIONARY = {
     body: 'Two people leaning inward together.',
     value: 13,
     archetypeCategory: 'Resonant',
+    egyptian: { unicode: '𓅓', description: 'Owl. Mutual resonance and nocturnal wisdom.' },
+    greek:    { unicode: 'μ', description: 'Mu: Mutual resonance and reduced mass.' },
   },
   'n': {
     category: 'Physical',
@@ -117,6 +147,8 @@ export const SOMATIC_DICTIONARY = {
     body: 'A person kneeling on one leg.',
     value: 14,
     archetypeCategory: 'Liminal',
+    egyptian: { unicode: '𓈖', description: 'Water Ripple. Liminal thresholds and flowing necessity.' },
+    greek:    { unicode: 'ν', description: 'Nu: Flowing kinematic viscosity.' },
   },
   'o': {
     category: 'Emotional',
@@ -124,6 +156,8 @@ export const SOMATIC_DICTIONARY = {
     body: 'A person with arms joined in a circle above their head.',
     value: 15,
     archetypeCategory: 'Resonant',
+    egyptian: { unicode: '𓍯', description: 'Lasso/Rope. Openness and social inclusion loops.' },
+    greek:    { unicode: 'Ο', description: 'Omicron: Open orbital symmetry.' },
   },
   'ö': {
     category: 'Emotional',
@@ -131,6 +165,8 @@ export const SOMATIC_DICTIONARY = {
     body: 'A figure peering inward, weight pulling downward toward the centre.',
     value: 15.5,
     archetypeCategory: 'Liminal',
+    egyptian: { unicode: '𓍯', description: 'Lasso/Rope. Openness and social inclusion loops.' },
+    greek:    { unicode: 'Ο', description: 'Omicron: Open orbital symmetry.' },
   },
   'p': {
     category: 'Physical',
@@ -138,6 +174,8 @@ export const SOMATIC_DICTIONARY = {
     body: 'A person standing confidently with one hand on their hip.',
     value: 16,
     archetypeCategory: 'Kinetic',
+    egyptian: { unicode: '𓊪', description: 'Stool/Mat. The primal seat of impulsive force.' },
+    greek:    { unicode: 'π', description: 'Pi: Primal cyclical pressure.' },
   },
   'q': {
     category: 'Intellectual',
@@ -145,6 +183,8 @@ export const SOMATIC_DICTIONARY = {
     body: 'A person standing, leaning on a walking stick.',
     value: 17,
     archetypeCategory: 'Sovereign',
+    egyptian: { unicode: '𓈎', description: 'Hill Slope. Questing and analytical dominance.' },
+    greek:    { unicode: 'χ', description: 'Chi: Electric susceptibility and questing.' },
   },
   'r': {
     category: 'Physical',
@@ -152,6 +192,8 @@ export const SOMATIC_DICTIONARY = {
     body: 'A person walking forward carrying a heavy backpack.',
     value: 18,
     archetypeCategory: 'Liminal',
+    egyptian: { unicode: '𓂋', description: 'Human Mouth. Primal reflex and speech origin.' },
+    greek:    { unicode: 'ρ', description: 'Rho: Primal mass density and reflex.' },
   },
   's': {
     category: 'Physical',
@@ -159,6 +201,8 @@ export const SOMATIC_DICTIONARY = {
     body: 'A twisting torso in motion.',
     value: 19,
     archetypeCategory: 'Kinetic',
+    egyptian: { unicode: '𓋴', description: 'Folded Cloth. Social, shifting, winding movement.' },
+    greek:    { unicode: 'σ', description: 'Sigma: Shifting electrical conductivity.' },
   },
   't': {
     category: 'Intellectual',
@@ -166,6 +210,8 @@ export const SOMATIC_DICTIONARY = {
     body: 'A person standing with arms stretched horizontally.',
     value: 20,
     archetypeCategory: 'Sovereign',
+    egyptian: { unicode: '𓏏', description: 'Loaf of Bread. Tension, sustenance, structural pillar.' },
+    greek:    { unicode: 'τ', description: 'Tau: Structural tension and shear stress.' },
   },
   'u': {
     category: 'Emotional',
@@ -173,6 +219,8 @@ export const SOMATIC_DICTIONARY = {
     body: 'A person with both arms raised in a U-shape.',
     value: 21,
     archetypeCategory: 'Resonant',
+    egyptian: { unicode: '𓅱', description: 'Quail Chick. Universal embrace and vocal roundness.' },
+    greek:    { unicode: 'υ', description: 'Upsilon: Universal mass-to-light ratios.' },
   },
   'ü': {
     category: 'Emotional',
@@ -180,6 +228,8 @@ export const SOMATIC_DICTIONARY = {
     body: 'A figure reaching upward, toes barely touching the ground.',
     value: 21.5,
     archetypeCategory: 'Liminal',
+    egyptian: { unicode: '𓅱', description: 'Quail Chick. Universal embrace and vocal roundness.' },
+    greek:    { unicode: 'υ', description: 'Upsilon: Universal mass-to-light ratios.' },
   },
   'v': {
     category: 'Physical',
@@ -187,6 +237,8 @@ export const SOMATIC_DICTIONARY = {
     body: 'A person balancing dynamically on one leg.',
     value: 22,
     archetypeCategory: 'Kinetic',
+    egyptian: { unicode: '𓆑', description: 'Horned Viper. Vibrating, balancing instinct.' },
+    greek:    { unicode: 'ς', description: 'Final Sigma: Vibrational end-state.' },
   },
   'w': {
     category: 'Physical',
@@ -194,6 +246,8 @@ export const SOMATIC_DICTIONARY = {
     body: 'A group of people holding their arms up together.',
     value: 23,
     archetypeCategory: 'Sovereign',
+    egyptian: { unicode: '𓅱', description: 'Quail Chick (Plural). Weighty complexity of the flock.' },
+    greek:    { unicode: 'Ω', description: 'Omega: Weighty complexity and resistance.' },
   },
   'x': {
     category: 'Intellectual',
@@ -201,6 +255,8 @@ export const SOMATIC_DICTIONARY = {
     body: 'A person jumping with limbs spread wide.',
     value: 24,
     archetypeCategory: 'Sovereign',
+    egyptian: { unicode: '𓏴', description: 'Crossed Sticks. The X-factor, crossing thresholds, resistance.' },
+    greek:    { unicode: 'ξ', description: 'Xi: The unknown/crossing extent of reaction.' },
   },
   'y': {
     category: 'Emotional',
@@ -208,6 +264,8 @@ export const SOMATIC_DICTIONARY = {
     body: 'A person with arms raised pleadingly to the sky.',
     value: 25,
     archetypeCategory: 'Resonant',
+    egyptian: { unicode: '𓇌', description: 'Double Reeds. Vertical expansion.' },
+    greek:    { unicode: 'ψ', description: 'Psi: Vertical quantum wave function.' },
   },
   'z': {
     category: 'Physical',
@@ -215,9 +273,11 @@ export const SOMATIC_DICTIONARY = {
     body: 'A kneeling person leaning their torso heavily backward.',
     value: 26,
     archetypeCategory: 'Sovereign',
+    egyptian: { unicode: '𓊃', description: 'Door Bolt. The finality of systems, locked administration.' },
+    greek:    { unicode: 'ζ', description: 'Zeta: Zenith electrokinetic potential.' },
   },
 
-  // ── Numbers — numeric value and archetypeCategory are not applicable ──
+  // ── Numbers — numeric value and archetypeCategory are null; greek uses Ionian numeral system ──
 
   '0': {
     category: 'Physical',
@@ -225,6 +285,8 @@ export const SOMATIC_DICTIONARY = {
     body: 'A pregnant belly or an empty space/hole.',
     value: null,
     archetypeCategory: null,
+    egyptian: { unicode: '𓂜', description: 'Arms of Negation. The beautiful void/empty space.' },
+    greek:    { unicode: '∅', description: 'Zero-Point Energy: The quantum vacuum state and absolute void.' },
   },
   '1': {
     category: 'Intellectual',
@@ -232,6 +294,8 @@ export const SOMATIC_DICTIONARY = {
     body: 'A perfectly straight pillar or upright stance.',
     value: null,
     archetypeCategory: null,
+    egyptian: { unicode: '𓏺', description: 'Single Stroke. The fundamental origin.' },
+    greek:    { unicode: "α'", description: 'Alpha: The fundamental ground state / single scalar unit.' },
   },
   '2': {
     category: 'Emotional',
@@ -239,6 +303,8 @@ export const SOMATIC_DICTIONARY = {
     body: 'A sitting, relaxing person.',
     value: null,
     archetypeCategory: null,
+    egyptian: { unicode: '𓏻', description: 'Two Strokes. The bond.' },
+    greek:    { unicode: "β'", description: 'Beta: Duality state / Quantum entanglement of two particles.' },
   },
   '3': {
     category: 'Emotional',
@@ -246,6 +312,8 @@ export const SOMATIC_DICTIONARY = {
     body: 'A person with pronounced curved hips/posture.',
     value: null,
     archetypeCategory: null,
+    egyptian: { unicode: '𓏼', description: 'Three Strokes. Creative overflow.' },
+    greek:    { unicode: "γ'", description: 'Gamma: Tripartite structure (e.g., the 3 quarks forming a baryon).' },
   },
   '4': {
     category: 'Intellectual',
@@ -253,6 +321,8 @@ export const SOMATIC_DICTIONARY = {
     body: 'A rigid chair or seated frame.',
     value: null,
     archetypeCategory: null,
+    egyptian: { unicode: '𓏽', description: 'Four Strokes. Structural foundation.' },
+    greek:    { unicode: "δ'", description: 'Delta: The 4-Dimensional Spacetime manifold (Minkowski space).' },
   },
   '5': {
     category: 'Physical',
@@ -260,6 +330,8 @@ export const SOMATIC_DICTIONARY = {
     body: 'A human with a prominent belly.',
     value: null,
     archetypeCategory: null,
+    egyptian: { unicode: '𓏾', description: 'Five Strokes. Transition and friction.' },
+    greek:    { unicode: "ε'", description: 'Epsilon: Quintessence / The hypothetical 5th fundamental force.' },
   },
   '6': {
     category: 'Physical',
@@ -267,6 +339,8 @@ export const SOMATIC_DICTIONARY = {
     body: 'A human sitting, focusing on the lower body.',
     value: null,
     archetypeCategory: null,
+    egyptian: { unicode: '𓏿', description: 'Six Strokes. Grounding.' },
+    greek:    { unicode: "ϛ'", description: 'Stigma: 6 degrees of kinematic freedom / Phase space limits.' },
   },
   '7': {
     category: 'Intellectual',
@@ -274,6 +348,8 @@ export const SOMATIC_DICTIONARY = {
     body: 'A smart person pushing their head forward aggressively.',
     value: null,
     archetypeCategory: null,
+    egyptian: { unicode: '𓐀', description: 'Seven Strokes. Intelligence pushing forward.' },
+    greek:    { unicode: "ζ'", description: 'Zeta: Calabi-Yau manifolds (7 extra compacted dimensions in M-theory).' },
   },
   '8': {
     category: 'Emotional',
@@ -281,6 +357,8 @@ export const SOMATIC_DICTIONARY = {
     body: 'Two humans permanently bound or connected.',
     value: null,
     archetypeCategory: null,
+    egyptian: { unicode: '𓐁', description: 'Eight Strokes. Infinity and cyclical state.' },
+    greek:    { unicode: "η'", description: 'Eta: The Eightfold Way (SU(3) flavor symmetry in particle physics).' },
   },
   '9': {
     category: 'Intellectual',
@@ -288,6 +366,8 @@ export const SOMATIC_DICTIONARY = {
     body: 'A human entirely focused on the brain/transcendence.',
     value: null,
     archetypeCategory: null,
+    egyptian: { unicode: '𓐂', description: 'Nine Strokes. Transcendent threshold.' },
+    greek:    { unicode: "θ'", description: 'Theta: 9-dimensional space required by Superstring theory.' },
   },
 
 };

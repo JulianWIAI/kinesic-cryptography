@@ -1,0 +1,456 @@
+/* ============================================================
+   SOMATIC CIPHER DECODER — SIGINT Dossier Print Styles
+   @media print — classified document format
+   ============================================================ */
+
+/* ── Print-only elements: hidden by default ──────────────── */
+.dossier-print-header,
+.dossier-print-footer { display: none; }
+
+@media print {
+
+  /* ── Page setup ──────────────────────────────────────── */
+  @page {
+    size: A4 portrait;
+    margin: 14mm 16mm 14mm 16mm;
+  }
+
+  /* ── Global reset to paper ───────────────────────────── */
+  *, *::before, *::after {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+
+  html, body {
+    background: #fff !important;
+    color: #000 !important;
+    font-family: 'Courier New', Courier, monospace !important;
+    font-size: 9pt !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* ── Show classified header / footer ─────────────────── */
+  .dossier-print-header,
+  .dossier-print-footer {
+    display: block !important;
+    width: 100%;
+  }
+
+  .dossier-print-header {
+    border: 3px solid #000;
+    padding: 8pt 10pt;
+    margin-bottom: 12pt;
+    page-break-after: avoid;
+  }
+
+  .dossier-classification-banner {
+    font-size: 9pt;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-align: center;
+    border: 1px solid #000;
+    padding: 3pt 6pt;
+    margin-bottom: 6pt;
+    background: #000 !important;
+    color: #fff !important;
+  }
+
+  .dossier-meta-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 7pt;
+    letter-spacing: 0.06em;
+    border-top: 1px solid #000;
+    padding-top: 4pt;
+    margin-top: 4pt;
+  }
+
+  .dossier-title {
+    font-size: 11pt;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-align: center;
+    margin: 6pt 0 0;
+    text-transform: uppercase;
+  }
+
+  .dossier-print-footer {
+    border: 3px solid #000;
+    padding: 5pt 10pt;
+    margin-top: 16pt;
+    display: flex !important;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 7pt;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    page-break-before: avoid;
+  }
+
+  /* ── Hide all UI chrome ──────────────────────────────── */
+  .site-header,
+  .site-footer,
+  .localization-bar,
+  .stream-selector-bar,
+  .controls-bar,
+  .waveform-panel,
+  #base-signal-box,
+  .synthesis-panel,
+  .spectral-panel,
+  .export-bar,
+  #empty-state,
+  .output-header,
+  .diagnostic-toggle-btn,
+  .spectral-collapse-btn,
+  .cluster-gravity,
+  .cluster-table,
+  .cluster-scatter-wrap { display: none !important; }
+
+  /* ── Main layout ─────────────────────────────────────── */
+  .main-content {
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: none !important;
+  }
+
+  /* ── Wave Equation — feature box ────────────────────── */
+  .wave-eq-box {
+    display: block !important;
+    border: 2px solid #000 !important;
+    background: #fff !important;
+    padding: 8pt 10pt !important;
+    margin-bottom: 10pt;
+    page-break-inside: avoid;
+  }
+
+  .wave-eq-header {
+    display: flex !important;
+    align-items: center;
+    gap: 6pt;
+    margin-bottom: 4pt;
+    border-bottom: 1px solid #000;
+    padding-bottom: 3pt;
+  }
+
+  .wave-eq-dot { display: none !important; }
+
+  .wave-eq-label {
+    font-size: 7pt !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.18em !important;
+    color: #000 !important;
+  }
+
+  .wave-eq-line {
+    font-family: 'Courier New', Courier, monospace !important;
+    font-size: 12pt !important;
+    font-weight: 700 !important;
+    color: #000 !important;
+    letter-spacing: 0.06em;
+    padding: 3pt 0;
+  }
+
+  /* ── Output grid — card layout ───────────────────────── */
+  .output-section { display: block !important; }
+
+  .output-grid {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 8pt !important;
+  }
+
+  .char-card {
+    display: flex !important;
+    flex-direction: column !important;
+    border: 2px solid #000 !important;
+    border-top: 4px solid #000 !important;
+    background: #fff !important;
+    color: #000 !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    margin-bottom: 0;
+    overflow: hidden;
+  }
+
+  .card-header {
+    background: #000 !important;
+    color: #fff !important;
+    padding: 4pt 6pt !important;
+    border-bottom: 1px solid #000 !important;
+  }
+
+  .card-char {
+    color: #fff !important;
+    text-shadow: none !important;
+    font-size: 1.4rem !important;
+  }
+
+  .card-tag, .card-index {
+    color: #ccc !important;
+    font-size: 6pt !important;
+  }
+
+  /* ── Streams ─────────────────────────────────────────── */
+  .card-streams {
+    grid-template-columns: 1fr 1fr !important;
+    border-bottom: 1px solid #ccc;
+  }
+
+  .stream {
+    padding: 4pt 5pt !important;
+    gap: 3pt !important;
+    background: #fff !important;
+  }
+
+  .stream--face {
+    border-right: 1px solid #ccc !important;
+    background: #fff !important;
+  }
+
+  .stream--body { background: #fff !important; }
+
+  .stream-dot { display: none !important; }
+
+  .stream-title {
+    font-size: 6pt !important;
+    color: #000 !important;
+    font-weight: 700;
+  }
+
+  .stream-image-wrap {
+    aspect-ratio: 4/3 !important;
+    border: 1px solid #ccc !important;
+    background: #f5f5f5 !important;
+    border-radius: 0 !important;
+  }
+
+  .stream-img {
+    filter: grayscale(100%) contrast(1.1) !important;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+  }
+
+  .stream-description {
+    font-size: 6pt !important;
+    color: #333 !important;
+    line-height: 1.4 !important;
+  }
+
+  /* ── Egyptian and Greek streams ──────────────────────── */
+  .stream--egyptian,
+  .stream--greek {
+    border-top: 1px solid #ccc !important;
+    background: #fafafa !important;
+    padding: 4pt 5pt !important;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 6pt !important;
+  }
+
+  .stream--egyptian .stream-header,
+  .stream--greek .stream-header {
+    display: none !important;
+  }
+
+  .card-egyptian-glyph,
+  .card-greek-glyph {
+    font-size: 1.4rem !important;
+    color: #000 !important;
+    text-shadow: none !important;
+    flex-shrink: 0 !important;
+    width: auto !important;
+    text-align: left !important;
+  }
+
+  .stream--egyptian .stream-description,
+  .stream--greek .stream-description {
+    font-size: 6pt !important;
+    color: #555 !important;
+    flex: 1;
+  }
+
+  /* ── Diagnostic panel ────────────────────────────────── */
+  .diagnostic-panel {
+    display: block !important;
+    border: 2px solid #000 !important;
+    background: #fff !important;
+    color: #000 !important;
+    margin-top: 10pt;
+    page-break-inside: avoid;
+    border-radius: 0 !important;
+  }
+
+  .diagnostic-header {
+    background: #000 !important;
+    color: #fff !important;
+    padding: 4pt 8pt !important;
+    border-bottom: 1px solid #000 !important;
+  }
+
+  .diagnostic-title {
+    color: #fff !important;
+    font-size: 7pt !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.14em !important;
+  }
+
+  .diagnostic-dot { display: none !important; }
+
+  .diagnostic-body {
+    padding: 6pt !important;
+  }
+
+  .diag-metrics-grid {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 4pt !important;
+  }
+
+  .diag-metric-tile {
+    border: 1px solid #000 !important;
+    background: #fff !important;
+    padding: 4pt 6pt !important;
+    min-width: 60pt;
+    border-radius: 0 !important;
+  }
+
+  .diag-metric-label {
+    font-size: 6pt !important;
+    color: #555 !important;
+  }
+
+  .diag-metric-value {
+    font-size: 10pt !important;
+    font-weight: 700 !important;
+    color: #000 !important;
+    text-shadow: none !important;
+  }
+
+  /* ── Narrative view in print ─────────────────────────── */
+  .narrative-container {
+    display: block !important;
+    overflow: visible !important;
+  }
+
+  .narrative-timeline {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 6pt !important;
+    min-width: auto !important;
+    padding: 0 !important;
+  }
+
+  .narrative-node {
+    width: 100pt !important;
+    border: 2px solid #000 !important;
+    background: #fff !important;
+    color: #000 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    padding: 4pt !important;
+  }
+
+  .node-char {
+    color: #000 !important;
+    text-shadow: none !important;
+    font-size: 1.2rem !important;
+  }
+
+  .node-img { filter: grayscale(100%) !important; }
+
+  .node-hieroglyph,
+  .node-greek {
+    color: #000 !important;
+    text-shadow: none !important;
+    font-size: 1.4rem !important;
+  }
+
+  .node-meta { color: #555 !important; }
+
+  .timeline-connector { display: none !important; }
+
+  /* ── Cluster mode in print ───────────────────────────── */
+  .comparison-container { display: block !important; }
+
+  .cluster-word-block {
+    border: 2px solid #000 !important;
+    background: #fff !important;
+    margin-bottom: 8pt;
+    break-inside: avoid;
+    border-radius: 0 !important;
+  }
+
+  .cluster-word-block-header {
+    background: #000 !important;
+    color: #fff !important;
+    border-left: none !important;
+    padding: 3pt 6pt !important;
+  }
+
+  .cluster-word-block-idx,
+  .cluster-word-block-count { color: #ccc !important; }
+  .cluster-word-block-name { color: #fff !important; }
+
+  /* ── Word stream in print ────────────────────────────── */
+  .word-stream-container { display: block !important; }
+
+  .word-stream-row { margin-bottom: 6pt; break-inside: avoid; }
+
+  .word-stream-row-header { margin-bottom: 3pt; }
+
+  .word-stream-row-dot { display: none !important; }
+
+  .word-stream-row-title {
+    color: #000 !important;
+    font-size: 7pt !important;
+    font-weight: 700;
+  }
+
+  .comparison-stream {
+    border: 1px solid #ccc !important;
+    background: #fff !important;
+    min-height: auto !important;
+    overflow: visible !important;
+    flex-wrap: wrap !important;
+    gap: 4pt !important;
+    padding: 4pt !important;
+    border-radius: 0 !important;
+  }
+
+  .word-stream-node {
+    border: 1px solid #ccc !important;
+    background: #fff !important;
+    width: 60pt !important;
+    border-radius: 0 !important;
+  }
+
+  .word-stream-node-char {
+    color: #000 !important;
+    text-shadow: none !important;
+  }
+
+  .word-stream-node-img { filter: grayscale(100%) !important; }
+
+  .word-stream-node-glyph {
+    color: #000 !important;
+    text-shadow: none !important;
+    font-size: 1.4rem !important;
+  }
+
+  .word-stream-node-greek-glyph {
+    color: #000 !important;
+    text-shadow: none !important;
+    font-size: 1.4rem !important;
+  }
+
+  .comparison-connector { display: none !important; }
+
+  .word-stream-node-category { color: #555 !important; }
+
+}

@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/components.css">
   <link rel="stylesheet" href="css/diagnostic.css">
+  <link rel="stylesheet" href="css/print.css">
 </head>
 <body>
 
@@ -27,6 +28,17 @@
     </div>
   </header>
 
+  <!-- ── SIGINT Dossier Print Header (screen: hidden; print: visible) ── -->
+  <div class="dossier-print-header" aria-hidden="true">
+    <div class="dossier-classification-banner">&#9646; TOP SECRET // SIGINT // SOMATIC CIPHER ANALYSIS &#9646;</div>
+    <div class="dossier-meta-row">
+      <span>DOC ID: <strong id="dossier-doc-id">&mdash;</strong></span>
+      <span>TIMESTAMP: <strong id="dossier-timestamp">&mdash;</strong></span>
+      <span>ANALYST: SCD/AUTO</span>
+    </div>
+    <h2 class="dossier-title">SIGINT INTELLIGENCE DOSSIER &mdash; SOMATIC CIPHER ANALYSIS</h2>
+  </div>
+
   <main class="main-content" id="main-content">
 
     <!-- ── Localization Bar ─────────────────────────────── -->
@@ -37,8 +49,38 @@
         <button class="loc-btn"                 data-lang="western"  aria-pressed="false">WESTERN (A&#8209;Z)</button>
         <button class="loc-btn"                 data-lang="japanese" aria-pressed="false">JAPANESE (ROMAJI)</button>
         <button class="loc-btn"                 data-lang="chinese"  aria-pressed="false">CHINESE (PINYIN)</button>
+        <button class="loc-btn"                 data-lang="cyrillic" aria-pressed="false">CYRILLIC (LATINIZED)</button>
+        <button class="loc-btn"                 data-lang="arabic"   aria-pressed="false">ARABIC&#8209;FARSI (LATINIZED)</button>
+        <button class="loc-btn"                 data-lang="korean"   aria-pressed="false">KOREAN (ROMAJA)</button>
       </div>
       <span class="loc-status" id="loc-status" aria-live="polite"></span>
+    </div>
+
+    <!-- ── Stream Selector ──────────────────────────────── -->
+    <div class="stream-selector-bar" id="stream-selector-bar" role="group" aria-label="Stream visibility controls">
+      <span class="stream-selector-label" aria-hidden="true">STREAMS</span>
+      <div class="stream-selector-options">
+        <label class="stream-check-label stream-check-label--face">
+          <input type="checkbox" id="stream-check-face" class="stream-check" checked>
+          <span class="stream-check-box" aria-hidden="true"></span>
+          <span class="stream-check-text">Facial Articulation</span>
+        </label>
+        <label class="stream-check-label stream-check-label--body">
+          <input type="checkbox" id="stream-check-body" class="stream-check" checked>
+          <span class="stream-check-box" aria-hidden="true"></span>
+          <span class="stream-check-text">Somatic Posture</span>
+        </label>
+        <label class="stream-check-label stream-check-label--egyptian">
+          <input type="checkbox" id="stream-check-egyptian" class="stream-check" checked>
+          <span class="stream-check-box" aria-hidden="true"></span>
+          <span class="stream-check-text">Egyptian Etymology</span>
+        </label>
+        <label class="stream-check-label stream-check-label--greek">
+          <input type="checkbox" id="stream-check-greek" class="stream-check" checked>
+          <span class="stream-check-box" aria-hidden="true"></span>
+          <span class="stream-check-text">Greek Physics Variables</span>
+        </label>
+      </div>
     </div>
 
     <!-- ── Single input (default) ───────────────────────── -->
@@ -60,7 +102,7 @@
             <span class="btn-icon" aria-hidden="true">&#9654;</span>
           </button>
         </div>
-        <p id="input-hint" class="input-hint">Letters (A–Z, Ä Ö Ü) and digits accepted &mdash; spaces and punctuation are discarded.</p>
+        <p id="input-hint" class="input-hint">Latin (A–Z, Ä Ö Ü), Cyrillic, Arabic/Farsi, Korean, Japanese, Chinese &mdash; all scripts transliterated automatically.</p>
       </div>
     </section>
 
@@ -188,6 +230,15 @@
 
     </section>
 
+    <!-- ── Intercepted Wave Equation ────────────────────────── -->
+    <div class="wave-eq-box" id="wave-eq-box" hidden aria-live="polite" aria-label="Intercepted wave equation">
+      <div class="wave-eq-header">
+        <span class="wave-eq-dot" aria-hidden="true"></span>
+        <span class="wave-eq-label">INTERCEPTED WAVE EQUATION</span>
+      </div>
+      <div class="wave-eq-content" id="wave-eq-content"></div>
+    </div>
+
     <!-- ── Psycholinguistic Diagnostic Engine Panel ───────── -->
     <section
       id="diagnostic-panel"
@@ -242,6 +293,14 @@
 
       </div>
     </section>
+
+    <!-- ── SIGINT Dossier Export ──────────────────────────────── -->
+    <div class="export-bar" id="export-bar" hidden>
+      <button id="export-btn" class="export-btn" type="button" aria-label="Export decoded intelligence as classified SIGINT dossier PDF">
+        <span class="export-btn-icon" aria-hidden="true">&#9632;</span>
+        EXPORT SIGINT DOSSIER
+      </button>
+    </div>
 
     <!-- ── Spectral Analysis Engine ─────────────────────────── -->
     <section
@@ -322,6 +381,12 @@
     </section>
 
   </main>
+
+  <!-- ── SIGINT Dossier Print Footer (screen: hidden; print: visible) ── -->
+  <div class="dossier-print-footer" aria-hidden="true">
+    <span>&#9646; TOP SECRET // DESTROY AFTER READING &#9646;</span>
+    <span id="dossier-page-note">SOMATIC CIPHER DECODER v5.0 &mdash; PROPRIETARY INTELLIGENCE SYSTEM</span>
+  </div>
 
   <!-- ── Synthesis Panel (fixed bottom) ───────────────────── -->
   <aside class="synthesis-panel" id="synthesis-panel" hidden aria-label="Contextual synthesis">

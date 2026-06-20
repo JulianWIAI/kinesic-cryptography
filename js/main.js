@@ -35,6 +35,7 @@ const state = {
   synthesisOpen: true,
   language:        'auto',   // 'auto' | 'western' | 'japanese' | 'chinese'
   streamsDisabled: false,   // when true, character image section is hidden in cluster mode
+  streams:         { face: true, body: true, egyptian: true, greek: true },
   decoded:         [],       // single-mode results
   cluster:         [],       // cluster-mode results: Array<{ word, decoded, analysis }>
 };
@@ -100,6 +101,22 @@ const baseSignalValue     = document.getElementById('base-signal-value');
 const btnDisableStreams   = document.getElementById('btn-disable-streams');
 const streamsToggleDivider = document.getElementById('streams-divider');
 
+// Stream visibility checkboxes
+const streamCheckFace     = /** @type {HTMLInputElement} */ (document.getElementById('stream-check-face'));
+const streamCheckBody     = /** @type {HTMLInputElement} */ (document.getElementById('stream-check-body'));
+const streamCheckEgyptian = /** @type {HTMLInputElement} */ (document.getElementById('stream-check-egyptian'));
+const streamCheckGreek    = /** @type {HTMLInputElement} */ (document.getElementById('stream-check-greek'));
+
+// Wave equation + export
+const waveEqBox     = document.getElementById('wave-eq-box');
+const waveEqContent = document.getElementById('wave-eq-content');
+const exportBar     = document.getElementById('export-bar');
+const exportBtn     = document.getElementById('export-btn');
+
+// Dossier print elements
+const dossierDocId    = document.getElementById('dossier-doc-id');
+const dossierTimestamp = document.getElementById('dossier-timestamp');
+
 // ── Spectral Analysis Engine DOM refs ──────────────────────
 const spectralCollapseBtn   = document.getElementById('spectral-collapse-btn');
 const spectralBodyEl        = document.getElementById('spectral-body');
@@ -130,6 +147,25 @@ btnStreamView.addEventListener('click', () => setView('stream'));
 btnCompMode.addEventListener('click', toggleComparisonMode);
 synthesisToggleBtn.addEventListener('click', toggleSynthesisCollapse);
 btnDisableStreams?.addEventListener('click', toggleStreamsDisabled);
+
+streamCheckFace?.addEventListener('change', () => {
+  state.streams.face = streamCheckFace.checked;
+  document.body.classList.toggle('hide-face', !streamCheckFace.checked);
+});
+streamCheckBody?.addEventListener('change', () => {
+  state.streams.body = streamCheckBody.checked;
+  document.body.classList.toggle('hide-body', !streamCheckBody.checked);
+});
+streamCheckEgyptian?.addEventListener('change', () => {
+  state.streams.egyptian = streamCheckEgyptian.checked;
+  document.body.classList.toggle('hide-egyptian', !streamCheckEgyptian.checked);
+});
+streamCheckGreek?.addEventListener('change', () => {
+  state.streams.greek = streamCheckGreek.checked;
+  document.body.classList.toggle('hide-greek', !streamCheckGreek.checked);
+});
+
+exportBtn?.addEventListener('click', exportDossier);
 
 // ── Language Selection ────────────────────────────────────
 
@@ -221,6 +257,8 @@ async function handleDecodeSingle() {
     renderSingle();
     renderDiagnostic(text, null);
     runDeepSpectralAnalysis(text);
+    _renderWaveEquation([{ label: result.latinized || inputEl.value.trim(), decoded: state.decoded }]);
+    exportBar?.removeAttribute('hidden');
   } catch (err) {
     _setLocStatus(err.message, 'loc-status--error');
   } finally {
@@ -258,6 +296,8 @@ async function handleDecodeCluster() {
     renderCluster();
     renderDiagnosticCluster(engineTexts);
     runDeepSpectralAnalysis(engineTexts.join(' '));
+    _renderWaveEquation(state.cluster.map(c => ({ label: c.word, decoded: c.decoded })));
+    exportBar?.removeAttribute('hidden');
   } catch (err) {
     _setLocStatus(err.message, 'loc-status--error');
   } finally {
@@ -315,6 +355,8 @@ function renderSingle() {
   if (state.decoded.length === 0) {
     showEmptyState();
     hideSynthesisPanel();
+    waveEqBox?.setAttribute('hidden', '');
+    exportBar?.setAttribute('hidden', '');
     return;
   }
 
@@ -334,6 +376,8 @@ function renderSingle() {
       wordStreamContainer.removeAttribute('hidden');
       wordStreamContainer.appendChild(buildWordStreamRow('face', state.decoded));
       wordStreamContainer.appendChild(buildWordStreamRow('body', state.decoded));
+      wordStreamContainer.appendChild(buildWordStreamRow('egyptian', state.decoded));
+      wordStreamContainer.appendChild(buildWordStreamRow('greek', state.decoded));
     } else {
       outputGrid.removeAttribute('hidden');
       state.decoded.forEach((item, i) => outputGrid.appendChild(createCardElement(item, i)));
@@ -505,6 +549,8 @@ function buildClusterWordBlock(item, wordIndex) {
   } else if (state.view === 'stream') {
     content.appendChild(buildWordStreamRow('face', decoded));
     content.appendChild(buildWordStreamRow('body', decoded));
+    content.appendChild(buildWordStreamRow('egyptian', decoded));
+    content.appendChild(buildWordStreamRow('greek', decoded));
   } else {
     content.classList.add('output-grid');
     decoded.forEach((d, i) => content.appendChild(createCardElement(d, i)));
@@ -597,6 +643,8 @@ function createCardElement(decoded, index) {
 
   article.appendChild(header);
   article.appendChild(streams);
+  article.appendChild(createEgyptianStream(decoded));
+  article.appendChild(createGreekStream(decoded));
   return article;
 }
 
@@ -638,6 +686,82 @@ function createStream(type, displayChar, imgSrc, description) {
   return section;
 }
 
+// ── Egyptian Etymology Stream Factory ────────────────────
+
+function createEgyptianStream(decoded) {
+  const { data } = decoded;
+  const egyptian = data?.egyptian;
+
+  const section = document.createElement('div');
+  section.className = 'stream stream--egyptian';
+
+  const headerEl = document.createElement('div');
+  headerEl.className = 'stream-header';
+  headerEl.innerHTML = `
+    <span class="stream-dot stream-dot--egyptian" aria-hidden="true"></span>
+    <span class="stream-title stream-title--egyptian">Egyptian Etymology</span>
+  `;
+
+  const glyphEl = document.createElement('div');
+  glyphEl.className = 'card-egyptian-glyph';
+  glyphEl.textContent = egyptian?.unicode ?? '?';
+  glyphEl.setAttribute('aria-hidden', 'true');
+
+  const desc = document.createElement('p');
+  desc.className = 'stream-description';
+  if (egyptian?.description) {
+    desc.textContent = egyptian.description;
+  } else {
+    const em = document.createElement('em');
+    em.className = 'no-data';
+    em.textContent = 'No Egyptian etymology on record.';
+    desc.appendChild(em);
+  }
+
+  section.appendChild(headerEl);
+  section.appendChild(glyphEl);
+  section.appendChild(desc);
+  return section;
+}
+
+// ── Greek Physics Stream Factory ─────────────────────────
+
+function createGreekStream(decoded) {
+  const { data } = decoded;
+  const greek = data?.greek;
+
+  const section = document.createElement('div');
+  section.className = 'stream stream--greek';
+
+  const headerEl = document.createElement('div');
+  headerEl.className = 'stream-header';
+  headerEl.innerHTML = `
+    <span class="stream-dot stream-dot--greek" aria-hidden="true"></span>
+    <span class="stream-title stream-title--greek">Greek Physics Variable</span>
+  `;
+
+  const glyphEl = document.createElement('div');
+  glyphEl.className = 'card-greek-glyph';
+  glyphEl.textContent = greek?.unicode ?? '?';
+  glyphEl.setAttribute('aria-hidden', 'true');
+
+  const desc = document.createElement('p');
+  desc.className = 'stream-description';
+  if (greek?.description) {
+    desc.textContent = greek.description;
+  } else {
+    const em = document.createElement('em');
+    em.className = 'no-data';
+    em.textContent = 'No Greek physics variable for this character.';
+    desc.appendChild(em);
+  }
+
+  section.appendChild(headerEl);
+  section.appendChild(glyphEl);
+  section.appendChild(desc);
+  return section;
+}
+
 // ── Timeline Node Factory (Narrative View) ────────────────
 
 function createTimelineNode(decoded, index) {
@@ -665,8 +789,26 @@ function createTimelineNode(decoded, index) {
   metaEl.className = 'node-meta';
   metaEl.textContent = data?.category ?? '';
 
+  const hieroglyphWrap = document.createElement('div');
+  hieroglyphWrap.className = 'node-hieroglyph-wrap';
+  const hieroglyphGlyph = document.createElement('span');
+  hieroglyphGlyph.className = 'node-hieroglyph';
+  hieroglyphGlyph.textContent = data?.egyptian?.unicode ?? '';
+  hieroglyphGlyph.setAttribute('aria-hidden', 'true');
+  hieroglyphWrap.appendChild(hieroglyphGlyph);
+
+  const greekWrap = document.createElement('div');
+  greekWrap.className = 'node-greek-wrap';
+  const greekGlyph = document.createElement('span');
+  greekGlyph.className = 'node-greek';
+  greekGlyph.textContent = data?.greek?.unicode ?? '';
+  greekGlyph.setAttribute('aria-hidden', 'true');
+  greekWrap.appendChild(greekGlyph);
+
   node.appendChild(charEl);
   node.appendChild(imagesEl);
+  node.appendChild(hieroglyphWrap);
+  node.appendChild(greekWrap);
   node.appendChild(metaEl);
   return node;
 }
@@ -909,6 +1051,8 @@ function clearAllOutputs() {
   _clearCardOutputs();
   hideDiagnosticPanel();
   spectralResultsEl?.setAttribute('hidden', '');
+  waveEqBox?.setAttribute('hidden', '');
+  exportBar?.setAttribute('hidden', '');
 }
 
 function showEmptyState()  { emptyState.removeAttribute('hidden'); }
@@ -924,8 +1068,13 @@ function updateOutputHeader(decoded, raw) {
 // ── Word Stream View ──────────────────────────────────────
 
 function buildWordStreamRow(type, decoded) {
-  const isFace = type === 'face';
-  const label  = isFace ? 'Facial Articulation Stream' : 'Somatic Posture Stream';
+  const isFace     = type === 'face';
+  const isEgyptian = type === 'egyptian';
+  const isGreek    = type === 'greek';
+  const label      = isEgyptian ? 'Egyptian Etymology Stream'
+    : isGreek    ? 'Greek Physics Variables Stream'
+    : isFace     ? 'Facial Articulation Stream'
+    : 'Somatic Posture Stream';
 
   const row = document.createElement('div');
   row.className = `word-stream-row word-stream-row--${type}`;
@@ -963,8 +1112,6 @@ function buildWordStreamRow(type, decoded) {
 function createWordStreamNode(decoded, index, type) {
   const { char, data, faceImg, bodyImg } = decoded;
   const displayChar   = char.toUpperCase();
-  const imgSrc        = type === 'face' ? faceImg : bodyImg;
-  const altText       = `${type === 'face' ? 'Facial articulation' : 'Somatic posture'} for ${displayChar}`;
   const categoryClass = data?.category ? (CATEGORY_CLASS[data.category] ?? '') : '';
 
   const node = document.createElement('div');
@@ -977,18 +1124,81 @@ function createWordStreamNode(decoded, index, type) {
   charEl.textContent = displayChar;
   charEl.setAttribute('aria-hidden', 'true');
 
-  const imgWrap = document.createElement('div');
-  imgWrap.className = 'word-stream-node-img-wrap';
-  imgWrap.appendChild(buildImg(imgSrc, altText, 'word-stream-node-img', imgWrap));
+  node.appendChild(charEl);
+
+  if (type === 'egyptian') {
+    const glyphEl = document.createElement('div');
+    glyphEl.className = 'word-stream-node-glyph';
+    glyphEl.textContent = data?.egyptian?.unicode ?? '?';
+    glyphEl.setAttribute('aria-hidden', 'true');
+    node.appendChild(glyphEl);
+  } else if (type === 'greek') {
+    const glyphEl = document.createElement('div');
+    glyphEl.className = 'word-stream-node-greek-glyph';
+    glyphEl.textContent = data?.greek?.unicode ?? '?';
+    glyphEl.setAttribute('aria-hidden', 'true');
+    node.appendChild(glyphEl);
+  } else {
+    const imgSrc  = type === 'face' ? faceImg : bodyImg;
+    const altText = `${type === 'face' ? 'Facial articulation' : 'Somatic posture'} for ${displayChar}`;
+    const imgWrap = document.createElement('div');
+    imgWrap.className = 'word-stream-node-img-wrap';
+    imgWrap.appendChild(buildImg(imgSrc, altText, 'word-stream-node-img', imgWrap));
+    node.appendChild(imgWrap);
+  }
 
   const categoryEl = document.createElement('span');
   categoryEl.className = 'word-stream-node-category';
   categoryEl.textContent = data?.category ?? '';
-
-  node.appendChild(charEl);
-  node.appendChild(imgWrap);
   node.appendChild(categoryEl);
+
   return node;
+}
+
+// ── Wave Equation Renderer ────────────────────────────────
+
+/**
+ * Builds one equation line per word from Greek letter mappings.
+ * @param {Array<{ label: string, decoded: Array }>} wordGroups
+ */
+function _renderWaveEquation(wordGroups) {
+  if (!waveEqBox || !waveEqContent) return;
+
+  const lines = wordGroups
+    .map(({ label, decoded }) => {
+      const terms = decoded
+        .filter(d => d.data?.greek?.unicode)
+        .map(d => d.data.greek.unicode);
+      if (terms.length === 0) return null;
+      const wordLabel = (label || '?').replace(/[^a-zA-ZÄÖÜäöü0-9]/g, '').toUpperCase() || label.toUpperCase();
+      return { wordLabel, equation: terms.join(' + ') };
+    })
+    .filter(Boolean);
+
+  if (lines.length === 0) {
+    waveEqBox.setAttribute('hidden', '');
+    return;
+  }
+
+  waveEqContent.innerHTML = lines.map(({ wordLabel, equation }) =>
+    `<div class="wave-eq-line">` +
+    `<span class="wave-eq-func">WAVE_FUNC</span>` +
+    `(<span class="wave-eq-word">${wordLabel}</span>) = ` +
+    `<span class="wave-eq-terms">${equation}</span>` +
+    `</div>`
+  ).join('');
+
+  waveEqBox.removeAttribute('hidden');
+}
+
+// ── SIGINT Dossier Export ─────────────────────────────────
+
+function exportDossier() {
+  const docId = 'SCD-' + Date.now().toString(36).toUpperCase();
+  const ts    = new Date().toISOString().replace('T', ' ').slice(0, 19) + ' UTC';
+  if (dossierDocId)    dossierDocId.textContent    = docId;
+  if (dossierTimestamp) dossierTimestamp.textContent = ts;
+  window.print();
 }
 
 // ── Spectral Analysis Engine ──────────────────────────────
