@@ -29,6 +29,18 @@
 
   <main class="main-content" id="main-content">
 
+    <!-- ── Localization Bar ─────────────────────────────── -->
+    <div class="localization-bar" id="localization-bar" role="toolbar" aria-label="Signal language mode">
+      <span class="loc-section-label" aria-hidden="true">SIGNAL LANGUAGE</span>
+      <div class="loc-options" role="group" aria-label="Language mode selection">
+        <button class="loc-btn loc-btn--active" data-lang="auto"     aria-pressed="true">AUTO&#8209;DETECT</button>
+        <button class="loc-btn"                 data-lang="western"  aria-pressed="false">WESTERN (A&#8209;Z)</button>
+        <button class="loc-btn"                 data-lang="japanese" aria-pressed="false">JAPANESE (ROMAJI)</button>
+        <button class="loc-btn"                 data-lang="chinese"  aria-pressed="false">CHINESE (PINYIN)</button>
+      </div>
+      <span class="loc-status" id="loc-status" aria-live="polite"></span>
+    </div>
+
     <!-- ── Single input (default) ───────────────────────── -->
     <section class="input-section" id="input-section-single" aria-label="Signal input">
       <div class="input-panel">
@@ -90,6 +102,11 @@
           <span class="toggle-icon" aria-hidden="true">&#9776;</span>
           Word Stream
         </button>
+        <div class="controls-divider" id="streams-divider" aria-hidden="true"></div>
+        <button id="btn-disable-streams" class="view-toggle view-toggle--disable" aria-pressed="false">
+          <span class="toggle-icon" aria-hidden="true">&#8856;</span>
+          Disable Images
+        </button>
       </div>
 
       <div class="controls-divider" aria-hidden="true"></div>
@@ -99,6 +116,15 @@
         Cluster Mode
       </button>
 
+    </div>
+
+    <!-- ── Intercepted Base Signal (JP/CN only) ────────── -->
+    <div class="base-signal-box" id="base-signal-box" hidden aria-live="polite" aria-label="Intercepted base signal (Latinized)">
+      <div class="base-signal-header">
+        <span class="base-signal-dot" aria-hidden="true"></span>
+        <span class="base-signal-label">INTERCEPTED BASE SIGNAL (LATINIZED)</span>
+      </div>
+      <div class="base-signal-value" id="base-signal-value"></div>
     </div>
 
     <!-- ── Wavelength Telemetry Panel ───────────────────── -->
@@ -314,6 +340,10 @@
   <footer class="site-footer">
     <span>SOMATIC CIPHER DECODER &mdash; v3.0</span>
   </footer>
+
+  <!-- Kuroshiro (Japanese → Romaji) — UMD globals required by pipeline.js -->
+  <script src="https://cdn.jsdelivr.net/npm/kuroshiro@1.2.0/dist/kuroshiro.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/kuroshiro-analyzer-kuromoji@1.1.0/dist/kuroshiro-analyzer-kuromoji.min.js"></script>
 
   <!-- Chart.js v4 — loaded as a non-module global so ES6 modules can access window.Chart -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>

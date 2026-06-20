@@ -1,4 +1,4 @@
-# Somatic Cipher Decoder — v3.2
+# Somatic Cipher Decoder — v4.0
 
 A pure client-side research tool that treats language as a **physical frequency signal**. It decodes alphanumeric text into visual dashboards of facial articulation and somatic posture data, runs real-time oscilloscope waveforms, performs full spectral analysis (FFT), and clusters semantic word groups into geometric scatter fields — all with zero backend dependencies.
 
@@ -6,11 +6,17 @@ A pure client-side research tool that treats language as a **physical frequency 
 
 ## Screenshots
 
-### Decode View
-![Decode View](https://raw.githubusercontent.com/JulianWIAI/kinesic-cryptography/main/screenshots/decode-view.png)
+### Single Word Decoder — Overview
+![Single Word Decoder](https://raw.githubusercontent.com/JulianWIAI/kinesic-cryptography/main/screenshots/decode-view.png)
 
-### Cluster Mode
-![Cluster Mode](https://raw.githubusercontent.com/JulianWIAI/kinesic-cryptography/main/screenshots/comparison-mode.png)
+### Cluster Mode — Overview
+![Cluster Mode](https://raw.githubusercontent.com/JulianWIAI/kinesic-cryptography/main/screenshots/cluster-mode.png)
+
+### Psycholinguistic Diagnostic Engine
+![Diagnostic Engine](https://raw.githubusercontent.com/JulianWIAI/kinesic-cryptography/main/screenshots/diagnostic-engine.png)
+
+### Spectral Analysis Engine
+![Spectral Analysis Engine](https://raw.githubusercontent.com/JulianWIAI/kinesic-cryptography/main/screenshots/spectral-engine.png)
 
 ---
 
@@ -23,9 +29,28 @@ A pure client-side research tool that treats language as a **physical frequency 
 | **Grid View** | Each decoded character renders as a card with two columns: Facial Articulation and Somatic Posture |
 | **Narrative View** | Horizontal scrollable timeline showing all characters in sequence |
 | **Word Stream View** | Two parallel strips — one for all face images, one for all body images |
-| **Cluster Mode** | Comma-separated word list decodes all words simultaneously; outputs Center of Gravity metrics and a Cluster Scatter |
+| **Cluster Mode** | Comma-separated word list decodes all words simultaneously; outputs Center of Gravity metrics, a word table, and a Cluster Scatter |
+| **Cluster Image Views** | In Cluster Mode the Grid / Narrative / Word Stream views render per-word character streams so words can be visually compared side-by-side |
+| **Disable Images** | Toggle button in the controls bar that instantly hides all character image cards in both single and cluster mode — useful for quick analysis of large clusters without scroll |
 | **Contextual Synthesis** | Fixed bottom panel concatenates all descriptions into a single narrative |
 | **Category Theming** | Each character is tagged `Physical`, `Emotional`, or `Intellectual` with a distinct card colour |
+
+---
+
+### Global Localization Bridge
+
+Transliterates Japanese and Chinese text into the Latin alphabet before passing it through the physics engine. Accessible via the **SIGNAL LANGUAGE** bar above the input.
+
+| Mode | Library | How it works |
+|---|---|---|
+| **AUTO-DETECT** | — | Heuristic Unicode scan: Hiragana/Katakana → Japanese, CJK Ideographs → Chinese, otherwise Western |
+| **WESTERN (A–Z)** | — | Pass-through; no transliteration (default behaviour) |
+| **JAPANESE (ROMAJI)** | [Kuroshiro](https://github.com/hexenq/kuroshiro) + [Kuromoji](https://github.com/takuyaa/kuromoji) | Converts mixed Kanji/Kana to Romaji; dictionary (~8 MB) is downloaded once on first use from the jsDelivr CDN |
+| **CHINESE (PINYIN)** | [pinyin-pro](https://github.com/zh-lx/pinyin-pro) | Converts Hanzi to tone-stripped Pinyin (ā → a); loaded as an ES module on first use via esm.sh |
+
+**Intercepted Base Signal box** — visible above the waveform panel after a Japanese or Chinese decode. Shows the exact Romanised string that was fed into the engine so the transliteration is always auditable.
+
+**Status indicator** — the localization bar displays real-time status messages during dictionary loading (`LOADING JP DICTIONARY…`) and confirms readiness (`JP READY`).
 
 ---
 
@@ -60,6 +85,8 @@ The same palette is shared across Wavelength Telemetry, Spectral Oscilloscopes, 
 ---
 
 ### Psycholinguistic Diagnostic Engine
+
+![Diagnostic Engine](https://raw.githubusercontent.com/JulianWIAI/kinesic-cryptography/main/screenshots/diagnostic-engine.png)
 
 Triggered on every decode. Collapsible panel beneath the output. Behaviour differs between single-word and cluster mode.
 
@@ -103,9 +130,11 @@ Located directly below the somatic character output when Cluster Mode is active:
 
 ### Spectral Analysis Engine
 
+![Spectral Analysis Engine](https://raw.githubusercontent.com/JulianWIAI/kinesic-cryptography/main/screenshots/spectral-engine.png)
+
 Always-visible section at the bottom of the main content. Driven entirely by the signal input — no separate text field needed.
 
-**Live oscilloscopes (on every keystroke, debounced 250 ms)**
+**Live oscilloscopes (on every keystroke)**
 
 | Chart | Description |
 |---|---|
@@ -120,18 +149,32 @@ Always-visible section at the bottom of the main content. Driven entirely by the
 |---|---|
 | **Window Aggregation Metrics** | Avg word σ, dominant Quersumme + Archetype name, Sovereignty %, Somatic %, word count |
 | **Dominant FFT Harmonics** | Radix-2 Cooley-Tukey FFT on the 256-sample Hann-windowed signal; top 5 non-DC power bins with relative strength bars — detects artificial or mechanical rhythmic patterns |
-| **Complexity Scatter (Word Sum × σ)** | One point per word; T1=green, T2=orange, T3=red; dashed boundaries at σ=2.0 and σ=5.0; auto-downsamples to 1 000 points for very large corpora |
+| **Complexity Scatter (Word Sum × σ)** | One point per word; T1=green, T2=orange, T3=red; dashed boundaries at σ=2.0 and σ=5.0 |
+
+---
+
+## Single Word — Usage
+
+1. Select a **SIGNAL LANGUAGE** if needed (default: AUTO-DETECT)
+2. Type or paste a word into the **SIGNAL INPUT** field — the Wavelength Telemetry and Spectral Oscilloscopes update live as you type
+3. Press **DECODE** or hit Enter
+4. Switch between **Grid**, **Narrative**, and **Word Stream** views using the controls bar
+5. Toggle **Disable Images** to hide character cards and focus on the numerical analysis panels
+6. For Japanese/Chinese input the **Intercepted Base Signal** box appears above the waveform, showing the exact Romanised string fed to the engine
 
 ---
 
 ## Cluster Mode — Usage
 
 1. Click **Cluster Mode** in the controls bar (the single input is replaced by a textarea)
-2. Type a comma-separated list of words: `ring, marriage, couple, children, family`
-3. As you type the **Wavelength Telemetry** and **Spectral Oscilloscopes** update live — each word as its own coloured line
-4. Click **Analyze Cluster** to decode all words simultaneously
-5. The output section shows the **Center of Gravity** block, a **word metrics table**, and the **Cluster Scatter**
-6. The **Psycholinguistic Diagnostic Engine** shows per-word metric rows, category bars, the multi-word radar, and the **Balkendiagramm**
+2. Select a **SIGNAL LANGUAGE** if needed
+3. Type a comma-separated list of words: `ring, marriage, couple, children, family`
+4. As you type the **Wavelength Telemetry** and **Spectral Oscilloscopes** update live — each word as its own coloured line
+5. Click **Analyze Cluster** to decode all words simultaneously
+6. The output section shows the **Center of Gravity** block, a word metrics table, the **Cluster Scatter**, and a **CHARACTER STREAMS** section with one image block per word
+7. Switch between **Grid**, **Narrative**, and **Word Stream** views to change how the per-word character images are laid out — all words update at once for direct visual comparison
+8. Toggle **Disable Images** to collapse the CHARACTER STREAMS section and show only the analytics table and scatter — useful when comparing 10+ words and scroll space is limited
+9. The **Psycholinguistic Diagnostic Engine** shows per-word metric rows, category bars, the multi-word radar, and the **Balkendiagramm**
 
 ---
 
@@ -169,7 +212,7 @@ Always-visible section at the bottom of the main content. Driven entirely by the
 | Y | 25 | Resonant |
 | Z | 26 | Sovereign |
 
-Non-alphabetic characters (digits, spaces, punctuation) contribute a value of 0 and are excluded from all calculations.
+Non-alphabetic characters (digits, spaces, punctuation) contribute a value of 0 and are excluded from all calculations. Japanese and Chinese input is transliterated to Latin before lookup.
 
 ---
 
@@ -218,6 +261,8 @@ python3 -m http.server 5500
 # then open http://localhost:5500
 ```
 
+> **Japanese mode** requires an internet connection on first use to download the Kuromoji dictionary (~8 MB) from the jsDelivr CDN. It is cached by the browser after the first load.
+
 ---
 
 ## File Structure
@@ -228,14 +273,23 @@ kinesic-cryptography/
 ├── index.html                   # App shell — all sections and canvas elements
 │
 ├── css/
-│   ├── style.css                # Global tokens, reset, typography, layout
+│   ├── style.css                # Global tokens, reset, typography, layout,
+│   │                            #   localization bar, base signal box
 │   ├── components.css           # Cards, timeline, cluster output, category colours
 │   └── diagnostic.css           # Diagnostic panel, waveform, spectral engine,
-│                                #   cluster metric rows, Balkendiagramm styles
+│                                #   cluster metric rows, Balkendiagramm,
+│                                #   cluster character stream section
 │
 ├── js/
 │   ├── main.js                  # Entry point — event wiring, view switching,
-│   │                            #   cluster parse/decode/render, spectral integration
+│   │                            #   cluster parse/decode/render, spectral integration,
+│   │                            #   language selection, disable-images toggle
+│   │
+│   │   ── Localization ─────────────────────────────────────
+│   ├── pipeline.js              # Global Localization Bridge:
+│   │                            #   detectLanguage (Unicode heuristic),
+│   │                            #   initKuroshiro (lazy Kuromoji dict load),
+│   │                            #   processInput (transliterate → normalise → engineInput)
 │   │
 │   │   ── Physics & Math ───────────────────────────────────
 │   ├── physics.js               # FFT (Radix-2 Cooley-Tukey, N=256, Hann window),
@@ -251,20 +305,14 @@ kinesic-cryptography/
 │   ├── palette.js               # 14-colour CLUSTER_COLORS palette (shared across all
 │   │                            #   chart modules for consistent per-word colouring)
 │   ├── charts.js                # Chart.js renderers:
-│   │                            #   renderRadarChart (N-dataset, palette-coloured),
-│   │                            #   renderScatterChart (letter-position, single/2-word),
-│   │                            #   renderGlobalEnvelopeChart (100-pt bezier, N-series),
-│   │                            #   renderMicroWaveChart (256-pt zero-tension, N-series),
-│   │                            #   renderWordScatterChart (Word Sum × σ, threshold lines),
-│   │                            #   renderClusterScatterChart (cluster scatter, word labels),
-│   │                            #   renderClusterBarChart (horizontal Balkendiagramm)
+│   │                            #   renderRadarChart, renderScatterChart,
+│   │                            #   renderGlobalEnvelopeChart, renderMicroWaveChart,
+│   │                            #   renderWordScatterChart, renderClusterScatterChart,
+│   │                            #   renderClusterBarChart (Balkendiagramm)
 │   ├── waveform.js              # Real-time Wavelength Telemetry — N-series oscilloscope
 │   │
 │   │   ── Decoder ──────────────────────────────────────────
-│   ├── diagnosticPanel.js       # Diagnostic Engine UI:
-│   │                            #   renderDiagnostic (single/2-word, includes letter count),
-│   │                            #   renderDiagnosticCluster (N-word: metric rows, category
-│   │                            #   bars, scores table, radar, Balkendiagramm)
+│   ├── diagnosticPanel.js       # Diagnostic Engine UI — single/cluster renders
 │   ├── decoder.js               # Input → DecodedCharacter array
 │   └── dictionary.js            # Somatic data ledger (face + body per character)
 │
@@ -276,12 +324,62 @@ kinesic-cryptography/
 
 ---
 
+## Asset Naming Convention
+
+Images must follow this exact naming pattern for the decoder to locate them:
+
+```
+assets/[character]-face.png
+assets/[character]-body.png
+```
+
+**Examples:** `assets/a-face.png`, `assets/3-body.png`, `assets/z-face.png`
+
+All characters are normalised to **lowercase** before the path is constructed. For Japanese/Chinese input, the Romanised equivalent letter is used after transliteration.
+
+---
+
+## Dictionary Structure
+
+Each entry in `js/dictionary.js` follows this structure:
+
+```js
+export const SOMATIC_DICTIONARY = {
+  'a': {
+    category: 'Physical',   // 'Physical' | 'Emotional' | 'Intellectual'
+    face: 'Description of the facial articulation for this character.',
+    body: 'Description of the somatic posture for this character.',
+  },
+  // ...
+};
+```
+
+### Category Colour Key
+
+| Category | Card Background | Use |
+|---|---|---|
+| `Physical` | Dark blue | Characters primarily engaging physical articulation |
+| `Emotional` | Dark amber | Characters with emotional or relational somatic quality |
+| `Intellectual` | Steel grey-blue | Characters associated with cognitive or focused expression |
+
+---
+
+## Supported Characters
+
+The decoder handles all **alphanumeric** input: `a–z`, `0–9`, and German umlauts `ä ö ü` (36+ characters). Spaces, punctuation, and special characters are silently discarded. Input is automatically converted to lowercase before lookup.
+
+Japanese and Chinese text is first transliterated to a Latin equivalent by the **Global Localization Bridge** before character lookup.
+
+---
+
 ## Technology
 
 - **Vanilla HTML / CSS / JavaScript** — no frameworks, no build tools, no backend
 - **ES6 Modules** — fully modular with `import`/`export`
-- **[Chart.js v4](https://www.chartjs.org/)** — loaded via CDN as a UMD global; used for radar, scatter, line (oscilloscope), bar (Balkendiagramm), and waveform charts
-- **Pure-JS FFT** — Radix-2 Cooley-Tukey implemented in `physics.js`; no Web Audio API, no external DSP library
+- **[Chart.js v4](https://www.chartjs.org/)** — loaded via CDN (UMD global); radar, scatter, line, bar, and waveform charts
+- **[Kuroshiro v1](https://github.com/hexenq/kuroshiro) + [kuroshiro-analyzer-kuromoji](https://github.com/hexenq/kuroshiro-analyzer-kuromoji)** — loaded via jsDelivr CDN as UMD globals; Japanese → Romaji transliteration with Kuromoji dictionary
+- **[pinyin-pro v3](https://github.com/zh-lx/pinyin-pro)** — loaded as an ES module via esm.sh on first use; Chinese → tone-stripped Pinyin
+- **Pure-JS FFT** — Radix-2 Cooley-Tukey implemented in `physics.js`; no Web Audio API required
 - **14-colour shared palette** — `palette.js` exports `CLUSTER_COLORS`; imported by `waveform.js`, `charts.js`, and `diagnosticPanel.js` to keep per-word colours consistent across all panels
 - **CSS Custom Properties** — centralised design tokens for all colours, spacing, and typography
 - [Space Mono](https://fonts.google.com/specimen/Space+Mono) + [Inter](https://fonts.google.com/specimen/Inter) via Google Fonts

@@ -6,6 +6,7 @@
  *           Psycholinguistic Diagnostic Engine.
  */
 
+import { processInput, initKuroshiro, isKuroshiroReady }           from './pipeline.js';
 import { decodeText }                                              from './decoder.js';
 import { renderDiagnostic, hideDiagnosticPanel,
          renderDiagnosticCluster }                                from './diagnosticPanel.js';
@@ -29,11 +30,13 @@ import {
 
 // ── App State ─────────────────────────────────────────────
 const state = {
-  view:          'grid',  // 'grid' | 'narrative' | 'stream'
+  view:          'grid',    // 'grid' | 'narrative' | 'stream'
   comparison:    false,
   synthesisOpen: true,
-  decoded:       [],      // single-mode results
-  cluster:       [],      // cluster-mode results: Array<{ word, decoded, analysis }>
+  language:        'auto',   // 'auto' | 'western' | 'japanese' | 'chinese'
+  streamsDisabled: false,   // when true, character image section is hidden in cluster mode
+  decoded:         [],       // single-mode results
+  cluster:         [],       // cluster-mode results: Array<{ word, decoded, analysis }>
 };
 
 // ── Category → CSS class map ─────────────────────────────
@@ -83,6 +86,20 @@ const waveformPanel       = document.getElementById('waveform-panel');
 const waveformCanvas      = /** @type {HTMLCanvasElement} */ (document.getElementById('waveform-canvas'));
 const waveformStatusEl    = document.getElementById('waveform-status');
 
+// Localization bar
+const locStatusEl     = document.getElementById('loc-status');
+const locBtns         = /** @type {NodeListOf<HTMLButtonElement>} */ (
+  document.querySelectorAll('.loc-btn')
+);
+
+// Base Signal box
+const baseSignalBox       = document.getElementById('base-signal-box');
+const baseSignalValue     = document.getElementById('base-signal-value');
+
+// Disable-streams toggle (cluster mode only)
+const btnDisableStreams   = document.getElementById('btn-disable-streams');
+const streamsToggleDivider = document.getElementById('streams-divider');
+
 // ── Spectral Analysis Engine DOM refs ──────────────────────
 const spectralCollapseBtn   = document.getElementById('spectral-collapse-btn');
 const spectralBodyEl        = document.getElementById('spectral-body');
@@ -112,6 +129,61 @@ btnNarrView.addEventListener('click', () => setView('narrative'));
 btnStreamView.addEventListener('click', () => setView('stream'));
 btnCompMode.addEventListener('click', toggleComparisonMode);
 synthesisToggleBtn.addEventListener('click', toggleSynthesisCollapse);
+btnDisableStreams?.addEventListener('click', toggleStreamsDisabled);
+
+// ── Language Selection ────────────────────────────────────
+
+locBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    const lang = btn.dataset.lang;
+    if (lang === state.language) return;
+    state.language = lang;
+    locBtns.forEach(b => {
+      b.classList.toggle('loc-btn--active', b.dataset.lang === lang);
+      b.setAttribute('aria-pressed', String(b.dataset.lang === lang));
+    });
+    _hideBaseSignal();
+    if (lang === 'japanese') _initKuroshiroLazy();
+  });
+});
+
+function _setLocStatus(msg, cls = '') {
+  if (!locStatusEl) return;
+  locStatusEl.textContent = msg;
+  locStatusEl.className   = ['loc-status', cls].filter(Boolean).join(' ');
+}
+
+async function _initKuroshiroLazy() {
+  if (isKuroshiroReady()) return;
+  _setBusy(true);
+  try {
+    await initKuroshiro(msg => _setLocStatus(msg, 'loc-status--loading'));
+    _setLocStatus('JP READY', '');
+  } catch (err) {
+    _setLocStatus('JP DICT ERROR', 'loc-status--error');
+  } finally {
+    _setBusy(false);
+  }
+}
+
+function _setBusy(busy) {
+  decodeBtn.disabled    = busy;
+  decodeBtnComp.disabled = busy;
+  const singleLabel = decodeBtn.querySelector('.btn-label');
+  const clusterLabel = decodeBtnComp.querySelector('.btn-label');
+  if (singleLabel)  singleLabel.textContent  = busy ? 'DECRYPTING…' : 'DECODE';
+  if (clusterLabel) clusterLabel.textContent = busy ? 'DECRYPTING…' : 'ANALYZE CLUSTER';
+}
+
+function _showBaseSignal(latinized) {
+  if (!baseSignalBox || !baseSignalValue) return;
+  baseSignalValue.textContent = latinized;
+  baseSignalBox.removeAttribute('hidden');
+}
+
+function _hideBaseSignal() {
+  baseSignalBox?.setAttribute('hidden', '');
+}
 
 // ── Helpers ───────────────────────────────────────────────
 
@@ -129,29 +201,68 @@ function parseClusterInput(raw) {
 
 // ── Decode Handlers ───────────────────────────────────────
 
-function handleDecodeSingle() {
-  state.decoded = decodeText(inputEl.value);
-  renderSingle();
-  renderDiagnostic(inputEl.value, null);
-  runDeepSpectralAnalysis(inputEl.value);
+async function handleDecodeSingle() {
+  _setBusy(true);
+  try {
+    const result = await processInput(inputEl.value, state.language);
+    const text   = result.engineInput;
+
+    if (result.mode !== 'western') {
+      _showBaseSignal(result.latinized);
+      // Drive oscilloscopes from the Latin signal after transliteration
+      const datasets = [{ label: 'SIGNAL', text }];
+      setWaveformPanelVisible(updateWaveform(waveformCanvas, datasets));
+      updateSpectralOscilloscopes(datasets);
+    } else {
+      _hideBaseSignal();
+    }
+
+    state.decoded = decodeText(text);
+    renderSingle();
+    renderDiagnostic(text, null);
+    runDeepSpectralAnalysis(text);
+  } catch (err) {
+    _setLocStatus(err.message, 'loc-status--error');
+  } finally {
+    _setBusy(false);
+  }
 }
 
-function handleDecodeCluster() {
-  const words = parseClusterInput(clusterInputEl.value);
-  if (words.length === 0) {
+async function handleDecodeCluster() {
+  const rawWords = parseClusterInput(clusterInputEl.value);
+  if (rawWords.length === 0) {
     clearAllOutputs();
     showEmptyState();
     hideSynthesisPanel();
     return;
   }
-  state.cluster = words.map(word => ({
-    word,
-    decoded:  decodeText(word),
-    analysis: analyzeWord(word),
-  }));
-  renderCluster();
-  renderDiagnosticCluster(words);
-  runDeepSpectralAnalysis(words.join(' '));
+
+  _setBusy(true);
+  try {
+    const results = await Promise.all(rawWords.map(w => processInput(w, state.language)));
+
+    const hasTranslit = results.some(r => r.mode !== 'western');
+    if (hasTranslit) {
+      _showBaseSignal(results.map(r => r.latinized).join('  /  '));
+    } else {
+      _hideBaseSignal();
+    }
+
+    const engineTexts = results.map(r => r.engineInput);
+    state.cluster = results.map((r, i) => ({
+      word:     r.engineInput || rawWords[i],
+      decoded:  decodeText(r.engineInput),
+      analysis: analyzeWord(r.engineInput),
+    }));
+
+    renderCluster();
+    renderDiagnosticCluster(engineTexts);
+    runDeepSpectralAnalysis(engineTexts.join(' '));
+  } catch (err) {
+    _setLocStatus(err.message, 'loc-status--error');
+  } finally {
+    _setBusy(false);
+  }
 }
 
 // ── Waveform Handlers (real-time) ─────────────────────────
@@ -199,7 +310,7 @@ function setWaveformPanelVisible(visible) {
 // ── Single-mode Renderer ──────────────────────────────────
 
 function renderSingle() {
-  clearAllOutputs();
+  _clearCardOutputs();
 
   if (state.decoded.length === 0) {
     showEmptyState();
@@ -210,21 +321,23 @@ function renderSingle() {
   hideEmptyState();
   updateOutputHeader(state.decoded, inputEl.value);
 
-  if (state.view === 'narrative') {
-    narrativeContainer.removeAttribute('hidden');
-    state.decoded.forEach((item, i) => {
-      narrativeTimeline.appendChild(createTimelineNode(item, i));
-      if (i < state.decoded.length - 1) {
-        narrativeTimeline.appendChild(createConnector());
-      }
-    });
-  } else if (state.view === 'stream') {
-    wordStreamContainer.removeAttribute('hidden');
-    wordStreamContainer.appendChild(buildWordStreamRow('face', state.decoded));
-    wordStreamContainer.appendChild(buildWordStreamRow('body', state.decoded));
-  } else {
-    outputGrid.removeAttribute('hidden');
-    state.decoded.forEach((item, i) => outputGrid.appendChild(createCardElement(item, i)));
+  if (!state.streamsDisabled) {
+    if (state.view === 'narrative') {
+      narrativeContainer.removeAttribute('hidden');
+      state.decoded.forEach((item, i) => {
+        narrativeTimeline.appendChild(createTimelineNode(item, i));
+        if (i < state.decoded.length - 1) {
+          narrativeTimeline.appendChild(createConnector());
+        }
+      });
+    } else if (state.view === 'stream') {
+      wordStreamContainer.removeAttribute('hidden');
+      wordStreamContainer.appendChild(buildWordStreamRow('face', state.decoded));
+      wordStreamContainer.appendChild(buildWordStreamRow('body', state.decoded));
+    } else {
+      outputGrid.removeAttribute('hidden');
+      state.decoded.forEach((item, i) => outputGrid.appendChild(createCardElement(item, i)));
+    }
   }
 
   populateSynthesis(state.decoded, null);
@@ -233,7 +346,7 @@ function renderSingle() {
 // ── Cluster Renderer ──────────────────────────────────────
 
 function renderCluster() {
-  clearAllOutputs();
+  _clearCardOutputs();
 
   if (state.cluster.length === 0) {
     showEmptyState();
@@ -321,9 +434,84 @@ function renderCluster() {
     .map(c => ({ word: c.word, wordSum: c.analysis.wordSum, sigma: c.analysis.sigma }));
   renderClusterScatterChart(canvas, scatterData);
 
+  // ── Per-word character stream section (skipped when disabled) ──
+  if (!state.streamsDisabled) {
+    const streamSection = document.createElement('div');
+    streamSection.className = 'cluster-stream-section';
+
+    const streamTitle = document.createElement('div');
+    streamTitle.className = 'cluster-stream-title';
+    streamTitle.textContent = 'CHARACTER STREAMS';
+    streamSection.appendChild(streamTitle);
+
+    state.cluster.forEach((item, i) => {
+      if (item.decoded.length > 0) {
+        streamSection.appendChild(buildClusterWordBlock(item, i));
+      }
+    });
+    comparisonContainer.appendChild(streamSection);
+  }
+
   // ── Synthesis ─────────────────────────────────────────
   const allDecoded = state.cluster.flatMap(c => c.decoded);
   populateSynthesis(allDecoded, null);
+}
+
+function toggleStreamsDisabled() {
+  state.streamsDisabled = !state.streamsDisabled;
+  btnDisableStreams.classList.toggle('view-toggle--active', state.streamsDisabled);
+  btnDisableStreams.setAttribute('aria-pressed', String(state.streamsDisabled));
+  if (state.comparison && state.cluster.length > 0) renderCluster();
+  else if (!state.comparison && state.decoded.length > 0) renderSingle();
+}
+
+// ── Cluster Word Block Factory ────────────────────────────
+
+const _WORD_COLORS = [
+  '#00c8ff', '#00ffc8', '#a78bfa', '#fb923c',
+  '#f59e0b', '#22d3a0', '#f472b6', '#60a5fa',
+];
+
+function buildClusterWordBlock(item, wordIndex) {
+  const { word, decoded } = item;
+  const color = _WORD_COLORS[wordIndex % _WORD_COLORS.length];
+
+  const block = document.createElement('div');
+  block.className = 'cluster-word-block';
+
+  const header = document.createElement('div');
+  header.className = 'cluster-word-block-header';
+  header.style.borderLeftColor = color;
+  header.innerHTML = `
+    <span class="cluster-word-block-idx">#${String(wordIndex + 1).padStart(2, '0')}</span>
+    <span class="cluster-word-block-name" style="color:${color}">${word.toUpperCase()}</span>
+    <span class="cluster-word-block-count">${decoded.length} chr</span>
+  `;
+  block.appendChild(header);
+
+  const content = document.createElement('div');
+  content.className = 'cluster-word-block-content';
+
+  if (state.view === 'narrative') {
+    content.classList.add('narrative-container');
+    const timeline = document.createElement('div');
+    timeline.className = 'narrative-timeline';
+    timeline.setAttribute('role', 'list');
+    decoded.forEach((d, i) => {
+      timeline.appendChild(createTimelineNode(d, i));
+      if (i < decoded.length - 1) timeline.appendChild(createConnector());
+    });
+    content.appendChild(timeline);
+  } else if (state.view === 'stream') {
+    content.appendChild(buildWordStreamRow('face', decoded));
+    content.appendChild(buildWordStreamRow('body', decoded));
+  } else {
+    content.classList.add('output-grid');
+    decoded.forEach((d, i) => content.appendChild(createCardElement(d, i)));
+  }
+
+  block.appendChild(content);
+  return block;
 }
 
 // ── View Toggle ───────────────────────────────────────────
@@ -338,7 +526,8 @@ function setView(view) {
   btnNarrView.setAttribute('aria-pressed', String(view === 'narrative'));
   btnStreamView.setAttribute('aria-pressed', String(view === 'stream'));
 
-  if (state.decoded.length > 0) renderSingle();
+  if (state.comparison && state.cluster.length > 0) renderCluster();
+  else if (state.decoded.length > 0) renderSingle();
 }
 
 // ── Comparison Mode Toggle ────────────────────────────────
@@ -348,15 +537,16 @@ function toggleComparisonMode() {
   btnCompMode.classList.toggle('active', state.comparison);
   btnCompMode.setAttribute('aria-pressed', String(state.comparison));
 
+  // View toggles remain visible in both modes so the user can switch
+  // character stream layout in cluster mode too
   if (state.comparison) {
     inputSectionSingle.setAttribute('hidden', '');
     inputSectionComp.removeAttribute('hidden');
-    viewTogglesEl.setAttribute('hidden', '');
   } else {
     inputSectionSingle.removeAttribute('hidden');
     inputSectionComp.setAttribute('hidden', '');
-    viewTogglesEl.removeAttribute('hidden');
   }
+  viewTogglesEl.removeAttribute('hidden');
 
   clearAllOutputs();
   showEmptyState();
@@ -695,7 +885,10 @@ function updateBodyPadding() {
 
 // ── Output State Helpers ──────────────────────────────────
 
-function clearAllOutputs() {
+// Clears only the character-card output areas.
+// Diagnostic and spectral panels are intentionally left alone so that
+// toggling "Disable Images" or switching view does not hide the analysis.
+function _clearCardOutputs() {
   outputGrid.innerHTML          = '';
   narrativeTimeline.innerHTML   = '';
   wordStreamContainer.innerHTML = '';
@@ -707,10 +900,15 @@ function clearAllOutputs() {
   comparisonContainer.setAttribute('hidden', '');
   outputHeader.setAttribute('hidden', '');
 
-  // Also reset the diagnostic panel, spectral deep-analysis results, and cluster chart
+  destroyClusterChart();
+}
+
+// Full reset — also clears the diagnostic and spectral panels.
+// Only called on mode switch and when the decoded result is empty.
+function clearAllOutputs() {
+  _clearCardOutputs();
   hideDiagnosticPanel();
   spectralResultsEl?.setAttribute('hidden', '');
-  destroyClusterChart();
 }
 
 function showEmptyState()  { emptyState.removeAttribute('hidden'); }
