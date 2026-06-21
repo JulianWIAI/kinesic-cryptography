@@ -5,18 +5,21 @@
 
 /* ── Panel shell ──────────────────────────────────────────── */
 .legend-panel {
-  position: fixed;
-  bottom: 24px;
-  right: 24px;
-  width: 340px;
+  position:        fixed;
+  bottom:          24px;
+  right:           24px;
+  width:           340px;
+  max-height:      70vh;
+  display:         flex;
+  flex-direction:  column;
   background-color: #D4B886;
-  color: #1a0f00;
-  border: 1px solid #a8885a;
-  border-radius: 6px;
-  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.55);
-  z-index: 900;
-  font-family: 'Inter', sans-serif;
-  transition: box-shadow 0.2s;
+  color:           #1a0f00;
+  border:          1px solid #a8885a;
+  border-radius:   6px;
+  box-shadow:      0 8px 40px rgba(0, 0, 0, 0.55);
+  z-index:         900;
+  font-family:     'Inter', sans-serif;
+  transition:      box-shadow 0.2s;
 }
 
 .legend-panel--minimized {
@@ -85,8 +88,11 @@
 
 /* ── Body (hidden when minimized) ────────────────────────── */
 .legend-body {
-  display: flex;
+  display:        flex;
   flex-direction: column;
+  flex:           1;
+  overflow:       hidden;
+  min-height:     0;
 }
 
 /* ── Tab bar ──────────────────────────────────────────────── */
@@ -127,9 +133,10 @@
 
 /* ── Tab content areas ────────────────────────────────────── */
 .legend-tab-content {
-  padding: 10px 12px 12px;
-  max-height: 360px;
-  overflow-y: auto;
+  flex:            1;
+  min-height:      0;
+  padding:         10px 12px 12px;
+  overflow-y:      auto;
   scrollbar-width: thin;
   scrollbar-color: #a8885a #D4B886;
 }
@@ -178,6 +185,28 @@
   font-size: 0.7rem;
   color: #1a0f00;
   line-height: 1.45;
+}
+
+/* ── Section divider inside legend list (A–Z / 0–9 break) ─── */
+.legend-list-sep {
+  display:        flex;
+  align-items:    center;
+  gap:            8px;
+  margin:         6px 0 2px;
+  font-family:    'Space Mono', monospace;
+  font-size:      0.55rem;
+  letter-spacing: 0.1em;
+  color:          #7a4e1a;
+  text-transform: uppercase;
+}
+
+.legend-list-sep::before,
+.legend-list-sep::after {
+  content:    '';
+  flex:       1;
+  height:     1px;
+  background: #a8885a;
+  opacity:    0.5;
 }
 
 /* ── Group blocks (Tabs 2 & 3) ────────────────────────────── */

@@ -30,8 +30,8 @@ export const SOMATIC_DICTIONARY = {
     body: 'A person mid-step, weight shifting — the liminal moment between stances.',
     value: 1.5,
     archetypeCategory: 'Liminal',
-    egyptian: { unicode: '𓄿', description: 'Egyptian Vulture. The primal cry/origin.' },
-    greek:    { unicode: 'α', description: 'Alpha: The fine-structure constant / origin point.' },
+    egyptian: { unicode: '𓄿𓏤𓏤', description: 'Vulture with two strokes. The primal cry splitting into duality.' },
+    greek:    { unicode: "α'", description: 'Alpha Prime: The origin state entering transition.' },
   },
   'b': {
     category: 'Physical',
@@ -165,8 +165,8 @@ export const SOMATIC_DICTIONARY = {
     body: 'A figure peering inward, weight pulling downward toward the centre.',
     value: 15.5,
     archetypeCategory: 'Liminal',
-    egyptian: { unicode: '𓍯', description: 'Lasso/Rope. Openness and social inclusion loops.' },
-    greek:    { unicode: 'Ο', description: 'Omicron: Open orbital symmetry.' },
+    egyptian: { unicode: '𓍯𓏤𓏤', description: 'Lasso with two strokes. The closed loop vibrating at a higher frequency.' },
+    greek:    { unicode: "Ο'", description: 'Omicron Prime: Open orbital symmetry under tension.' },
   },
   'p': {
     category: 'Physical',
@@ -228,8 +228,8 @@ export const SOMATIC_DICTIONARY = {
     body: 'A figure reaching upward, toes barely touching the ground.',
     value: 21.5,
     archetypeCategory: 'Liminal',
-    egyptian: { unicode: '𓅱', description: 'Quail Chick. Universal embrace and vocal roundness.' },
-    greek:    { unicode: 'υ', description: 'Upsilon: Universal mass-to-light ratios.' },
+    egyptian: { unicode: '𓅱𓏤𓏤', description: 'Quail Chick with two strokes. The universal vessel compressed and elevated.' },
+    greek:    { unicode: "υ'", description: 'Upsilon Prime: High-frequency universal mass ratio.' },
   },
   'v': {
     category: 'Physical',

@@ -60,6 +60,11 @@ export function decodeText(input) {
     .map(char => buildDecodedCharacter(char));
 }
 
+// Maps characters whose asset filenames differ from the character itself.
+// Umlauts use romanized equivalents (ä→ae, ö→oe, ü→ue) so URLs stay
+// ASCII-safe on all hosting environments including GitHub Pages.
+const ASSET_KEY = { 'ä': 'ae', 'ö': 'oe', 'ü': 'ue' };
+
 /**
  * Constructs a single DecodedCharacter object for the given character.
  *
@@ -67,12 +72,11 @@ export function decodeText(input) {
  * @returns {DecodedCharacter}
  */
 function buildDecodedCharacter(char) {
-  // Umlaut filenames use the actual character; image error handler
-  // will show a placeholder if no asset exists.
+  const fileKey = ASSET_KEY[char] ?? char;
   return {
     char,
     data:    SOMATIC_DICTIONARY[char] ?? null,
-    faceImg: `assets/${char}-face.png`,
-    bodyImg: `assets/${char}-body.png`,
+    faceImg: `assets/${fileKey}-face.png`,
+    bodyImg: `assets/${fileKey}-body.png`,
   };
 }
