@@ -135,17 +135,17 @@ function buildMetricColumn(word, comp, root, archetype) {
     <div class="diag-word-label">${word.toUpperCase()}</div>
     <div class="diag-metric-row">
       <div class="diag-metric-tile diag-tile--quersumme">
-        <span class="diag-tile-label">QUERSUMME</span>
+        <span class="diag-tile-label">QUERSUMME <span data-tip="Digital root — the Word Sum reduced to a single digit (1–9) by repeatedly adding its digits. Reveals the word's Archetypal Core: e.g., 1 = Origin/Survival, 8 = Infinity/State, 9 = Transcendent."><button class="tip-btn" aria-label="About Quersumme">?</button></span></span>
         <span class="diag-tile-value">${root}</span>
         <span class="diag-tile-sub">${archetype.name}</span>
       </div>
       <div class="diag-metric-tile diag-tile--sum">
-        <span class="diag-tile-label">WORD SUM</span>
+        <span class="diag-tile-label">WORD SUM <span data-tip="Total lexical weight — the sum of each letter's positional value (A=1 to Z=26). Higher values indicate heavier, more conceptually complex words."><button class="tip-btn" aria-label="About Word Sum">?</button></span></span>
         <span class="diag-tile-value">${sumDisplay}</span>
         <span class="diag-tile-sub">Σ letters</span>
       </div>
       <div class="diag-metric-tile diag-tile--sigma">
-        <span class="diag-tile-label">σ SIGMA</span>
+        <span class="diag-tile-label">σ SIGMA <span data-tip="Standard deviation of letter values — the most important metric for detecting State language. Low σ (<2.0): somatic, natural, harmonized. High σ (>5.0): bureaucratic, volatile, State-structured."><button class="tip-btn" aria-label="About Sigma">?</button></span></span>
         <span class="diag-tile-value">${comp.sigma.toFixed(2)}</span>
         <span class="diag-tile-sub">Std. deviation</span>
       </div>

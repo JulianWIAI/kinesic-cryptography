@@ -1,0 +1,214 @@
+/* ============================================================
+   SOMATIC CIPHER DECODER — Linguistic Architecture Legend
+   Floating papyrus overlay panel
+   ============================================================ */
+
+/* ── Panel shell ──────────────────────────────────────────── */
+.legend-panel {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 340px;
+  background-color: #D4B886;
+  color: #1a0f00;
+  border: 1px solid #a8885a;
+  border-radius: 6px;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.55);
+  z-index: 900;
+  font-family: 'Inter', sans-serif;
+  transition: box-shadow 0.2s;
+}
+
+.legend-panel--minimized {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
+/* ── Header ───────────────────────────────────────────────── */
+.legend-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 7px 10px 7px 12px;
+  background-color: #b8945c;
+  border-radius: 6px 6px 0 0;
+  border-bottom: 1px solid #a8885a;
+  user-select: none;
+}
+
+.legend-panel--minimized .legend-header {
+  border-radius: 6px;
+  border-bottom: none;
+}
+
+.legend-header-left {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.legend-header-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background-color: #6b3a00;
+  flex-shrink: 0;
+}
+
+.legend-title {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  color: #1a0f00;
+}
+
+.legend-toggle-btn {
+  background: none;
+  border: 1px solid rgba(26, 15, 0, 0.3);
+  color: #1a0f00;
+  width: 20px;
+  height: 20px;
+  border-radius: 3px;
+  font-size: 0.85rem;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.12s;
+}
+
+.legend-toggle-btn:hover {
+  background: rgba(0, 0, 0, 0.12);
+}
+
+/* ── Body (hidden when minimized) ────────────────────────── */
+.legend-body {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Tab bar ──────────────────────────────────────────────── */
+.legend-tabs {
+  display: flex;
+  border-bottom: 1px solid #a8885a;
+  background-color: #c9a870;
+}
+
+.legend-tab {
+  flex: 1;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 6px 4px 5px;
+  font-family: 'Space Mono', monospace;
+  font-size: 0.54rem;
+  letter-spacing: 0.04em;
+  color: #5a3a10;
+  cursor: pointer;
+  text-align: center;
+  line-height: 1.3;
+  transition: color 0.12s, background 0.12s;
+  margin-bottom: -1px;
+}
+
+.legend-tab:hover {
+  color: #1a0f00;
+  background: rgba(0, 0, 0, 0.07);
+}
+
+.legend-tab--active {
+  color: #1a0f00;
+  border-bottom-color: #5a2d00;
+  font-weight: 700;
+  background: rgba(0, 0, 0, 0.04);
+}
+
+/* ── Tab content areas ────────────────────────────────────── */
+.legend-tab-content {
+  padding: 10px 12px 12px;
+  max-height: 360px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #a8885a #D4B886;
+}
+
+.legend-tab-content::-webkit-scrollbar       { width: 5px; }
+.legend-tab-content::-webkit-scrollbar-track { background: #D4B886; }
+.legend-tab-content::-webkit-scrollbar-thumb { background: #a8885a; border-radius: 3px; }
+
+/* ── Intro blurb ──────────────────────────────────────────── */
+.legend-intro {
+  font-size: 0.69rem;
+  font-style: italic;
+  color: #3d2200;
+  margin: 0 0 10px;
+  line-height: 1.5;
+  border-left: 2px solid #a8885a;
+  padding-left: 8px;
+}
+
+/* ── Letter entry list (Tab 1) ────────────────────────────── */
+.legend-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.legend-item {
+  display: flex;
+  gap: 8px;
+  line-height: 1.4;
+}
+
+.legend-item-key {
+  font-family: 'Space Mono', monospace;
+  font-weight: 700;
+  font-size: 0.72rem;
+  color: #5a2d00;
+  min-width: 26px;
+  flex-shrink: 0;
+}
+
+.legend-item-text {
+  font-size: 0.7rem;
+  color: #1a0f00;
+  line-height: 1.45;
+}
+
+/* ── Group blocks (Tabs 2 & 3) ────────────────────────────── */
+.legend-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.legend-group {
+  border-left: 2px solid #a8885a;
+  padding-left: 8px;
+}
+
+.legend-group-title {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.66rem;
+  font-weight: 700;
+  color: #5a2d00;
+  margin: 0 0 3px;
+  line-height: 1.3;
+}
+
+.legend-group-text {
+  font-size: 0.69rem;
+  color: #1a0f00;
+  margin: 0;
+  line-height: 1.45;
+}
+
+/* ── Print — suppress legend in dossier ──────────────────── */
+@media print {
+  .legend-panel { display: none !important; }
+}

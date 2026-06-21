@@ -11,6 +11,8 @@
   <link rel="stylesheet" href="css/components.css">
   <link rel="stylesheet" href="css/diagnostic.css">
   <link rel="stylesheet" href="css/print.css">
+  <link rel="stylesheet" href="css/legend.css">
+  <link rel="stylesheet" href="css/guide.css">
 </head>
 <body>
 
@@ -22,9 +24,15 @@
       </div>
       <p class="site-subtitle">Kinesthetic Signal Analysis &mdash; Facial &amp; Postural Stream Decoder</p>
     </div>
-    <div class="header-status" aria-hidden="true">
-      <span class="status-dot"></span>
-      <span class="status-label">SYSTEM ONLINE</span>
+    <div class="header-right">
+      <div class="header-status" aria-hidden="true">
+        <span class="status-dot"></span>
+        <span class="status-label">SYSTEM ONLINE</span>
+      </div>
+      <button id="help-guide-btn" class="help-guide-btn" type="button" aria-haspopup="dialog" aria-controls="help-drawer" aria-label="Open Analyst Guide">
+        <span class="help-guide-btn-icon" aria-hidden="true">&#9432;</span>
+        ANALYST GUIDE
+      </button>
     </div>
   </header>
 
@@ -180,6 +188,7 @@
         <div class="waveform-title">
           <span class="waveform-dot" aria-hidden="true"></span>
           WAVELENGTH TELEMETRY
+          <span data-tip="Treats text as a physical frequency wave. Each letter's numeric value (A=1–Z=26) becomes a point on the waveform. Smooth, rolling waves signal natural somatic language; jagged spikes signal State-structured or artificial language."><button class="tip-btn" aria-label="About Wavelength Telemetry">?</button></span>
         </div>
         <span class="waveform-status" aria-live="polite" id="waveform-status">SCANNING&hellip;</span>
       </div>
@@ -274,11 +283,11 @@
         <!-- Charts row -->
         <div class="diag-charts-row">
           <div class="diag-chart-box">
-            <div class="diag-chart-title">Archetypal Radar &mdash; Category Profile</div>
+            <div class="diag-chart-title">Archetypal Radar &mdash; Category Profile <span data-tip="Web-chart mapping the word's psychological profile across five archetypal categories: Origin, Liminal, Kinetic, Resonant, and Sovereign. The wider the footprint, the more that dimension dominates the word's conceptual energy."><button class="tip-btn" aria-label="About Archetypal Radar">?</button></span></div>
             <canvas id="diagnostic-radar"></canvas>
           </div>
           <div class="diag-chart-box" id="diagnostic-scatter-box">
-            <div class="diag-chart-title">Complexity Scatter &mdash; Letter Values by Position</div>
+            <div class="diag-chart-title">Complexity Scatter &mdash; Letter Values by Position <span data-tip="Each letter is plotted by its position in the word (X-axis) against its numeric value (Y-axis). Reveals which positions carry the heaviest conceptual load and whether the word's energy is front-loaded, back-loaded, or evenly distributed."><button class="tip-btn" aria-label="About Complexity Scatter">?</button></span></div>
             <canvas id="diagnostic-scatter"></canvas>
           </div>
         </div>
@@ -333,6 +342,7 @@
               <div class="osc-chart-label">
                 <span class="osc-chart-label-letter">A</span>
                 GLOBAL ENVELOPE &mdash; 100-pt Macro Signal &middot; Smooth Bezier Curve
+                <span data-tip="A compressed, zoomed-out view of the entire text. Shows the macroeconomic energy flow from first letter to last — useful for spotting large-scale structural patterns or energy peaks across a full document."><button class="tip-btn" aria-label="About Global Envelope">?</button></span>
               </div>
               <div class="osc-canvas-bg">
                 <canvas id="osc-global-canvas" aria-label="Global envelope waveform"></canvas>
@@ -343,6 +353,7 @@
               <div class="osc-chart-label">
                 <span class="osc-chart-label-letter">B</span>
                 MICRO WAVELENGTH &mdash; 256-pt Raw Letter Array &middot; High-Frequency Jaggedness
+                <span data-tip="A zoomed-in 256-point view of the exact text window being analyzed. Reveals fine-grained rhythmic patterns, structural anomalies, and syllabic repetition invisible at the macro scale."><button class="tip-btn" aria-label="About Micro Wavelength">?</button></span>
               </div>
               <div class="osc-canvas-bg">
                 <canvas id="osc-micro-canvas" aria-label="Micro wavelength waveform"></canvas>
@@ -363,6 +374,7 @@
           <div class="spectral-section">
             <div class="spectral-section-title">
               DOMINANT FFT HARMONIC FREQUENCIES &mdash; Artificial Rhythm Detector
+              <span data-tip="Fast Fourier Transform scan for repeating mathematical patterns in the letter-value wave. Propaganda, bureaucratic, and intelligence text often contains non-random frequency peaks — this tool surfaces them as detected artificial rhythms."><button class="tip-btn" aria-label="About FFT Harmonic Frequencies">?</button></span>
             </div>
             <div id="spectral-harmonic-tiles" class="spectral-harmonic-tiles"></div>
           </div>
@@ -406,6 +418,247 @@
     <span>SOMATIC CIPHER DECODER &mdash; v3.0</span>
   </footer>
 
+  <!-- ── Help overlay backdrop ────────────────────────────── -->
+  <div id="help-overlay" class="help-overlay" aria-hidden="true"></div>
+
+  <!-- ── Analyst Guide Slide-Out Drawer ───────────────────── -->
+  <aside id="help-drawer" class="help-drawer" role="dialog" aria-modal="true" aria-label="Analyst Guide" aria-hidden="true">
+
+    <div class="help-drawer-header">
+      <div class="help-drawer-header-left">
+        <span class="help-drawer-dot" aria-hidden="true"></span>
+        <span class="help-drawer-title">ANALYST&rsquo;S GUIDE &mdash; UNDERSTANDING THE METRICS</span>
+      </div>
+      <button id="help-drawer-close" class="help-drawer-close" type="button" aria-label="Close Analyst Guide">&#10005;</button>
+    </div>
+
+    <div class="help-drawer-body">
+
+      <p class="guide-welcome">Welcome to the Psycholinguistic Diagnostic Engine. This tool analyzes the structural, mathematical, and physical &ldquo;weight&rdquo; of language to determine whether a text originates from a biological/somatic root or a complex, administrative &ldquo;State&rdquo; structure. Use this guide to read your dashboard correctly.</p>
+
+      <!-- ── Section 1: Core Metrics ─────────────────────── -->
+      <div class="guide-section">
+        <div class="guide-section-eyebrow">Section 01</div>
+        <div class="guide-section-title">The Core Metrics</div>
+
+        <div class="guide-metric">
+          <div class="guide-metric-name">Word Sum &mdash; Lexical Weight</div>
+          <p class="guide-metric-desc">The total energy or &ldquo;mass&rdquo; of a word. We assign a value to every letter (A=1, B=2&hellip; Z=26) and sum them all. A higher sum generally indicates a heavier, more conceptually complex word.</p>
+        </div>
+
+        <div class="guide-metric">
+          <div class="guide-metric-name guide-metric-name--orange">&sigma; Sigma &mdash; Standard Deviation</div>
+          <p class="guide-metric-desc">The most important metric for detecting &ldquo;State&rdquo; language. It measures how scattered (volatile) the individual letter values are within a word.</p>
+          <ul class="guide-sub-list">
+            <li class="guide-sub-item"><span class="guide-sub-bullet">&#9654;</span><span><span class="guide-sub-key">Low &sigma; (&lt;&nbsp;2.0)</span> &mdash; Somatic, universal, natural language. Harmonized and stable.</span></li>
+            <li class="guide-sub-item"><span class="guide-sub-bullet">&#9654;</span><span><span class="guide-sub-key">High &sigma; (&gt;&nbsp;5.0)</span> &mdash; State, systemic, bureaucratic language. Structurally complex and volatile.</span></li>
+          </ul>
+        </div>
+
+        <div class="guide-metric">
+          <div class="guide-metric-name guide-metric-name--purple">Quersumme &mdash; Digital Root</div>
+          <p class="guide-metric-desc">We take the Word Sum and repeatedly add its digits until a single number (1&ndash;9) remains. This reveals the word&rsquo;s <em>Archetypal Core</em>.</p>
+          <ul class="guide-sub-list">
+            <li class="guide-sub-item"><span class="guide-sub-bullet">&#9654;</span><span><span class="guide-sub-key">1</span> &mdash; Origin / Survival</span></li>
+            <li class="guide-sub-item"><span class="guide-sub-bullet">&#9654;</span><span><span class="guide-sub-key">2</span> &mdash; Duality / Balance</span></li>
+            <li class="guide-sub-item"><span class="guide-sub-bullet">&#9654;</span><span><span class="guide-sub-key">3</span> &mdash; Synthesis / Growth</span></li>
+            <li class="guide-sub-item"><span class="guide-sub-bullet">&#9654;</span><span><span class="guide-sub-key">4</span> &mdash; Structure / Foundation</span></li>
+            <li class="guide-sub-item"><span class="guide-sub-bullet">&#9654;</span><span><span class="guide-sub-key">5</span> &mdash; Motion / Change</span></li>
+            <li class="guide-sub-item"><span class="guide-sub-bullet">&#9654;</span><span><span class="guide-sub-key">6</span> &mdash; Harmony / Community</span></li>
+            <li class="guide-sub-item"><span class="guide-sub-bullet">&#9654;</span><span><span class="guide-sub-key">7</span> &mdash; Insight / Mystery</span></li>
+            <li class="guide-sub-item"><span class="guide-sub-bullet">&#9654;</span><span><span class="guide-sub-key">8</span> &mdash; Infinity / State</span></li>
+            <li class="guide-sub-item"><span class="guide-sub-bullet">&#9654;</span><span><span class="guide-sub-key">9</span> &mdash; Transcendent / Completion</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- ── Section 2: Radar ────────────────────────────── -->
+      <div class="guide-section">
+        <div class="guide-section-eyebrow">Section 02</div>
+        <div class="guide-section-title">The Archetypal Radar Chart</div>
+        <p class="guide-metric-desc" style="margin-bottom:12px">This web-chart plots the word across five psychological categories. The wider the footprint in a given direction, the more that archetype dominates the word&rsquo;s conceptual energy.</p>
+        <div class="guide-radar-grid">
+          <div class="guide-radar-item">
+            <span class="guide-radar-dot" style="background:#fbbf24"></span>
+            <span><span class="guide-radar-label">Origin</span><br>Fundamental, survival-based attention.</span>
+          </div>
+          <div class="guide-radar-item">
+            <span class="guide-radar-dot" style="background:#a855f7"></span>
+            <span><span class="guide-radar-label">Liminal</span><br>Thresholds, transitions, shifting perspectives.</span>
+          </div>
+          <div class="guide-radar-item">
+            <span class="guide-radar-dot" style="background:#ef4444"></span>
+            <span><span class="guide-radar-label">Kinetic</span><br>Physical motion, force, friction, bodily drive.</span>
+          </div>
+          <div class="guide-radar-item">
+            <span class="guide-radar-dot" style="background:#22c55e"></span>
+            <span><span class="guide-radar-label">Resonant</span><br>Social harmony, human connection, empathy.</span>
+          </div>
+          <div class="guide-radar-item" style="grid-column: 1 / -1">
+            <span class="guide-radar-dot" style="background:#3b82f6"></span>
+            <span><span class="guide-radar-label">Sovereign</span><br>Power, authority, logic, and State control.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Section 3: Scatter ─────────────────────────── -->
+      <div class="guide-section">
+        <div class="guide-section-eyebrow">Section 03</div>
+        <div class="guide-section-title">The Complexity Scatter Plot</div>
+        <p class="guide-metric-desc" style="margin-bottom:10px">Plots words on a grid to reveal clusters of conceptual meaning. In Cluster Mode, every word in your set appears as a labeled point.</p>
+        <div class="guide-axis-row"><span class="guide-axis-key">X-Axis</span> Word Sum (Total Lexical Weight)</div>
+        <div class="guide-axis-row"><span class="guide-axis-key">Y-Axis</span> Sigma &sigma; (Structural Complexity)</div>
+        <div class="guide-axis-row" style="margin-top:10px">Words spiking high on Y are heavy &ldquo;State/System&rdquo; nodes. Words clustering low on Y are foundational, somatic concepts.</div>
+      </div>
+
+      <!-- ── Section 4: Oscilloscope ────────────────────── -->
+      <div class="guide-section">
+        <div class="guide-section-eyebrow">Section 04</div>
+        <div class="guide-section-title">The Oscilloscope &mdash; Wavelength Telemetry</div>
+        <p class="guide-metric-desc" style="margin-bottom:12px">We treat the text as a literal physical frequency. The letter sequence is converted to a continuous wave, giving a real-time visual representation of the text&rsquo;s &ldquo;vibration.&rdquo;</p>
+
+        <div class="guide-metric">
+          <div class="guide-metric-name">Wavelength Telemetry (Live)</div>
+          <p class="guide-metric-desc">The primary visualizer displaying raw letter values as a dynamic frequency wave. Updates on every keystroke.</p>
+        </div>
+        <div class="guide-metric">
+          <div class="guide-metric-name">Micro Wavelength &mdash; 256-pt Array</div>
+          <p class="guide-metric-desc">A zoomed-in look at the exact window of text being analyzed. Surfaces fine-grained rhythmic patterns and structural anomalies.</p>
+        </div>
+        <div class="guide-metric">
+          <div class="guide-metric-name">Global Envelope &mdash; 100-pt Array</div>
+          <p class="guide-metric-desc">A compressed, zoomed-out view of the entire document. Shows the macroeconomic energy flow from first letter to last.</p>
+        </div>
+        <ul class="guide-sub-list" style="margin-top:10px">
+          <li class="guide-sub-item"><span class="guide-sub-bullet" style="color:#22c55e">&#8776;</span><span><span class="guide-sub-key" style="color:#22c55e">Smooth waves</span> &mdash; Natural, somatic, rhythmic language.</span></li>
+          <li class="guide-sub-item"><span class="guide-sub-bullet" style="color:#f97316">&#9889;</span><span><span class="guide-sub-key" style="color:#f97316">Jagged spikes</span> &mdash; Highly structural, artificial, or State-loaded language.</span></li>
+        </ul>
+      </div>
+
+      <!-- ── Section 5: FFT ─────────────────────────────── -->
+      <div class="guide-section">
+        <div class="guide-section-eyebrow">Section 05</div>
+        <div class="guide-section-title">Spectral Analysis &mdash; FFT</div>
+
+        <div class="guide-metric">
+          <div class="guide-metric-name">Dominant FFT Harmonic Frequencies</div>
+          <p class="guide-metric-desc">We apply a Fast Fourier Transform to the letter-value wave to scan for repeating mathematical patterns. Natural language produces irregular, non-repeating spectra. If an artificial, steganographic rhythm is embedded in the text &mdash; such as a specific repeating syllable structure common in propaganda or intelligence reporting &mdash; this tool detects it as an <em>Artificial Rhythm</em> and displays the dominant frequency peak.</p>
+        </div>
+      </div>
+
+    </div><!-- /help-drawer-body -->
+  </aside>
+
+  <!-- ── Linguistic Architecture Legend (floating overlay) ─── -->
+  <aside id="legend-panel" class="legend-panel" aria-label="Linguistic Architecture Legend">
+
+    <div class="legend-header">
+      <div class="legend-header-left">
+        <span class="legend-header-dot" aria-hidden="true"></span>
+        <span class="legend-title">LINGUISTIC ARCHITECTURE LEGEND</span>
+      </div>
+      <button id="legend-toggle" class="legend-toggle-btn" aria-expanded="true" aria-label="Minimize legend panel">&#8722;</button>
+    </div>
+
+    <div id="legend-body" class="legend-body">
+
+      <!-- ── Tab bar ─────────────────────────────────────────── -->
+      <div class="legend-tabs" role="tablist" aria-label="Legend categories">
+        <button class="legend-tab legend-tab--active" data-tab="geometry" role="tab" aria-selected="true">Geometrical<br>Shape</button>
+        <button class="legend-tab" data-tab="lines" role="tab" aria-selected="false">Count of<br>Lines</button>
+        <button class="legend-tab" data-tab="proportion" role="tab" aria-selected="false">Proportion<br>&amp; Space</button>
+      </div>
+
+      <!-- ── TAB 1: Geometrical Shape ─────────────────────────── -->
+      <div class="legend-tab-content" id="legend-tab-geometry" role="tabpanel">
+        <p class="legend-intro">The geometry of a letter triggers innate human psychological responses. Sharp edges imply direction, warning, and planning. Round shapes imply stability, wholeness, and high-level concepts. Orthogonal lines imply rigid structure.</p>
+        <ul class="legend-list">
+          <li class="legend-item"><span class="legend-item-key">A</span><span class="legend-item-text">Edgy, sharp apex. Acts as a warning, an arrow pointing upward, or a planner&rsquo;s compass. Triggers attention.</span></li>
+          <li class="legend-item"><span class="legend-item-key">B</span><span class="legend-item-text">Flat back, two closed frontal loops. Containment, internal pressure, biological shapes.</span></li>
+          <li class="legend-item"><span class="legend-item-key">C</span><span class="legend-item-text">Open half-circle. Receiving, swallowing, capturing. A trap or an open mouth.</span></li>
+          <li class="legend-item"><span class="legend-item-key">D</span><span class="legend-item-text">Straight wall with a massive forward curve. Pushing forward, holding a boundary.</span></li>
+          <li class="legend-item"><span class="legend-item-key">E</span><span class="legend-item-text">Orthogonal, rigidly structured like a shelf or teeth. Mechanical, systematic.</span></li>
+          <li class="legend-item"><span class="legend-item-key">F</span><span class="legend-item-text">Top-heavy orthogonal. Pointing forward but missing the bottom foundation. Directional force.</span></li>
+          <li class="legend-item"><span class="legend-item-key">G</span><span class="legend-item-text">Curved with a sudden sharp inward angle. A cycle that catches itself; a hook.</span></li>
+          <li class="legend-item"><span class="legend-item-key">H</span><span class="legend-item-text">Two pillars connected by a bridge. Absolute structural harmony and connection.</span></li>
+          <li class="legend-item"><span class="legend-item-key">I / i</span><span class="legend-item-text">A single straight line. Represents higher, stable, singular concepts. Focus on the intellect.</span></li>
+          <li class="legend-item"><span class="legend-item-key">J</span><span class="legend-item-text">A vertical drop ending in an upward hook. Digging, pulling up from below.</span></li>
+          <li class="legend-item"><span class="legend-item-key">K</span><span class="legend-item-text">A vertical wall with a sharp kinetic wedge striking it. Collision, breaking, kinetic action.</span></li>
+          <li class="legend-item"><span class="legend-item-key">L</span><span class="legend-item-text">A strict 90-degree right angle. The most stable resting state; a floor and a wall.</span></li>
+          <li class="legend-item"><span class="legend-item-key">M</span><span class="legend-item-text">Zigzagging peaks. Mountains, heartbeats, continuous sharp friction.</span></li>
+          <li class="legend-item"><span class="legend-item-key">N</span><span class="legend-item-text">A diagonal slashing between two pillars. Tension, pulling, binding.</span></li>
+          <li class="legend-item"><span class="legend-item-key">O</span><span class="legend-item-text">The perfect continuous circle. Ultimate stability, loops, infinity, ubiquitous presence.</span></li>
+          <li class="legend-item"><span class="legend-item-key">P</span><span class="legend-item-text">Top-heavy curve. A head on a stick; cognitive weight over physical foundation.</span></li>
+          <li class="legend-item"><span class="legend-item-key">Q</span><span class="legend-item-text">A stable circle punctured by a sharp diagonal. Interruption of a stable state, a catalyst.</span></li>
+          <li class="legend-item"><span class="legend-item-key">R</span><span class="legend-item-text">A grounded pillar, a contained loop, and a kicking leg. Complex, repulsive/attractive, primal action.</span></li>
+          <li class="legend-item"><span class="legend-item-key">S</span><span class="legend-item-text">The serpentine double curve. Fluidity, evasion, shifting states.</span></li>
+          <li class="legend-item"><span class="legend-item-key">T</span><span class="legend-item-text">Perfectly balanced orthogonal crossbar. Structural pillar, holding weight from above.</span></li>
+          <li class="legend-item"><span class="legend-item-key">U</span><span class="legend-item-text">An open vessel. Receptivity, holding, containing.</span></li>
+          <li class="legend-item"><span class="legend-item-key">V</span><span class="legend-item-text">A sharp downward wedge. Penetration, narrowing focus, balance on a single point.</span></li>
+          <li class="legend-item"><span class="legend-item-key">W</span><span class="legend-item-text">Twin valleys, expansive jaggedness. The most expansive, disruptive geometric footprint.</span></li>
+          <li class="legend-item"><span class="legend-item-key">X</span><span class="legend-item-text">Two crossing diagonals. Marking a spot, cancellation, the ultimate intersection/blockade.</span></li>
+          <li class="legend-item"><span class="legend-item-key">Y</span><span class="legend-item-text">A funnel plunging into a single line. Collecting from the wide top and channeling down.</span></li>
+          <li class="legend-item"><span class="legend-item-key">Z</span><span class="legend-item-text">Sharp horizontal and diagonal snapping. Lightning, fast back-and-forth shifts.</span></li>
+        </ul>
+      </div>
+
+      <!-- ── TAB 2: Count of Lines ─────────────────────────────── -->
+      <div class="legend-tab-content" id="legend-tab-lines" role="tabpanel" hidden>
+        <p class="legend-intro">The number of strokes required to draw a letter indicates its importance for human life and survival. The higher the line count, the more critical and foundational the concept.</p>
+        <div class="legend-groups">
+          <div class="legend-group">
+            <p class="legend-group-title">1 Line &mdash; C, I, O, S, U</p>
+            <p class="legend-group-text">Foundational but simple. Ubiquitous or fluid states of being. Not complex life-sustaining machineries.</p>
+          </div>
+          <div class="legend-group">
+            <p class="legend-group-title">2 Lines &mdash; D, J, L, P, Q, T, V, X</p>
+            <p class="legend-group-text">Interactions between two forces. Important for society and geometry but do not carry the ultimate weight of survival.</p>
+          </div>
+          <div class="legend-group">
+            <p class="legend-group-title">3 Lines &mdash; A, B, F, H, K, N, R, Y, Z</p>
+            <p class="legend-group-text">Highly complex structures requiring significant energy to maintain and represent.</p>
+          </div>
+          <div class="legend-group">
+            <p class="legend-group-title">4 Lines &mdash; E, M, W</p>
+            <p class="legend-group-text">The absolute maximum line count. Unavoidable, monumental constants of human existence.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── TAB 3: Proportion & Space ─────────────────────────── -->
+      <div class="legend-tab-content" id="legend-tab-proportion" role="tabpanel" hidden>
+        <p class="legend-intro">How much physical horizontal space a letter occupies correlates to the physical or conceptual size of the object it describes.</p>
+        <div class="legend-groups">
+          <div class="legend-group">
+            <p class="legend-group-title">1. Massive Footprint &mdash; M, W</p>
+            <p class="legend-group-text">Demand the absolute most space. Describe unavoidable, expansive concepts that cover the globe.</p>
+          </div>
+          <div class="legend-group">
+            <p class="legend-group-title">2. The Solid Block &mdash; A, H, N, O, U, X</p>
+            <p class="legend-group-text">Occupy a nearly perfect square of space. Represent unshakeable, foundational structures of reality.</p>
+          </div>
+          <div class="legend-group">
+            <p class="legend-group-title">3. The Grounded Brick &mdash; B, D, E</p>
+            <p class="legend-group-text">Take up significant width but are anchored by a heavy, flat vertical wall on the left. Containment and borders.</p>
+          </div>
+          <div class="legend-group">
+            <p class="legend-group-title">4. Top-Heavy Overhangs &mdash; F, P, T, Y</p>
+            <p class="legend-group-text">Demand wide space at the top but sit on a narrow or missing base. Looming, overarching cognitive concepts.</p>
+          </div>
+          <div class="legend-group">
+            <p class="legend-group-title">5. Dynamic / Asymmetrical &mdash; C, G, K, Q, R, S, V, Z</p>
+            <p class="legend-group-text">Filled with negative space, sharp cutouts, or shifting curves. Action, friction, and shifting states.</p>
+          </div>
+          <div class="legend-group">
+            <p class="legend-group-title">6. Narrow Footprint &mdash; I, J, L</p>
+            <p class="legend-group-text">Slip into words without demanding horizontal space. Everywhere, easily overlooked, forming the interior logic of concepts.</p>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /legend-body -->
+  </aside>
+
   <!-- Kuroshiro (Japanese → Romaji) — UMD globals required by pipeline.js -->
   <script src="https://cdn.jsdelivr.net/npm/kuroshiro@1.2.0/dist/kuroshiro.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/kuroshiro-analyzer-kuromoji@1.1.0/dist/kuroshiro-analyzer-kuromoji.min.js"></script>
@@ -414,5 +667,7 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 
   <script type="module" src="js/main.js"></script>
+  <script type="module" src="js/legend.js"></script>
+  <script type="module" src="js/helpDrawer.js"></script>
 </body>
 </html>

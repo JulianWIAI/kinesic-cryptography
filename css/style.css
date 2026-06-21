@@ -178,6 +178,13 @@ button {
   text-transform: uppercase;
 }
 
+.header-right {
+  display:     flex;
+  align-items: center;
+  gap:         var(--space-5);
+  flex-shrink: 0;
+}
+
 .header-status {
   display: flex;
   align-items: center;
