@@ -27,6 +27,7 @@ import {
   renderClusterScatterChart,
   destroyClusterChart,
 }                                                  from './charts.js';
+import { renderPdsPanel, destroyPdsPanel }         from './pdsPanel.js';
 
 // ── App State ─────────────────────────────────────────────
 const state = {
@@ -116,6 +117,11 @@ const exportBtn     = document.getElementById('export-btn');
 // Dossier print elements
 const dossierDocId    = document.getElementById('dossier-doc-id');
 const dossierTimestamp = document.getElementById('dossier-timestamp');
+
+// ── PDS Engine DOM refs ────────────────────────────────────
+const pdsPanelEl    = document.getElementById('pds-panel');
+const pdsCollapseBtn = document.getElementById('pds-collapse-btn');
+const pdsBodyEl     = document.getElementById('pds-body');
 
 // ── Spectral Analysis Engine DOM refs ──────────────────────
 const spectralCollapseBtn   = document.getElementById('spectral-collapse-btn');
@@ -259,6 +265,9 @@ async function handleDecodeSingle() {
     runDeepSpectralAnalysis(text);
     _renderWaveEquation([{ label: result.latinized || inputEl.value.trim(), decoded: state.decoded }]);
     exportBar?.removeAttribute('hidden');
+    // Run PDS/Ousiometric analysis on the original (non-transliterated) input
+    // so the VAD lexicon receives native-script text for multilingual support.
+    renderPdsPanel(inputEl.value, state.language);
   } catch (err) {
     _setLocStatus(err.message, 'loc-status--error');
   } finally {
@@ -298,6 +307,8 @@ async function handleDecodeCluster() {
     runDeepSpectralAnalysis(engineTexts.join(' '));
     _renderWaveEquation(state.cluster.map(c => ({ label: c.word, decoded: c.decoded })));
     exportBar?.removeAttribute('hidden');
+    // Pass original (raw) words joined so the VAD module receives native-script tokens.
+    renderPdsPanel(rawWords.join(' '), state.language);
   } catch (err) {
     _setLocStatus(err.message, 'loc-status--error');
   } finally {
@@ -1045,7 +1056,7 @@ function _clearCardOutputs() {
   destroyClusterChart();
 }
 
-// Full reset — also clears the diagnostic and spectral panels.
+// Full reset — also clears the diagnostic, spectral, and PDS panels.
 // Only called on mode switch and when the decoded result is empty.
 function clearAllOutputs() {
   _clearCardOutputs();
@@ -1053,6 +1064,9 @@ function clearAllOutputs() {
   spectralResultsEl?.setAttribute('hidden', '');
   waveEqBox?.setAttribute('hidden', '');
   exportBar?.setAttribute('hidden', '');
+  // Destroy the PDS chart and hide the panel on full reset.
+  destroyPdsPanel();
+  pdsPanelEl?.setAttribute('hidden', '');
 }
 
 function showEmptyState()  { emptyState.removeAttribute('hidden'); }
@@ -1317,5 +1331,20 @@ if (spectralCollapseBtn && spectralBodyEl) {
     spectralCollapseBtn.setAttribute('aria-expanded', String(spectralPanelOpen));
     spectralCollapseBtn.setAttribute('aria-label',
       spectralPanelOpen ? 'Collapse spectral panel' : 'Expand spectral panel');
+  });
+}
+
+// ── PDS panel collapse toggle ──────────────────────────────
+
+let pdsPanelOpen = true;
+
+if (pdsCollapseBtn && pdsBodyEl) {
+  pdsCollapseBtn.addEventListener('click', () => {
+    pdsPanelOpen = !pdsPanelOpen;
+    pdsBodyEl.classList.toggle('pds-body--collapsed', !pdsPanelOpen);
+    pdsCollapseBtn.textContent = pdsPanelOpen ? '▼' : '▲';
+    pdsCollapseBtn.setAttribute('aria-expanded', String(pdsPanelOpen));
+    pdsCollapseBtn.setAttribute('aria-label',
+      pdsPanelOpen ? 'Collapse PDS panel' : 'Expand PDS panel');
   });
 }

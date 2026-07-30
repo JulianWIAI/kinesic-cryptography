@@ -1,0 +1,528 @@
+/* ============================================================
+   OUSIOMETRIC PDS PANEL — Styles
+   Power · Danger · Structure threat-matrix UI.
+   SIGINT aesthetic: dark surfaces, cyan/red neon accents,
+   monospace fonts throughout.
+   Inherits all custom properties from style.css — no redefinitions.
+   ============================================================ */
+
+
+/* ── Keyframe Animations ────────────────────────────────────────── */
+
+/* Pulsing box-shadow for the apex alert box — red glow oscillation */
+@keyframes pds-apex-pulse {
+  0%   { box-shadow: 0 0  6px rgba(255, 30, 30, 0.45),
+                     0 0 18px rgba(255, 30, 30, 0.20); }
+  100% { box-shadow: 0 0 14px rgba(255, 30, 30, 0.70),
+                     0 0 32px rgba(255, 30, 30, 0.35); }
+}
+
+/* Pulsing dot animation for the panel header status indicator */
+@keyframes pds-dot-pulse {
+  0%, 100% { opacity: 1;   box-shadow: 0 0 0   0 rgba(0, 200, 255, 0.5); }
+  50%       { opacity: 0.5; box-shadow: 0 0 0 5px rgba(0, 200, 255, 0);   }
+}
+
+/* Pulsing dot for the apex legend item — red pulse */
+@keyframes pds-apex-dot-pulse {
+  0%, 100% { opacity: 1;   box-shadow: 0 0 0   0 rgba(255, 34, 34, 0.6); }
+  50%       { opacity: 0.4; box-shadow: 0 0 0 5px rgba(255, 34, 34, 0);   }
+}
+
+/* Danger bar flash — opacity oscillation when danger > APEX_THRESHOLD */
+@keyframes pds-danger-flash {
+  0%   { opacity: 1.0; }
+  100% { opacity: 0.55; }
+}
+
+/* Structure flicker — rapid opacity steps for chaotic/low-structure signal */
+@keyframes pds-flicker {
+  0%   { opacity: 1.0; }
+  50%  { opacity: 0.4; }
+  100% { opacity: 1.0; }
+}
+
+/* Apex alert chip glow pulse */
+@keyframes pds-chip-pulse {
+  0%, 100% { box-shadow: 0 0 4px rgba(255, 34, 34, 0.5); }
+  50%       { box-shadow: 0 0 9px rgba(255, 80, 80, 0.8); }
+}
+
+
+/* ── Panel Container ─────────────────────────────────────────────── */
+
+.pds-panel {
+  background:    var(--clr-surface-2);
+  border:        1px solid rgba(0, 200, 255, 0.18);
+  border-radius: var(--radius-lg);
+  margin:        var(--space-8) var(--space-4);
+  overflow:      hidden;
+  /* Subtle cyan glow on the outer edge — SIGINT station aesthetic */
+  box-shadow:    0 0 0 1px rgba(0, 200, 255, 0.04),
+                 0 4px 24px rgba(0, 0, 0, 0.4);
+}
+
+
+/* ── Panel Header ────────────────────────────────────────────────── */
+
+.pds-header {
+  display:         flex;
+  align-items:     center;
+  justify-content: space-between;
+  padding:         var(--space-3) var(--space-6);
+  background:      rgba(0, 200, 255, 0.04);
+  border-bottom:   1px solid rgba(0, 200, 255, 0.14);
+}
+
+.pds-title {
+  display:        flex;
+  align-items:    center;
+  gap:            var(--space-2);
+  font-family:    var(--font-mono);
+  font-size:      var(--text-xs);
+  font-weight:    700;
+  letter-spacing: 0.1em;
+  color:          var(--clr-accent);
+  text-transform: uppercase;
+}
+
+/* Animated status dot — mirrors .spectral-dot */
+.pds-dot {
+  width:         7px;
+  height:        7px;
+  border-radius: 50%;
+  background:    var(--clr-accent);
+  flex-shrink:   0;
+  animation:     pds-dot-pulse 2s ease-in-out infinite;
+}
+
+/* Collapse/expand toggle button — mirrors .spectral-collapse-btn */
+.pds-collapse-btn {
+  background:    none;
+  border:        1px solid var(--clr-border-soft);
+  color:         var(--clr-text-muted);
+  cursor:        pointer;
+  padding:       var(--space-1) var(--space-2);
+  font-size:     var(--text-sm);
+  border-radius: var(--radius-sm);
+  line-height:   1;
+  transition:    color var(--transition-base, 220ms ease),
+                 border-color var(--transition-base, 220ms ease);
+  font-family:   var(--font-mono);
+}
+
+.pds-collapse-btn:hover {
+  color:        var(--clr-text);
+  border-color: rgba(0, 200, 255, 0.5);
+}
+
+
+/* ── Panel Body ──────────────────────────────────────────────────── */
+
+.pds-body {
+  padding:    var(--space-6);
+  transition: max-height 0.32s ease, opacity 0.32s ease, padding 0.32s ease;
+  overflow:   hidden;
+  max-height: 9999px; /* large value ensures smooth collapse animation */
+}
+
+.pds-body--collapsed {
+  max-height:     0 !important;
+  padding-top:    0;
+  padding-bottom: 0;
+  opacity:        0;
+  overflow:       hidden;
+}
+
+
+/* ── Apex Alert ──────────────────────────────────────────────────── */
+
+/* Red glowing alert box — shown when apex-zone words are detected */
+.pds-apex-alert {
+  display:       flex;
+  align-items:   flex-start;
+  gap:           var(--space-3);
+  padding:       var(--space-3) var(--space-4);
+  margin-bottom: var(--space-5);
+  background:    rgba(255, 20, 20, 0.07);
+  border:        1px solid rgba(255, 34, 34, 0.45);
+  border-radius: var(--radius-md);
+  /* Pulsing red outer glow */
+  animation:     pds-apex-pulse 1.4s ease-in-out infinite alternate;
+}
+
+/* Icon column */
+.pds-apex-icon {
+  font-size:   1.2rem;
+  line-height: 1;
+  flex-shrink: 0;
+  margin-top:  0.05rem;
+  /* Unicode ⚠ or ◆ — colour forced red */
+  color:       #ff3333;
+  filter:      drop-shadow(0 0 4px rgba(255, 34, 34, 0.7));
+}
+
+/* Text content column */
+.pds-apex-body {
+  flex:           1;
+  min-width:      0;
+}
+
+.pds-apex-label {
+  font-family:    var(--font-mono);
+  font-size:      var(--text-xs);
+  font-weight:    700;
+  letter-spacing: 0.08em;
+  color:          #ff4444;
+  text-transform: uppercase;
+  margin-bottom:  var(--space-2);
+}
+
+/* Container for word chips — wrapping flex row */
+.pds-apex-words {
+  display:   flex;
+  flex-wrap: wrap;
+  gap:       var(--space-1) var(--space-2);
+}
+
+/* Individual apex-threat word chip */
+.pds-apex-chip {
+  display:        inline-block;
+  padding:        2px var(--space-2);
+  background:     rgba(255, 30, 30, 0.15);
+  border:         1px solid rgba(255, 34, 34, 0.50);
+  border-radius:  var(--radius-sm);
+  font-family:    var(--font-mono);
+  font-size:      var(--text-xs);
+  font-weight:    700;
+  color:          #ff7070;
+  letter-spacing: 0.05em;
+  animation:      pds-chip-pulse 1.8s ease-in-out infinite alternate;
+  cursor:         default;
+  /* Slight scale on hover for interaction feel */
+  transition:     transform 120ms ease;
+}
+
+.pds-apex-chip:hover {
+  transform: scale(1.05);
+}
+
+
+/* ── Cards Row (chart | telemetry split) ─────────────────────────── */
+
+/* Two-column layout: scatter plot on the left, bars on the right.
+   Collapses to single column on smaller screens. */
+.pds-cards-row {
+  display:   flex;
+  gap:       var(--space-5);
+  flex-wrap: wrap;
+  align-items: stretch;
+}
+
+.pds-card {
+  flex:          1 1 320px;
+  min-width:     0;
+  background:    var(--clr-surface);
+  border:        1px solid rgba(0, 200, 255, 0.14);
+  border-radius: var(--radius-md);
+  padding:       var(--space-4) var(--space-5);
+  display:       flex;
+  flex-direction: column;
+  gap:           var(--space-3);
+}
+
+/* Card title — monospace, cyan, all-caps */
+.pds-card-title {
+  font-family:    var(--font-mono);
+  font-size:      var(--text-xs);
+  font-weight:    700;
+  letter-spacing: 0.10em;
+  color:          var(--clr-accent);
+  text-transform: uppercase;
+  margin:         0;
+  padding-bottom: var(--space-2);
+  border-bottom:  1px solid rgba(0, 200, 255, 0.10);
+}
+
+/* Card subtitle / description line */
+.pds-card-subtitle {
+  font-family: var(--font-mono);
+  font-size:   var(--text-xs);
+  color:       var(--clr-text-faint);
+  margin:      0;
+  line-height: 1.5;
+}
+
+
+/* ── Threat Matrix (scatter chart) ───────────────────────────────── */
+
+/* Fixed-height wrapper — ensures the canvas has a defined size */
+.pds-matrix-wrap {
+  position: relative;
+  height:   320px;
+  width:    100%;
+}
+
+/* Chart.js canvas fills the wrapper */
+.pds-matrix-wrap canvas {
+  width:  100% !important;
+  height: 100% !important;
+}
+
+/* Quadrant label overlay — text labels for the four chart regions.
+   pointer-events: none so they don't interfere with chart tooltips. */
+.pds-quadrant-labels {
+  position:       absolute;
+  inset:          0;
+  pointer-events: none;
+}
+
+/* Base style for all four quadrant labels */
+.pds-qlabel {
+  position:    absolute;
+  font-family: var(--font-mono);
+  font-size:   9px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  opacity:     0.35;
+  text-transform: uppercase;
+  line-height: 1.2;
+}
+
+/* Top-left: High Danger, Low Power */
+.pds-qlabel--tl {
+  top:   12px;
+  left:  8px;
+  color: #ff8844;
+}
+
+/* Top-right: High Danger, High Power — APEX ZONE */
+.pds-qlabel--tr {
+  top:        12px;
+  right:      8px;
+  text-align: right;
+  color:      #ff4444;
+  opacity:    0.5;
+}
+
+/* Bottom-left: Low Danger, Low Power */
+.pds-qlabel--bl {
+  bottom: 28px;
+  left:   8px;
+  color:  var(--clr-text-muted);
+}
+
+/* Bottom-right: Low Danger, High Power */
+.pds-qlabel--br {
+  bottom:     28px;
+  right:      8px;
+  text-align: right;
+  color:      #00ff88;
+  opacity:    0.40;
+}
+
+/* Legend row below the chart */
+.pds-matrix-legend {
+  display:     flex;
+  flex-wrap:   wrap;
+  gap:         var(--space-2) var(--space-4);
+  margin-top:  var(--space-2);
+  align-items: center;
+}
+
+/* Single legend item — dot + label */
+.pds-legend-item {
+  display:     flex;
+  align-items: center;
+  gap:         var(--space-2);
+  font-family: var(--font-mono);
+  font-size:   var(--text-xs);
+  color:       var(--clr-text-muted);
+}
+
+/* Coloured circle dot */
+.pds-legend-dot {
+  width:         8px;
+  height:        8px;
+  border-radius: 50%;
+  flex-shrink:   0;
+}
+
+/* Normal words — cyan */
+.pds-legend--normal .pds-legend-dot {
+  background: var(--clr-accent);
+  box-shadow: 0 0 5px rgba(0, 200, 255, 0.5);
+}
+
+/* Apex threats — red, pulsing */
+.pds-legend--apex .pds-legend-dot {
+  background: #ff3333;
+  box-shadow: 0 0 4px rgba(255, 34, 34, 0.7);
+  animation:  pds-apex-dot-pulse 1.4s ease-in-out infinite;
+}
+
+
+/* ── Telemetry Bars ──────────────────────────────────────────────── */
+
+/* Stack of three horizontal bars */
+.pds-telemetry-bars {
+  display:        flex;
+  flex-direction: column;
+  gap:            var(--space-4);
+  /* Vertical centering within the card */
+  justify-content: center;
+  flex:           1;
+}
+
+/* Single bar row: label + value + track */
+.pds-bar-item {
+  display:     flex;
+  align-items: center;
+  gap:         var(--space-3);
+}
+
+/* Dimension label — fixed width so bars align vertically */
+.pds-bar-label {
+  font-family:    var(--font-mono);
+  font-size:      var(--text-xs);
+  font-weight:    700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  min-width:      78px;
+  flex-shrink:    0;
+}
+
+/* Colour-coded labels by dimension */
+.pds-bar-label--power     { color: #00ff88; }
+.pds-bar-label--danger    { color: #ff4444; }
+.pds-bar-label--structure { color: #e8f0ff; }
+
+/* Numeric percentage — monospaced, right-aligned */
+.pds-bar-value {
+  font-family:  var(--font-mono);
+  font-size:    var(--text-xs);
+  font-weight:  700;
+  min-width:    42px;
+  text-align:   right;
+  flex-shrink:  0;
+}
+
+/* Bar track (background rail) */
+.pds-bar-track {
+  flex:            1;
+  height:          14px;
+  background:      rgba(255, 255, 255, 0.04);
+  border:          1px solid rgba(255, 255, 255, 0.06);
+  border-radius:   var(--radius-sm);
+  overflow:        hidden;
+  position:        relative;
+}
+
+/* Bar fill — animates width from 0 on mount */
+.pds-bar-fill {
+  height:           100%;
+  border-radius:    inherit;
+  transition:       width 600ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  position:         relative;
+}
+
+/* Power fill — dark-green to neon-green gradient */
+.pds-bar-fill--power {
+  background: linear-gradient(to right, #0d1a0d, #00ff88);
+}
+
+/* Danger fill — near-black to flashing red gradient */
+.pds-bar-fill--danger {
+  background: linear-gradient(to right, #0d0d1a, #ff2222);
+}
+
+/* Structure fill — near-black to white/stable gradient */
+.pds-bar-fill--structure {
+  background: linear-gradient(to right, #080808, #e8f0ff);
+}
+
+/* Flash animation: danger bar when danger > APEX_THRESHOLD */
+.pds-bar--flash .pds-bar-fill--danger {
+  animation: pds-danger-flash 0.8s ease-in-out infinite alternate;
+}
+
+/* Flicker animation: structure bar when structure is very low (chaotic) */
+.pds-bar--flicker .pds-bar-fill--structure {
+  animation: pds-flicker 0.15s steps(2, end) infinite;
+}
+
+
+/* ── Match Count ─────────────────────────────────────────────────── */
+
+/* Small meta-label showing how many tokens matched the lexicon */
+.pds-match-count {
+  margin-top:  var(--space-4);
+  font-family: var(--font-mono);
+  font-size:   var(--text-xs);
+  color:       var(--clr-text-faint);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+
+/* ── Loading & Empty States ──────────────────────────────────────── */
+
+/* Centered placeholder shown while fetching lexicon */
+.pds-loading,
+.pds-empty {
+  display:     flex;
+  align-items: center;
+  justify-content: center;
+  padding:     var(--space-8) var(--space-4);
+  font-family: var(--font-mono);
+  font-size:   var(--text-xs);
+  color:       var(--clr-text-faint);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-align:  center;
+}
+
+/* Subtle blinking cursor after loading text */
+.pds-loading::after {
+  content:   ' _';
+  animation: pds-dot-pulse 1s steps(2, end) infinite;
+}
+
+
+/* ── Responsive overrides ────────────────────────────────────────── */
+
+/* On narrow screens, stack the two cards vertically */
+@media (max-width: 700px) {
+  .pds-cards-row {
+    flex-direction: column;
+  }
+
+  .pds-card {
+    flex-basis: auto;
+  }
+
+  .pds-matrix-wrap {
+    height: 260px;
+  }
+}
+
+/* On very small screens, shorten the bar label min-width */
+@media (max-width: 480px) {
+  .pds-bar-label {
+    min-width: 60px;
+    font-size: 0.60rem;
+  }
+
+  .pds-bar-value {
+    min-width: 34px;
+    font-size: 0.60rem;
+  }
+
+  .pds-header {
+    padding: var(--space-2) var(--space-4);
+  }
+
+  .pds-body {
+    padding: var(--space-4);
+  }
+}

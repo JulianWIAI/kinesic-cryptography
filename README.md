@@ -1,6 +1,6 @@
-# Somatic Cipher Decoder — v5.0
+# Somatic Cipher Decoder — v6.0
 
-A pure client-side research tool that treats language as a **physical frequency signal**. It decodes alphanumeric text into visual dashboards of facial articulation, somatic posture, Egyptian hieroglyphic etymology, and Greek physics variables — then runs real-time oscilloscope waveforms, performs full spectral analysis (FFT), clusters semantic word groups into geometric scatter fields, and exports the entire analysis as a classified SIGINT dossier — all with zero backend dependencies.
+A pure client-side research tool that treats language as a **physical frequency signal**. It decodes alphanumeric text into visual dashboards of facial articulation, somatic posture, Egyptian hieroglyphic etymology, and Greek physics variables — then runs real-time oscilloscope waveforms, performs full spectral analysis (FFT), clusters semantic word groups into geometric scatter fields, maps words through the NRC VAD ousiometric transformation, runs multilingual 8-dimensional NRC emotion intensity analysis, and exports the entire analysis as a classified SIGINT dossier — all with zero backend dependencies.
 
 ---
 
@@ -49,19 +49,131 @@ Each decoded character is rendered across **four parallel visual streams**. Stre
 
 ### Global Localization Bridge
 
-Transliterates non-Latin scripts into the Latin alphabet before passing input through the physics engine. Accessible via the **SIGNAL LANGUAGE** bar above the input. Now supports **seven modes**.
+Transliterates non-Latin scripts into the Latin alphabet before passing input through the physics engine. Accessible via the **SIGNAL LANGUAGE** bar above the input. Supports **eight modes**.
 
 | Mode | Engine | How it works |
 |---|---|---|
 | **AUTO-DETECT** | — | Unicode heuristic: Hiragana/Katakana → Japanese; CJK Ideographs → Chinese; Cyrillic → Cyrillic; Arabic block → Arabic; Hangul → Korean; otherwise Western |
 | **WESTERN (A–Z)** | — | Pass-through; no transliteration |
-| **JAPANESE (ROMAJI)** | [Kuroshiro](https://github.com/hexenq/kuroshiro) + [Kuromoji](https://github.com/takuyaa/kuromoji) | Converts mixed Kanji/Kana to Romaji; Kuromoji dictionary (~8 MB) downloaded once via jsDelivr CDN |
-| **CHINESE (PINYIN)** | [pinyin-pro](https://github.com/zh-lx/pinyin-pro) | Converts Hanzi to tone-stripped Pinyin (ā → a); loaded as an ES module via esm.sh on first use |
+| **FRENCH (FR)** | — | Pass-through Latin; pins VAD lexicon to French (`vad-fr.json`) — overrides auto-detect for French text that lacks accented characters |
+| **JAPANESE (ROMAJI)** | [Kuroshiro](https://github.com/hexenq/kuroshiro) + [Kuromoji](https://github.com/takuyaa/kuromoji) | Converts mixed Kanji/Kana to Romaji; also routes VAD lookup to `vad-ja.json` |
+| **CHINESE (PINYIN)** | [pinyin-pro](https://github.com/zh-lx/pinyin-pro) | Converts Hanzi to tone-stripped Pinyin (ā → a); routes VAD to `vad-zh.json` |
 | **CYRILLIC (LATINIZED)** | Built-in map | 66-entry map covering lowercase, uppercase, and Ukrainian/Bulgarian variants (щ→shch, ш→sh, ж→zh, я→ya, etc.) |
 | **ARABIC-FARSI (LATINIZED)** | Built-in map | `NFKC` normalization collapses FB50–FEFF presentation forms to canonical 0600–06FF block first; then consonant + diacritic strip map; Farsi extras (پ→p, چ→ch, ژ→zh, گ→g); Arabic-Indic digits (٠–٩ → 0–9) |
-| **KOREAN (ROMAJA)** | Built-in decomposer | Zero-dependency Unicode decomposition: `idx = cp − 0xAC00`; choseong / jungseong / jongseong extracted by formula; mapped to 19 initials, 21 vowels, 28 finals |
+| **KOREAN (ROMAJA)** | Built-in decomposer | Zero-dependency Unicode decomposition: `idx = cp − 0xAC00`; choseong / jungseong / jongseong extracted by formula; mapped to 19 initials, 21 vowels, 28 finals; routes VAD to `vad-ko.json` |
 
 **Intercepted Base Signal box** — visible after a Japanese, Chinese, Cyrillic, Arabic/Farsi, or Korean decode. Shows the exact Latinized string fed to the engine.
+
+---
+
+### Ousiometric PDS Engine
+
+A full psycholinguistic vector analysis panel on the main dashboard, driven by the NRC VAD (Valence–Arousal–Dominance) Lexicon. Fires automatically after every decode.
+
+#### Language support
+
+Eight languages share the same detection pipeline as the Signal Language bar. Auto-detect uses Unicode script ranges (Arabic, CJK, Hiragana/Katakana, Hangul) and character/word-level heuristics (German umlauts, Spanish ñ, French ç/œ). Explicit language buttons always take priority.
+
+| Language | VAD file | Auto-detect signal |
+|---|---|---|
+| English | `data/vad-en.json` | Default fallback |
+| French | `data/vad-fr.json` | ç, œ, or French function words |
+| German | `data/vad-de.json` | ä, ö, ü, ß, or German function words |
+| Spanish | `data/vad-es.json` | ñ, ¡, ¿, or Spanish function words |
+| Arabic | `data/vad-ar.json` | Arabic Unicode block U+0600–U+06FF |
+| Chinese | `data/vad-zh.json` | CJK Unified Ideographs U+4E00–U+9FFF |
+| Japanese | `data/vad-ja.json` | Hiragana U+3040–U+309F or Katakana U+30A0–U+30FF |
+| Korean | `data/vad-ko.json` | Hangul U+AC00–U+D7AF |
+
+Each lexicon is lazy-loaded on first use with in-flight promise deduplication — subsequent analyses for the same language resolve from memory with no network request.
+
+#### Ousiometric transformation
+
+Words are mapped from VAD space to Power–Danger–Structure (PDS) space using the transformation from Dodds et al. (arXiv:2110.06847):
+
+```
+Power     = clamp((D × 0.65) + (V × 0.35), 0, 1)
+Danger    = clamp(((1−V) × 0.60) + (A × 0.40), 0, 1)
+Structure = clamp((V × 0.55) + ((1−A) × 0.45), 0, 1)
+```
+
+#### [ OUSIOMETRIC THREAT MATRIX ]
+
+Chart.js scatter plot — X = Power Index, Y = Danger Index.
+
+| Element | Description |
+|---|---|
+| **Cyan dots** | Individual lexical units (matched VAD words) |
+| **Red dots** | Apex threats — words where both Power ≥ 0.65 and Danger ≥ 0.65 |
+| **Red dashed threshold lines** | Vertical at x=0.65, horizontal at y=0.65 |
+| **Red shaded quadrant** | Top-right apex zone (High Power + High Danger) |
+| **APEX ZONE label** | Annotated directly on the chart via a custom `afterDraw` plugin |
+| **APEX THREAT alert banner** | Flashing red alert injected above the panel when any apex word is detected |
+
+#### [ BASE P.D.S. TELEMETRY ]
+
+Three animated horizontal progress bars showing the aggregate PDS signature across all matched tokens.
+
+| Bar | Colour | Flash behaviour |
+|---|---|---|
+| **POWER** | Neon green gradient | — |
+| **DANGER** | Red gradient | Flashes when aggregate Danger ≥ 0.65 |
+| **STRUCTURE** | White gradient | Flickers when aggregate Structure < 0.25 |
+
+---
+
+### Psycholinguistic Cluster Analyzer
+
+A standalone analysis page (`cluster-analyzer.html`) accessible via the **CLUSTER ANALYZER** button in the main dashboard header. Analyses word clusters against the NRC 8-Dimensional Emotion Intensity Lexicon.
+
+#### Language support
+
+Eight languages selectable from a dropdown in the input panel. Lexicons are lazy-loaded with in-flight deduplication — cached after first fetch.
+
+| Option | Lexicon file |
+|---|---|
+| ENGLISH | `lexicons/nrc_8d_en.json` |
+| ARABIC | `lexicons/nrc_8d_ar.json` |
+| FARSI | `lexicons/nrc_8d_fa.json` |
+| FRENCH | `lexicons/nrc_8d_fr.json` |
+| JAPANESE | `lexicons/nrc_8d_ja.json` |
+| KOREAN | `lexicons/nrc_8d_ko.json` |
+| RUSSIAN | `lexicons/nrc_8d_ru.json` |
+| CHINESE | `lexicons/nrc_8d_zh.json` |
+
+All 8 emotion dimensions (`anger`, `fear`, `anticipation`, `disgust`, `surprise`, `trust`, `joy`, `sadness`) are always present for every word — missing scores default to `0.0`.
+
+#### DOMINANT EMOTION SCATTER — σ × Σ Matrix
+
+Chart.js scatter plot — X = Word Sum (Σ), Y = sigma (σ). Each dot is coloured by the word's dominant NRC emotion.
+
+| Emotion | Abbreviation | Colour |
+|---|---|---|
+| Anger | ANG | `#FF3333` |
+| Fear | FEA | `#9933FF` |
+| Anticipation | ANT | `#FF8800` |
+| Disgust | DIS | `#88FF00` |
+| Surprise | SUR | `#FF00FF` |
+| Trust | TRU | `#00FFFF` |
+| Joy | JOY | `#FFD700` |
+| Sadness | SAD | `#3366FF` |
+
+Dots below the 0.5 dominant-emotion threshold render in the neutral accent colour (`#00c8ff`). Threshold lines at σ=2.0 (green, T1 boundary) and σ=5.0 (orange, T3 boundary) are drawn via a custom Chart.js plugin.
+
+#### HIGH-DENSITY TELEMETRY HEATMAP — 8-D NRC Affect
+
+A table with one row per word. Columns: `WORD`, `σ`, `Σ`, then one column per emotion. Each emotion cell background is computed as `rgba(R, G, B, intensity × 0.85 + 0.05)` — fully transparent at 0.0, fully saturated at 1.0.
+
+#### HUD Compound Trigger Alerts
+
+Two heuristic rules evaluated against the aggregate emotion profile of the entire word cluster. When triggered, a flashing critical banner appears at the top of the output area.
+
+| Trigger | Rule | Interpretation |
+|---|---|---|
+| **Systemic Coercion** | avg σ > 4.0 AND avg Fear > 0.5 AND avg Trust > 0.5 | High structural complexity paired with simultaneous fear and trust — language engineered to demand compliance through intimidation and authority |
+| **Volatile Populism** | avg σ < 2.5 AND avg Anger > 0.6 AND avg Disgust > 0.5 | Simple, blunt vocabulary maximising anger and disgust — language optimised for outrage and tribal polarisation |
+
+The status bar and header badge both update with the active language code after each analysis (e.g. `ANALYSIS COMPLETE [RU] — 6 / 6 tokens matched`).
 
 ---
 
@@ -123,8 +235,6 @@ Triggered on every decode. Collapsible panel beneath the output.
 | **Archetypal Radar** | 5-axis radar — Origin, Kinetic, Sovereign, Liminal, Resonant |
 | **Complexity Scatter** | Letter value by position, coloured by category |
 
-The **Quersumme**, **Word Sum**, and **σ Sigma** tiles each carry a `[?]` tooltip badge with a plain-language explanation (see [Contextual Tooltips](#contextual-tooltips)).
-
 #### Cluster Mode (N words)
 
 | Section | Description |
@@ -156,8 +266,6 @@ Always-visible section at the bottom. Driven entirely by the signal input.
 | **A — Global Envelope** | 100-bucket mean value per bucket, smooth bezier — macro rhythmic structure |
 | **B — Micro Wavelength** | First 256 raw letter values, zero tension — high-frequency character-level jaggedness |
 
-Both charts carry `[?]` tooltip badges.
-
 **On DECODE (deep analysis)**
 
 | Output | Description |
@@ -166,81 +274,100 @@ Both charts carry `[?]` tooltip badges.
 | **Dominant FFT Harmonics** | Radix-2 Cooley-Tukey FFT on 256-sample Hann-windowed signal; top 5 non-DC power bins — detects artificial rhythmic patterns |
 | **Complexity Scatter (Word Sum × σ)** | One point per word; T1=green, T2=orange, T3=red |
 
-The **Dominant FFT Harmonics** section title carries a `[?]` tooltip badge.
-
 ---
 
 ### Contextual Tooltips
 
-Small `[?]` badge buttons appear next to the labels of all key metrics and charts. Hovering reveals a single-floating dark popup (`position: fixed`, edge-clamped) with a 1–2 sentence plain-language explanation. No CSS duplication — one global `#tip-popup` element is repositioned via `getBoundingClientRect()` on each trigger.
-
-Tooltips are attached to:
-
-| Location | Element type |
-|---|---|
-| Quersumme tile | Dynamic (injected by `diagnosticPanel.js`) |
-| Word Sum tile | Dynamic |
-| σ Sigma tile | Dynamic |
-| Archetypal Radar chart title | Static HTML |
-| Complexity Scatter chart title | Static HTML |
-| Wavelength Telemetry panel title | Static HTML |
-| Global Envelope oscilloscope label | Static HTML |
-| Micro Wavelength oscilloscope label | Static HTML |
-| Dominant FFT Harmonics section title | Static HTML |
+Small `[?]` badge buttons appear next to the labels of all key metrics and charts. Hovering reveals a single-floating dark popup (`position: fixed`, edge-clamped) with a 1–2 sentence plain-language explanation.
 
 ---
 
 ### Analyst Guide (Slide-Out Drawer)
 
-An **ANALYST GUIDE** button in the top-right of the header opens a full-width slide-in panel from the right edge (`transform: translateX(100%)` → `translateX(0)`, 280 ms cubic-bezier transition). The main dashboard remains visible to the left.
-
-The drawer contains five sections matching the Analyst's Guide:
-
-1. **The Core Metrics** — Word Sum, σ Sigma thresholds, Quersumme with all nine archetypes listed
-2. **The Archetypal Radar** — colour-coded explanation of all five radar axes
-3. **The Complexity Scatter Plot** — X/Y axis definitions and how to read clustering
-4. **The Oscilloscope** — Wavelength Telemetry, Micro Wavelength, Global Envelope with wave-shape interpretation guide
-5. **Spectral Analysis / FFT** — explanation of artificial rhythm detection
-
-Close via the `×` button, clicking the backdrop, or pressing `Escape`.
+An **ANALYST GUIDE** button in the top-right header opens a full-width slide-in panel. The drawer contains five sections: Core Metrics, Archetypal Radar, Complexity Scatter Plot, Oscilloscope, and Spectral Analysis / FFT.
 
 ---
 
 ### Linguistic Architecture Legend
 
-A persistent floating overlay (bottom-right, `position: fixed`) styled with a sandy papyrus theme (`#D4B886` background, dark `#1a0f00` text) to visually differentiate it from the dark analytical dashboard. Compact by default; minimize/maximize toggle collapses it to just the header bar.
-
-Three tabs:
-
-| Tab | Content |
-|---|---|
-| **Geometrical Shape** | 26 letter entries (A–Z) with their psychological/geometric archetype descriptions |
-| **Count of Lines** | Four groups by stroke count (1–4 lines) with their conceptual significance |
-| **Proportion & Space** | Six groups by horizontal footprint (Massive → Narrow) |
+A persistent floating overlay (bottom-right, `position: fixed`) styled with a sandy papyrus theme. Three tabs: **Geometrical Shape**, **Count of Lines**, **Proportion & Space**.
 
 ---
 
-## Single Word — Usage
+## Data Pipeline — NRC Lexicon Converter
+
+`convert_nrc.py` — a command-line Python 3 script that converts raw NRC TSV data dumps into the compact JSON format consumed by both the PDS Engine and the Cluster Analyzer.
+
+### Input formats
+
+**NRC-EIL (8-D Emotion Intensity)** — one row per word-emotion pair:
+```
+English_Word    Emotion    Score    Translated_Word
+outraged        anger      0.964    empört
+```
+
+**NRC-VAD** — one row per word, three scores:
+```
+English_Word    Valence    Arousal    Dominance    Translated_Word
+abandon         0.052      0.519      0.245        aufgeben
+```
+
+The English-only root files have one fewer column and no header row; the `--word-col` and `--no-header` flags handle this automatically.
+
+### Usage
+
+```bash
+# 8-D Emotion Intensity — translated file (header present, translated word in col 3)
+python3 convert_nrc.py 8d raw/NRC-EIL\ \(8-D\ Emotions\)/NRC-AffectIntensity-Lexicon-de.txt \
+    --out lexicons/nrc_8d_de.json
+
+# 8-D Emotion Intensity — English root file (no header, word in col 0)
+python3 convert_nrc.py 8d raw/NRC-EIL\ \(8-D\ Emotions\)/NRC-AffectIntensity-Lexicon-en.txt \
+    --word-col 0 --no-header --out lexicons/nrc_8d_en.json
+
+# VAD — translated file (header present, translated word in col 4)
+python3 convert_nrc.py vad raw/NRC-VAD/NRC-VAD-Lexicon-de.txt \
+    --out data/vad-de.json
+
+# VAD — English root file (no header, word in col 0)
+python3 convert_nrc.py vad raw/NRC-VAD/NRC-VAD-Lexicon-en.txt \
+    --word-col 0 --no-header --out data/vad-en.json
+
+# Batch-convert every .txt file in a directory
+python3 convert_nrc.py batch --raw-dir raw --out-dir lexicons
+```
+
+### Output guarantees
+
+- All 8 emotion keys always present — missing dimensions filled with `0.0`
+- Scores clamped to `[0.0, 1.0]`
+- Non-standard emotion labels silently skipped
+- Files written as minified UTF-8 JSON (`ensure_ascii=False`, `sort_keys=True`)
+- Lexicons cached in memory after first load; in-flight promise deduplication prevents duplicate fetches
+
+---
+
+## Usage
+
+### Main Dashboard
 
 1. Select a **SIGNAL LANGUAGE** if needed (default: AUTO-DETECT)
 2. Type or paste text into **SIGNAL INPUT** — Wavelength Telemetry and Spectral Oscilloscopes update live
 3. Press **DECODE** or hit Enter
-4. Switch between **Grid**, **Narrative**, and **Word Stream** views
-5. Toggle individual **STREAMS** checkboxes to show/hide Facial, Somatic, Egyptian, or Greek layers
-6. Read the **INTERCEPTED WAVE EQUATION** below the output
+4. Read the **Ousiometric Threat Matrix** and **P.D.S. Telemetry** bars in the PDS panel
+5. Switch between **Grid**, **Narrative**, and **Word Stream** views
+6. Toggle individual **STREAMS** checkboxes to show/hide Facial, Somatic, Egyptian, or Greek layers
 7. Click **EXPORT SIGINT DOSSIER** to print a classified PDF
 
----
+### Cluster Analyzer (separate page)
 
-## Cluster Mode — Usage
-
-1. Click **Cluster Mode** in the controls bar
-2. Type a comma-separated list: `ring, marriage, couple, children, family`
-3. Live waveforms appear per word as you type
-4. Click **Analyze Cluster** to decode all words simultaneously
-5. The output shows Center of Gravity, word metrics table, Cluster Scatter, and per-word CHARACTER STREAMS
-6. Switch view modes to change how per-word character images are laid out
-7. Toggle **Disable Images** to collapse the image streams and focus on the analytics panels
+1. Click **CLUSTER ANALYZER** in the main dashboard header
+2. Select a **LEXICON LANGUAGE** from the dropdown (EN / AR / FA / FR / JA / KO / RU / ZH)
+3. Enter words in the textarea — comma or newline separated
+4. Press **ANALYSE CLUSTER** or use **Ctrl+Enter**
+5. Read the **Dominant Emotion Scatter** and **Heatmap Table**
+6. Watch for the **HUD alert banner** — fires when Systemic Coercion or Volatile Populism is detected
+7. Use **← MAIN DASHBOARD** to return
 
 ---
 
@@ -264,13 +391,9 @@ Three tabs:
 | M | 13 | Resonant | | Y | 25 | Resonant |
 | | | | | Z | 26 | Sovereign |
 
-Non-alphabetic characters (digits, spaces, punctuation) contribute a value of 0 and are excluded from all calculations.
-
 ---
 
 ## Greek Physics Layer
-
-Each letter (A–Z) and digit (0–9) is mapped to a Greek physics symbol from the Ionian numeral system.
 
 | Input | Greek Symbol | Physics Meaning |
 |---|---|---|
@@ -340,6 +463,7 @@ This project uses **ES6 Modules** (`type="module"`), which require an HTTP serve
 1. Install the [Live Server](https://marketplace.visualstudio.com/items?itemName=ritwickdey.LiveServer) extension
 2. Right-click `index.html` → **Open with Live Server**
 3. The app opens at `http://127.0.0.1:5500`
+4. Navigate to `cluster-analyzer.html` for the 8-D Emotion Analyzer
 
 **Alternative: Python**
 
@@ -348,7 +472,9 @@ python3 -m http.server 5500
 # then open http://localhost:5500
 ```
 
-> **Japanese mode** requires an internet connection on first use to download the Kuromoji dictionary (~8 MB) from jsDelivr CDN. It is cached by the browser after the first load. All other localization modes (Cyrillic, Arabic/Farsi, Korean) are built-in with no network requirement.
+> **Japanese mode** requires an internet connection on first use to download the Kuromoji dictionary (~8 MB) from jsDelivr CDN. All other localization modes are built-in with no network requirement.
+>
+> **NRC lexicons** (VAD and 8-D EIL) are lazy-loaded per language on first use and cached in browser memory. No server-side processing is required.
 
 ---
 
@@ -357,34 +483,82 @@ python3 -m http.server 5500
 ```
 kinesic-cryptography/
 │
-├── index.html                   # App shell — all sections, canvas elements, drawers
+├── index.html                   # Main dashboard — all decoder sections, PDS panel
+├── cluster-analyzer.html        # Standalone 8-D Emotion Cluster Analyzer page
+├── convert_nrc.py               # Data pipeline — NRC TSV → JSON converter (Python 3)
 │
 ├── css/
 │   ├── style.css                # Global tokens, reset, typography, layout, header
 │   ├── components.css           # Cards, timeline, cluster output, category colours,
-│   │                            #   Egyptian/Greek stream styles, stream visibility
-│   │                            #   body-class toggles, wave equation box, export button
+│   │                            #   stream styles, stream visibility body-class toggles,
+│   │                            #   wave equation box, export button
 │   ├── diagnostic.css           # Diagnostic panel, waveform, spectral engine,
 │   │                            #   cluster metric rows, Balkendiagramm
+│   ├── pds.css                  # Ousiometric PDS Engine — Threat Matrix card,
+│   │                            #   P.D.S. Telemetry bars, apex alert banner,
+│   │                            #   keyframes: pds-danger-flash, pds-flicker,
+│   │                            #   pds-apex-pulse, pds-dot-pulse
+│   ├── cluster-analyzer.css     # Cluster Analyzer page — input panel, language select,
+│   │                            #   HUD editorial alerts (ca-editorial-flash keyframe),
+│   │                            #   analysis grid, scatter plot wrap, emotion legend chips,
+│   │                            #   heatmap table
 │   ├── legend.css               # Floating Linguistic Architecture Legend (papyrus theme)
 │   ├── guide.css                # Tooltip system (#tip-popup, .tip-btn) and
 │   │                            #   Analyst Guide slide-out drawer
-│   └── print.css                # SIGINT dossier @media print layout —
-│                                #   classification banner, B&W card grid, UI chrome hidden
+│   └── print.css                # SIGINT dossier @media print layout
 │
 ├── js/
 │   ├── main.js                  # Entry point — event wiring, view switching,
 │   │                            #   4-stream render, wave equation, dossier export,
 │   │                            #   cluster parse/decode/render, spectral integration,
-│   │                            #   language selection, stream checkbox toggles
+│   │                            #   language selection, PDS panel wiring
 │   │
 │   │   ── Localization ─────────────────────────────────────
-│   ├── pipeline.js              # Global Localization Bridge (7 modes):
+│   ├── pipeline.js              # Global Localization Bridge (8 modes):
 │   │                            #   detectLanguage (Unicode heuristic for 6 scripts),
 │   │                            #   _cyrillicToLatin, _arabicToLatin (NFKC + map),
 │   │                            #   _hangulToRomaja (Unicode decomposition formula),
 │   │                            #   initKuroshiro (lazy Kuromoji load),
 │   │                            #   processInput (transliterate → normalise → engineInput)
+│   │
+│   │   ── NRC VAD / Ousiometrics ─────────────────────────────
+│   ├── vad.js                   # NRC VAD lexicon integration:
+│   │                            #   VAD_PATHS (8 languages: en de es fr ar zh ja ko),
+│   │                            #   loadVadLexicon (lazy fetch + in-flight dedup cache),
+│   │                            #   getVadLangCode (Unicode + stateLanguage routing),
+│   │                            #   _tokenize (5 strategies: Latin, Arabic, CJK,
+│   │                            #   Japanese kana/kanji, Korean hangul),
+│   │                            #   analyzeVad (text → matched VAD word array)
+│   ├── ousiometrics.js          # PDS transformation (Dodds et al. arXiv:2110.06847):
+│   │                            #   calculateOusiometrics(v,a,d) → {power,danger,structure},
+│   │                            #   computePdsWords, computeAggregatePds,
+│   │                            #   detectApexThreats, APEX_THRESHOLD = 0.65
+│   ├── pdsPanel.js              # PDS panel renderer:
+│   │                            #   renderPdsPanel(text, stateLanguage) — async orchestrator,
+│   │                            #   _renderThreatMatrix (Chart.js scatter + apex zone plugin),
+│   │                            #   _renderTelemetry (animated progress bars),
+│   │                            #   _renderApexAlert, destroyPdsPanel
+│   │
+│   │   ── NRC 8-D Emotion / Cluster Analyzer ─────────────────
+│   ├── affectLexicon.js         # Shared emotion constants:
+│   │                            #   EMOTION_KEYS, EMOTION_ABBR, EMOTION_COLORS,
+│   │                            #   EMOTION_RGBA, DEFAULT_COLOR, NEUTRAL_THRESHOLD
+│   ├── analysisEngine.js        # 8-D analysis pipeline:
+│   │                            #   loadLexicon(langCode) — async fetch + dual-cache,
+│   │                            #   parseWordInput(rawInput) → string[],
+│   │                            #   runAnalysis(words, langCode) → Promise<ResultObject[]>
+│   ├── wh.js                    # Cluster Analyzer visualizations (WH namespace):
+│   │                            #   WH.initPlot — scatter plot coloured by dominant emotion
+│   │                            #     + T1/T3 threshold line plugin,
+│   │                            #   WH.initTable — 8-column rgba heatmap table,
+│   │                            #   canvas registry (Map) to prevent Chart.js reuse errors
+│   ├── hudAlerts.js             # Compound trigger detection:
+│   │                            #   calculateAverages(results) → aggregate metrics,
+│   │                            #   detectTriggers(results) → alert configs array,
+│   │                            #   ui.setEditorial — flashing HUD banner renderer
+│   ├── clusterAnalyzerMain.js   # Cluster Analyzer entry point (no exports):
+│   │                            #   DOMContentLoaded wiring, language select read,
+│   │                            #   async runAndRender, Ctrl+Enter shortcut, auto-run
 │   │
 │   │   ── Physics & Math ───────────────────────────────────
 │   ├── physics.js               # FFT (Radix-2 Cooley-Tukey, N=256, Hann window),
@@ -397,28 +571,48 @@ kinesic-cryptography/
 │   ├── categoricalAnalysis.js   # Category breakdown, sovereignty/somatic/resonant scores
 │   │
 │   │   ── Visualisation ─────────────────────────────────────
-│   ├── palette.js               # 14-colour CLUSTER_COLORS palette (shared across all
-│   │                            #   chart modules for consistent per-word colouring)
-│   ├── charts.js                # Chart.js renderers:
-│   │                            #   renderRadarChart, renderScatterChart,
-│   │                            #   renderGlobalEnvelopeChart, renderMicroWaveChart,
-│   │                            #   renderWordScatterChart, renderClusterScatterChart,
-│   │                            #   renderClusterBarChart (Balkendiagramm)
-│   ├── waveform.js              # Real-time Wavelength Telemetry — N-series oscilloscope
+│   ├── palette.js               # 14-colour CLUSTER_COLORS palette
+│   ├── charts.js                # Chart.js renderers: radar, scatter, envelope,
+│   │                            #   micro wave, word scatter, cluster scatter, Balkendiagramm
+│   ├── waveform.js              # Real-time Wavelength Telemetry oscilloscope
 │   │
 │   │   ── UI Overlays ──────────────────────────────────────
-│   ├── legend.js                # Linguistic Architecture Legend —
-│   │                            #   tab switching, minimize/maximize toggle
-│   ├── helpDrawer.js            # Analyst Guide drawer (open/close/Escape/overlay-click)
-│   │                            #   + global tooltip system (event-delegated,
-│   │                            #   getBoundingClientRect edge-clamping)
+│   ├── legend.js                # Linguistic Architecture Legend — tab switching,
+│   │                            #   minimize/maximize toggle
+│   ├── helpDrawer.js            # Analyst Guide drawer + global tooltip system
 │   │
 │   │   ── Decoder ──────────────────────────────────────────
-│   ├── diagnosticPanel.js       # Diagnostic Engine UI — single/cluster renders;
-│   │                            #   injects [?] tooltip badges on metric tiles
+│   ├── diagnosticPanel.js       # Diagnostic Engine UI — single/cluster renders
 │   ├── decoder.js               # Input → DecodedCharacter array
 │   └── dictionary.js            # Somatic data ledger — face, body, egyptian, greek
-│                                #   fields per character; Ionian numeral digits 0–9
+│
+├── lexicons/                    # NRC 8-D Emotion Intensity JSON (Cluster Analyzer)
+│   ├── nrc_8d_en.json           # English  — 5,891 words
+│   ├── nrc_8d_ar.json           # Arabic   — 4,878 words
+│   ├── nrc_8d_de.json           # German   — 4,967 words
+│   ├── nrc_8d_es.json           # Spanish  — 4,992 words
+│   ├── nrc_8d_fa.json           # Farsi    — 4,678 words
+│   ├── nrc_8d_fr.json           # French   — 5,083 words
+│   ├── nrc_8d_ja.json           # Japanese — 4,895 words
+│   ├── nrc_8d_ko.json           # Korean   — 4,722 words
+│   ├── nrc_8d_ru.json           # Russian  — 4,979 words
+│   └── nrc_8d_zh.json           # Chinese  — 4,684 words
+│
+├── data/                        # NRC VAD Lexicon JSON (PDS Engine)
+│   ├── vad-en.json              # English  — 19,971 words
+│   ├── vad-ar.json              # Arabic   — 14,839 words
+│   ├── vad-de.json              # German   — 15,478 words
+│   ├── vad-es.json              # Spanish  — 15,289 words
+│   ├── vad-fa.json              # Farsi    — 14,092 words
+│   ├── vad-fr.json              # French   — 15,555 words
+│   ├── vad-ja.json              # Japanese — 15,828 words
+│   ├── vad-ko.json              # Korean   — 14,694 words
+│   ├── vad-ru.json              # Russian  — 15,368 words
+│   └── vad-zh.json              # Chinese  — 14,499 words
+│
+├── raw/                         # Raw NRC source files (not served — pipeline input only)
+│   ├── NRC-EIL (8-D Emotions)/  # Per-language NRC Emotion Intensity TSV files
+│   └── NRC-VAD/                 # Per-language NRC VAD TSV files
 │
 ├── screenshots/
 │   ├── decode-view.png
@@ -427,57 +621,10 @@ kinesic-cryptography/
 │   └── spectral-engine.png
 │
 └── assets/
-    ├── a-face.png               # Facial articulation image for "a"
-    ├── a-body.png               # Somatic posture image for "a"
-    └── ...                      # One face + one body image per supported character
+    ├── a-face.png
+    ├── a-body.png
+    └── ...
 ```
-
----
-
-## Dictionary Structure
-
-Each entry in `js/dictionary.js` follows this structure:
-
-```js
-export const SOMATIC_DICTIONARY = {
-  'a': {
-    category:        'Physical',   // 'Physical' | 'Emotional' | 'Intellectual'
-    face:            'Description of the facial articulation for this character.',
-    body:            'Description of the somatic posture for this character.',
-    value:           1,            // numeric letter value (null for digits)
-    archetypeCategory: 'Origin',   // archetypal category (null for digits)
-    egyptian: {
-      unicode:      '𓀀',          // Unicode hieroglyph character
-      description:  'Egyptian etymology description.',
-    },
-    greek: {
-      unicode:      'α',           // Greek physics symbol (Ionian numeral for digits)
-      description:  'Physics variable description.',
-    },
-  },
-  // Digits use double-quoted strings for Ionian numerals with apostrophe strokes:
-  '6': {
-    egyptian: { unicode: '𓏿', description: 'Six Strokes. Grounding.' },
-    greek:    { unicode: "ϛ'", description: 'Stigma: 6 degrees of kinematic freedom.' },
-  },
-};
-```
-
-### Category Colour Key
-
-| Category | Card Background | Use |
-|---|---|---|
-| `Physical` | Dark blue | Characters primarily engaging physical articulation |
-| `Emotional` | Dark amber | Characters with emotional or relational somatic quality |
-| `Intellectual` | Steel grey-blue | Characters associated with cognitive or focused expression |
-
----
-
-## Supported Characters
-
-The decoder handles all **alphanumeric** input: `a–z`, `0–9`, and German umlauts `ä ö ü`. Spaces, punctuation, and special characters are silently discarded. Input is automatically converted to lowercase before lookup.
-
-All non-Latin scripts are first transliterated to Latin by the **Global Localization Bridge** before character lookup: Japanese → Romaji, Chinese → Pinyin, Cyrillic → Latinized, Arabic/Farsi → Latinized, Korean → Romaja.
 
 ---
 
@@ -485,13 +632,15 @@ All non-Latin scripts are first transliterated to Latin by the **Global Localiza
 
 - **Vanilla HTML / CSS / JavaScript** — no frameworks, no build tools, no backend
 - **ES6 Modules** — fully modular with `import`/`export`
-- **[Chart.js v4](https://www.chartjs.org/)** — UMD global via CDN; radar, scatter, line, bar, and waveform charts
-- **[Kuroshiro v1](https://github.com/hexenq/kuroshiro) + [kuroshiro-analyzer-kuromoji](https://github.com/hexenq/kuroshiro-analyzer-kuromoji)** — UMD globals via jsDelivr; Japanese → Romaji with Kuromoji dictionary
-- **[pinyin-pro v3](https://github.com/zh-lx/pinyin-pro)** — ES module via esm.sh; Chinese → tone-stripped Pinyin
+- **[Chart.js v4](https://www.chartjs.org/)** — UMD global via CDN; radar, scatter, line, bar, waveform, and custom plugin charts
+- **[Kuroshiro v1](https://github.com/hexenq/kuroshiro) + [kuroshiro-analyzer-kuromoji](https://github.com/hexenq/kuroshiro-analyzer-kuromoji)** — UMD globals via jsDelivr; Japanese → Romaji
+- **[pinyin-pro v3](https://github.com/zh-lx/pinyin-pro)** — ES module via esm.sh; Chinese → Pinyin
+- **NRC VAD Lexicon** (Mohammad, 2018) — 10 languages; lazy-loaded JSON; ousiometric PDS transformation per Dodds et al. arXiv:2110.06847
+- **NRC Emotion Intensity Lexicon** (Mohammad, 2018) — 10 languages; lazy-loaded JSON; 8-dimensional affect vectors
+- **`convert_nrc.py`** — Python 3.8+ data pipeline; no third-party dependencies; converts NRC TSV dumps to frontend JSON
 - **Pure-JS FFT** — Radix-2 Cooley-Tukey in `physics.js`; no Web Audio API required
-- **Built-in Cyrillic / Arabic / Korean transliteration** — zero CDN dependencies; Cyrillic via 66-entry character map; Arabic/Farsi via NFKC normalization + consonant map; Korean via Unicode Hangul block decomposition formula
-- **14-colour shared palette** — `palette.js` exports `CLUSTER_COLORS`; imported by `waveform.js`, `charts.js`, and `diagnosticPanel.js` for consistent per-word colours across all panels
-- **CSS body-class stream toggling** — `body.hide-face` / `body.hide-body` / `body.hide-egyptian` / `body.hide-greek` applied instantly on checkbox change; no DOM re-render
-- **CSS Custom Properties** — centralised design tokens for all colours, spacing, and typography
-- **`window.print()` + `@media print`** — SIGINT dossier export with classification banner and B&W card grid; no third-party PDF library
+- **Built-in transliteration** — Cyrillic (66-entry map), Arabic/Farsi (NFKC + consonant map), Korean (Hangul decomposition formula), French/Japanese/Korean VAD routing via Unicode heuristics
+- **Dual in-flight dedup caches** — both `vad.js` and `analysisEngine.js` use `Map`-based promise registries to prevent redundant parallel fetches
+- **CSS Custom Properties** — centralised design tokens for all colours, spacing, typography
+- **`window.print()` + `@media print`** — SIGINT dossier export; no third-party PDF library
 - [Space Mono](https://fonts.google.com/specimen/Space+Mono) + [Inter](https://fonts.google.com/specimen/Inter) via Google Fonts

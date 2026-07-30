@@ -13,6 +13,7 @@
   <link rel="stylesheet" href="css/print.css">
   <link rel="stylesheet" href="css/legend.css">
   <link rel="stylesheet" href="css/guide.css">
+  <link rel="stylesheet" href="css/pds.css">
 </head>
 <body>
 
@@ -29,6 +30,10 @@
         <span class="status-dot"></span>
         <span class="status-label">SYSTEM ONLINE</span>
       </div>
+      <a href="cluster-analyzer.html" class="help-guide-btn" aria-label="Open Psycholinguistic Cluster Analyzer">
+        <span class="help-guide-btn-icon" aria-hidden="true">&#9643;</span>
+        CLUSTER ANALYZER
+      </a>
       <button id="help-guide-btn" class="help-guide-btn" type="button" aria-haspopup="dialog" aria-controls="help-drawer" aria-label="Open Analyst Guide">
         <span class="help-guide-btn-icon" aria-hidden="true">&#9432;</span>
         ANALYST GUIDE
@@ -55,6 +60,7 @@
       <div class="loc-options" role="group" aria-label="Language mode selection">
         <button class="loc-btn loc-btn--active" data-lang="auto"     aria-pressed="true">AUTO&#8209;DETECT</button>
         <button class="loc-btn"                 data-lang="western"  aria-pressed="false">WESTERN (A&#8209;Z)</button>
+        <button class="loc-btn"                 data-lang="french"   aria-pressed="false">FRENCH (FR)</button>
         <button class="loc-btn"                 data-lang="japanese" aria-pressed="false">JAPANESE (ROMAJI)</button>
         <button class="loc-btn"                 data-lang="chinese"  aria-pressed="false">CHINESE (PINYIN)</button>
         <button class="loc-btn"                 data-lang="cyrillic" aria-pressed="false">CYRILLIC (LATINIZED)</button>
@@ -390,6 +396,95 @@
 
         </div>
       </div>
+    </section>
+
+    <!-- ── Ousiometric PDS Engine ─────────────────────────────── -->
+    <section
+      id="pds-panel"
+      class="pds-panel"
+      hidden
+      aria-label="Ousiometric PDS Analysis Engine"
+    >
+      <!-- Loading indicator — visible while async VAD fetch is in-progress (outside .pds-body so it stays visible when body is hidden) -->
+      <div class="pds-loading" hidden aria-live="polite">
+        <span class="pds-loading-text">// ANALYSING LEXICAL SIGNAL&hellip;</span>
+      </div>
+
+      <div class="pds-header">
+        <div class="pds-title">
+          <span class="pds-dot" aria-hidden="true"></span>
+          OUSIOMETRIC PDS ENGINE &mdash; NRC VAD Lexical Analysis
+        </div>
+        <button
+          id="pds-collapse-btn"
+          class="pds-collapse-btn"
+          aria-expanded="true"
+          aria-controls="pds-body"
+          aria-label="Collapse PDS panel"
+        >&#9660;</button>
+      </div>
+
+      <div class="pds-body" id="pds-body">
+
+        <!-- Apex Threat Alert — hidden until apex threats are detected -->
+        <div id="pds-apex-alert" class="pds-apex-alert" hidden aria-live="assertive" aria-atomic="true">
+          <span class="pds-apex-alert-icon" aria-hidden="true">&#9888;</span>
+          <div class="pds-apex-alert-content">
+            <span class="pds-apex-alert-text">APEX THREAT VOCABULARY DETECTED</span>
+            <div id="pds-apex-words" class="pds-apex-words" aria-label="Detected apex threat words"></div>
+          </div>
+        </div>
+
+        <!-- Two-card layout -->
+        <div class="pds-cards-row">
+
+          <!-- Card 1: Ousiometric Threat Matrix (scatter plot) -->
+          <div class="pds-card">
+            <div class="pds-card-title">[ OUSIOMETRIC THREAT MATRIX ]</div>
+            <div class="pds-card-subtitle">
+              Power &times; Danger Lexical Scatter &mdash; NRC VAD Transformed
+              <span data-tip="Each word is plotted by its Ousiometric Power score (X) against its Danger score (Y), derived from the NRC VAD lexicon via the PDS rotation (Dodds et al. arXiv:2110.06847). Words clustering in the top-right quadrant (High Power + High Danger) represent Apex Threats."><button class="tip-btn" aria-label="About Ousiometric Threat Matrix">?</button></span>
+            </div>
+            <!-- Scatter canvas wrapper — quadrant labels overlay the chart -->
+            <div class="pds-matrix-wrap">
+              <div class="pds-quadrant-labels" aria-hidden="true">
+                <span class="pds-qlabel pds-qlabel--tl">HIGH DANGER<br>LOW POWER</span>
+                <span class="pds-qlabel pds-qlabel--tr">&#9888; APEX ZONE<br>HIGH DANGER<br>HIGH POWER</span>
+                <span class="pds-qlabel pds-qlabel--bl">SAFE ZONE</span>
+                <span class="pds-qlabel pds-qlabel--br">HIGH POWER<br>LOW DANGER</span>
+              </div>
+              <canvas id="pds-matrix-canvas" aria-label="Ousiometric Threat Matrix scatter plot"></canvas>
+            </div>
+            <!-- Custom legend -->
+            <div class="pds-matrix-legend" aria-label="Scatter plot legend">
+              <div class="pds-legend-item pds-legend--normal">
+                <span class="pds-legend-dot" aria-hidden="true"></span>
+                <span>LEXICAL UNIT</span>
+              </div>
+              <div class="pds-legend-item pds-legend--apex">
+                <span class="pds-legend-dot" aria-hidden="true"></span>
+                <span>APEX THREAT</span>
+              </div>
+            </div>
+            <div id="pds-match-count" class="pds-match-count" aria-live="polite"></div>
+          </div>
+
+          <!-- Card 2: Base P.D.S. Telemetry (bar charts) -->
+          <div class="pds-card">
+            <div class="pds-card-title">[ BASE P.D.S. TELEMETRY ]</div>
+            <div class="pds-card-subtitle">
+              Macro Psycholinguistic Signature &mdash; Averaged Across All Tokens
+              <span data-tip="Macro-level averages of Power, Danger, and Structure across all VAD-matched words. Power = Dominance + Valence. Danger = inverse Valence + Arousal. Structure = Valence + inverse Arousal. Based on Ousiometric rotation (arXiv:2110.06847)."><button class="tip-btn" aria-label="About Base PDS Telemetry">?</button></span>
+            </div>
+            <div id="pds-telemetry-bars" class="pds-telemetry-bars" aria-label="PDS macro score bars"></div>
+            <!-- Empty state — shown when no VAD matches are found -->
+            <div class="pds-empty" hidden aria-live="polite">
+              <span>// NO VAD MATCHES &mdash; ENTER LONGER TEXT OR SWITCH LANGUAGE MODE</span>
+            </div>
+          </div>
+
+        </div><!-- /pds-cards-row -->
+      </div><!-- /pds-body -->
     </section>
 
   </main>

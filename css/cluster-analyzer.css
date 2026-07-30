@@ -1,0 +1,671 @@
+/**
+ * cluster-analyzer.css
+ * ─────────────────────────────────────────────────────────────────────────────
+ * Psycholinguistic Cluster Analyzer — SIGINT Aesthetic Stylesheet
+ *
+ * Dark-mode only. Neon cyan accent on a near-black background.
+ * Uses CSS custom properties from the global style.css where available,
+ * but also defines its own values so this file is self-contained if needed.
+ *
+ * Section map:
+ *   1. Reset & base
+ *   2. Animations / keyframes
+ *   3. Header
+ *   4. Main layout
+ *   5. Classification bar
+ *   6. Input panel
+ *   7. HUD editorial alerts
+ *   8. Analysis grid (cards)
+ *   9. Scatter plot
+ *  10. Emotion legend
+ *  11. Heatmap table
+ *  12. Footer
+ *  13. Responsive overrides
+ * ─────────────────────────────────────────────────────────────────────────────
+ */
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   1. RESET & BASE
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin:     0;
+  padding:    0;
+}
+
+body {
+  background-color: #07090f;
+  color:            #c8d8e8;
+  font-family:      'Inter', sans-serif;
+  font-size:        14px;
+  line-height:      1.5;
+  min-height:       100vh;
+  /* Prevent horizontal overflow on small screens */
+  overflow-x:       hidden;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   2. ANIMATIONS / KEYFRAMES
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/**
+ * ca-status-pulse
+ * Used on the header status dot to indicate the system is live.
+ * Pulses between full and 40 % opacity.
+ */
+@keyframes ca-status-pulse {
+  0%,
+  100% { opacity: 1;   }
+  50%  { opacity: 0.4; }
+}
+
+/**
+ * ca-editorial-flash
+ * Used on critical editorial alerts — oscillates between a dark red
+ * glow and no glow, drawing the analyst's eye to a detected threat.
+ */
+@keyframes ca-editorial-flash {
+  from { box-shadow: none; }
+  to   { box-shadow: 0 0 16px rgba(255, 30, 30, 0.4); }
+}
+
+/**
+ * ca-dot-pulse
+ * Shared pulse used by the status dot in the header.
+ * Uses box-shadow expansion to simulate a sonar / radar ping effect.
+ */
+@keyframes ca-dot-pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(0, 200, 255, 0.6); }
+  70%  { box-shadow: 0 0 0 6px rgba(0, 200, 255, 0);  }
+  100% { box-shadow: 0 0 0 0 rgba(0, 200, 255, 0);    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   3. HEADER
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/**
+ * Sticky SIGINT-style page header.
+ * Frosted-glass effect via backdrop-filter + a subtle cyan bottom border.
+ */
+.ca-header {
+  position:        sticky;
+  top:             0;
+  z-index:         100;
+  background:      rgba(7, 9, 15, 0.95);
+  backdrop-filter: blur(10px);
+  border-bottom:   1px solid rgba(0, 200, 255, 0.15);
+  padding:         12px 24px;
+  display:         flex;
+  align-items:     center;
+  justify-content: space-between;
+  gap:             16px;
+}
+
+/** Left brand string: "// PSYCHOLINGUISTIC CLUSTER ANALYZER" */
+.ca-header-brand {
+  font-family:    'Space Mono', monospace;
+  font-size:      13px;
+  color:          #00c8ff;
+  letter-spacing: 0.1em;
+  white-space:    nowrap;
+}
+
+.ca-header-brand span {
+  /* The "//" comment-leader in a dimmer tone */
+  opacity: 0.5;
+}
+
+/** Right-side cluster: status dot + text + back link */
+.ca-header-right {
+  display:     flex;
+  align-items: center;
+  gap:         20px;
+}
+
+/** Status indicator row (dot + text) */
+.ca-header-status {
+  display:     flex;
+  align-items: center;
+  gap:         8px;
+}
+
+/** Pulsing status indicator dot */
+.ca-status-dot {
+  width:            7px;
+  height:           7px;
+  border-radius:    50%;
+  background:       #00c8ff;
+  flex-shrink:      0;
+  animation:        ca-dot-pulse 2s ease-out infinite,
+                    ca-status-pulse 2s ease-in-out infinite;
+}
+
+/** Small header status text */
+.ca-status-text {
+  font-family:    'Space Mono', monospace;
+  font-size:      10px;
+  color:          #00c8ff;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/** Back-navigation link to main dashboard */
+.ca-header-back {
+  font-family:    'Space Mono', monospace;
+  font-size:      10px;
+  color:          #5a6a82;
+  text-decoration: none;
+  letter-spacing: 0.08em;
+  white-space:    nowrap;
+  transition:     color 220ms ease;
+}
+
+.ca-header-back:hover {
+  color: #00c8ff;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   4. MAIN LAYOUT
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.ca-main {
+  max-width:      1400px;
+  margin:         0 auto;
+  padding:        24px 16px;
+  display:        flex;
+  flex-direction: column;
+  gap:            24px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   5. CLASSIFICATION BAR
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/**
+ * Decorative SIGINT classification banner.
+ * Purely aesthetic — aria-hidden in the HTML.
+ */
+.ca-classification-bar {
+  text-align:     center;
+  font-family:    'Space Mono', monospace;
+  font-size:      9px;
+  color:          rgba(0, 200, 255, 0.4);
+  letter-spacing: 0.15em;
+  padding:        6px 0;
+  border-top:     1px solid rgba(0, 200, 255, 0.08);
+  border-bottom:  1px solid rgba(0, 200, 255, 0.08);
+  text-transform: uppercase;
+  user-select:    none;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   6. INPUT PANEL
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/** Card wrapper for the word-input section */
+.ca-input-panel {
+  background:     #0e1118;
+  border:         1px solid rgba(0, 200, 255, 0.18);
+  border-radius:  8px;
+  padding:        20px;
+  display:        flex;
+  flex-direction: column;
+  gap:            12px;
+}
+
+/** "CLUSTER SIGNAL INPUT —" label above the textarea */
+.ca-input-label {
+  font-family:    'Space Mono', monospace;
+  font-size:      10px;
+  color:          #00c8ff;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  display:        block;
+}
+
+/** Main word-input textarea */
+.ca-word-input {
+  width:           100%;
+  background:      #07090f;
+  border:          1px solid rgba(0, 200, 255, 0.3);
+  color:           #c8d8e8;
+  font-family:     'Space Mono', monospace;
+  font-size:       13px;
+  padding:         12px;
+  border-radius:   6px;
+  resize:          vertical;
+  min-height:      80px;
+  outline:         none;
+  caret-color:     #00c8ff;
+  transition:      border-color 220ms ease, box-shadow 220ms ease;
+}
+
+.ca-word-input::placeholder {
+  color:   rgba(0, 200, 255, 0.3);
+  opacity: 1;
+}
+
+.ca-word-input:focus {
+  border-color: #00c8ff;
+  box-shadow:   0 0 0 2px rgba(0, 200, 255, 0.1);
+}
+
+/** Row containing the language label + select dropdown */
+.ca-lang-row {
+  display:     flex;
+  align-items: center;
+  gap:         12px;
+  flex-wrap:   wrap;
+}
+
+/** "LEXICON LANGUAGE" label for the select */
+.ca-lang-label {
+  font-family:    'Space Mono', monospace;
+  font-size:      10px;
+  color:          #00c8ff;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  white-space:    nowrap;
+  cursor:         default;
+}
+
+/**
+ * Language selector dropdown — styled to match the SIGINT dark aesthetic.
+ * Custom appearance is reset so the border / background can be fully
+ * controlled without relying on browser-native chrome.
+ */
+.ca-lang-select {
+  appearance:      none;
+  -webkit-appearance: none;
+  background:      #07090f url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%2300c8ff'/%3E%3C/svg%3E") no-repeat right 10px center;
+  border:          1px solid rgba(0, 200, 255, 0.35);
+  border-radius:   4px;
+  color:           #c8d8e8;
+  font-family:     'Space Mono', monospace;
+  font-size:       11px;
+  letter-spacing:  0.06em;
+  padding:         7px 32px 7px 12px;
+  cursor:          pointer;
+  outline:         none;
+  transition:      border-color 220ms ease, box-shadow 220ms ease;
+  /* Minimum width accommodates the longest option label */
+  min-width:       200px;
+}
+
+.ca-lang-select:hover {
+  border-color: #00c8ff;
+}
+
+.ca-lang-select:focus {
+  border-color: #00c8ff;
+  box-shadow:   0 0 0 2px rgba(0, 200, 255, 0.12);
+}
+
+/* Style the native <option> elements in browsers that support it */
+.ca-lang-select option {
+  background: #0e1118;
+  color:      #c8d8e8;
+}
+
+/** Row containing the analyse button and inline status text */
+.ca-input-actions {
+  display:     flex;
+  align-items: center;
+  gap:         16px;
+  flex-wrap:   wrap;
+}
+
+/** "ANALYSE CLUSTER ▶▶" button */
+.ca-analyse-btn {
+  background:     transparent;
+  border:         1px solid #00c8ff;
+  color:          #00c8ff;
+  font-family:    'Space Mono', monospace;
+  font-weight:    700;
+  font-size:      11px;
+  letter-spacing: 0.12em;
+  padding:        10px 28px;
+  border-radius:  4px;
+  cursor:         pointer;
+  text-transform: uppercase;
+  display:        inline-flex;
+  align-items:    center;
+  gap:            8px;
+  transition:     background 220ms ease, box-shadow 220ms ease, transform 120ms ease;
+  white-space:    nowrap;
+}
+
+.ca-analyse-btn:hover {
+  background: rgba(0, 200, 255, 0.1);
+  box-shadow: 0 0 12px rgba(0, 200, 255, 0.25);
+}
+
+.ca-analyse-btn:active {
+  transform: scale(0.98);
+}
+
+/** Inline status / progress text */
+.ca-status-bar {
+  font-family: 'Space Mono', monospace;
+  font-size:   10px;
+  color:       #5a6a82;
+  min-height:  16px;
+  letter-spacing: 0.04em;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   7. HUD EDITORIAL ALERTS
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/**
+ * Outer container — no intrinsic styling; content is injected by JS.
+ * Hidden by default (HTML `hidden` attribute), revealed on trigger detection.
+ */
+.ca-hud-container {
+  /* intentionally unstyled — children carry all visual weight */
+}
+
+/** Base editorial banner: flex row with icon + body */
+.ca-editorial {
+  display:       flex;
+  gap:           16px;
+  padding:       16px 20px;
+  border-radius: 6px;
+  border-left:   4px solid transparent;
+  align-items:   flex-start;
+}
+
+/** Critical severity — flashing red glow, hard-red left border */
+.ca-editorial--critical {
+  background:   rgba(255, 30, 30, 0.08);
+  border-color: #ff3333;
+  animation:    ca-editorial-flash 1.2s ease-in-out infinite alternate;
+}
+
+/** Warning severity — amber, static */
+.ca-editorial--warning {
+  background:   rgba(255, 136, 0, 0.08);
+  border-color: #ff8800;
+}
+
+/** Icon column (⚠ or ◈) */
+.ca-editorial-icon {
+  font-size:   24px;
+  flex-shrink: 0;
+  line-height: 1;
+  margin-top:  2px;
+}
+
+/** Body column: title + detail */
+.ca-editorial-body {
+  display:        flex;
+  flex-direction: column;
+  gap:            4px;
+}
+
+/** Alert heading */
+.ca-editorial-title {
+  font-family:    'Space Mono', monospace;
+  font-weight:    700;
+  font-size:      12px;
+  color:          #ffffff;
+  letter-spacing: 0.08em;
+}
+
+/** Alert detail / explanation text */
+.ca-editorial-detail {
+  font-size:   12px;
+  color:       #a0b8c8;
+  line-height: 1.6;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   8. ANALYSIS GRID (CARDS)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/**
+ * Two-column grid holding the scatter-plot card and the table card.
+ * Collapses to single column below 900 px.
+ */
+.ca-analysis-grid {
+  display:               grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap:                   20px;
+}
+
+/** Individual analysis card */
+.ca-analysis-card {
+  background:     #0e1118;
+  border:         1px solid rgba(0, 200, 255, 0.18);
+  border-radius:  8px;
+  overflow:       hidden;
+  display:        flex;
+  flex-direction: column;
+}
+
+/** Card title bar */
+.ca-card-header {
+  padding:       14px 20px;
+  border-bottom: 1px solid rgba(0, 200, 255, 0.1);
+  display:       flex;
+  align-items:   center;
+  gap:           8px;
+}
+
+/** Small status indicator dot in card header */
+.ca-card-dot {
+  width:         7px;
+  height:        7px;
+  border-radius: 50%;
+  background:    #00c8ff;
+  flex-shrink:   0;
+}
+
+/** Card title text */
+.ca-card-title {
+  font-family:    'Space Mono', monospace;
+  font-weight:    700;
+  font-size:      11px;
+  color:          #00c8ff;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/** Card content area */
+.ca-card-body {
+  padding: 16px;
+  flex:    1;
+  /* Allow inner elements (table) to scroll horizontally */
+  overflow: hidden;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   9. SCATTER PLOT
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/** Fixed-height wrapper — canvas fills it via JS responsive mode */
+.ca-plot-wrap {
+  position: relative;
+  width:    100%;
+  height:   380px;
+}
+
+/**
+ * Force canvas to fill its parent.
+ * Chart.js's responsive mode handles the actual pixel dimensions;
+ * these CSS rules prevent layout overflow.
+ */
+.ca-plot-wrap canvas {
+  width:  100% !important;
+  height: 100% !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   10. EMOTION LEGEND
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/** Container for all emotion colour chips below the scatter plot */
+.ca-emotion-legend {
+  display:    flex;
+  flex-wrap:  wrap;
+  gap:        8px 16px;
+  margin-top: 12px;
+}
+
+/** Single legend chip: coloured dot + label text */
+.ca-legend-chip {
+  display:     flex;
+  align-items: center;
+  gap:         6px;
+  font-family: 'Space Mono', monospace;
+  font-size:   10px;
+  color:       #7a8898;
+}
+
+/** Coloured circle swatch */
+.ca-legend-swatch {
+  display:       inline-block;
+  width:         10px;
+  height:        10px;
+  border-radius: 50%;
+  flex-shrink:   0;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   11. HEATMAP TABLE
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/** Scroll wrapper for the emotion heatmap table on narrow viewports */
+.ca-table-wrap {
+  overflow-x: auto;
+  width:      100%;
+}
+
+/** Core table — coloured cells are set inline by JS */
+.ca-heatmap-table {
+  border-collapse: collapse;
+  width:           100%;
+  font-family:     'Space Mono', monospace;
+  font-size:       11px;
+}
+
+/** Header cells */
+.ca-heatmap-table th {
+  padding:        8px 10px;
+  color:          #5a6a82;
+  font-weight:    700;
+  font-size:      10px;
+  border-bottom:  1px solid rgba(0, 200, 255, 0.12);
+  white-space:    nowrap;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+/** First 3 header columns (WORD, σ, Σ) are left-aligned; rest are centred */
+.ca-heatmap-table th:nth-child(-n+3) {
+  text-align: left;
+}
+
+.ca-heatmap-table th:nth-child(n+4) {
+  text-align: center;
+}
+
+/** Data cells */
+.ca-heatmap-table td {
+  padding:      7px 10px;
+  border-bottom: 1px solid rgba(0, 200, 255, 0.05);
+  white-space:   nowrap;
+  /* Background colour is set inline by JS for emotion cells */
+  transition:    background-color 120ms ease;
+}
+
+/** Row hover highlight */
+.ca-heatmap-table tr:hover td {
+  background-color: rgba(0, 200, 255, 0.04) !important;
+}
+
+/**
+ * .ca-cell-val
+ * Wrapper span inside each emotion cell.
+ * Forces centred display even if the TD has non-centred base style.
+ */
+.ca-cell-val {
+  display:    block;
+  text-align: center;
+}
+
+/* ── Sigma tier colour badges ────────────────────────────────────────────── */
+
+/** T1 — Somatic / Universal (σ ≤ 2.0) — green */
+.ca-sigma-t1 { color: #22c55e; }
+
+/** T2 — Archetypal Bridge (2.0 < σ ≤ 5.0) — orange */
+.ca-sigma-t2 { color: #f97316; }
+
+/** T3 — State / System (σ > 5.0) — red */
+.ca-sigma-t3 { color: #ef4444; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   12. FOOTER
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.ca-footer {
+  text-align:     center;
+  font-family:    'Space Mono', monospace;
+  font-size:      9px;
+  color:          rgba(0, 200, 255, 0.2);
+  padding:        20px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-top:     auto;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   13. RESPONSIVE OVERRIDES
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/**
+ * Collapse the two-column analysis grid to a single column on screens
+ * narrower than 900 px (tablets, phones).
+ */
+@media (max-width: 900px) {
+  .ca-analysis-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Reduce header padding on narrow screens */
+  .ca-header {
+    padding:        10px 14px;
+    flex-wrap:      wrap;
+    gap:            8px;
+  }
+
+  /* Stack right-side header elements vertically on very small screens */
+  .ca-header-right {
+    gap: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .ca-main {
+    padding: 16px 10px;
+    gap:     16px;
+  }
+
+  .ca-card-body {
+    padding: 10px;
+  }
+
+  .ca-input-panel {
+    padding: 14px;
+  }
+
+  .ca-analyse-btn {
+    width:          100%;
+    justify-content: center;
+  }
+}

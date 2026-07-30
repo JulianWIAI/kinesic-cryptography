@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Psycholinguistic Cluster Analyzer — SIGINT</title>
+
+  <!-- ── Google Fonts ─────────────────────────────────────────────────────── -->
+  <!-- Space Mono: monospace headings, labels, code-style readouts            -->
+  <!-- Inter: body text, tooltips, detail copy                                -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Inter:wght@300;400;500&display=swap"
+    rel="stylesheet"
+  >
+
+  <!-- ── Global design tokens (CSS custom properties) ─────────────────────── -->
+  <!-- Provides --clr-bg, --clr-surface, --clr-accent, font vars, spacing, etc. -->
+  <link rel="stylesheet" href="css/style.css">
+
+  <!-- ── Cluster Analyzer page styles ─────────────────────────────────────── -->
+  <link rel="stylesheet" href="css/cluster-analyzer.css">
+</head>
+
+<body>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════
+       SITE HEADER
+       Sticky top bar with brand label, live status indicator, and back link.
+       ═══════════════════════════════════════════════════════════════════════ -->
+  <header class="ca-header" role="banner">
+
+    <!-- Left: product brand string -->
+    <div class="ca-header-brand">
+      <span>// </span>PSYCHOLINGUISTIC CLUSTER ANALYZER
+    </div>
+
+    <!-- Right: status indicator + back navigation -->
+    <div class="ca-header-right">
+      <div class="ca-header-status" aria-label="System status">
+        <!-- Pulsing dot — CSS animation indicates live system -->
+        <span class="ca-status-dot" aria-hidden="true"></span>
+        <!-- Updated by clusterAnalyzerMain.js during analysis -->
+        <span class="ca-status-text" id="ca-status">SYSTEM ONLINE</span>
+      </div>
+
+      <a href="index.html" class="ca-header-back" aria-label="Return to main dashboard">
+        ← MAIN DASHBOARD
+      </a>
+    </div>
+
+  </header><!-- /ca-header -->
+
+
+  <!-- ═══════════════════════════════════════════════════════════════════════
+       MAIN CONTENT
+       ═══════════════════════════════════════════════════════════════════════ -->
+  <main class="ca-main" role="main">
+
+    <!-- ── Classification banner (decorative, not screen-reader visible) ──── -->
+    <div class="ca-classification-bar" aria-hidden="true">
+      ◈ TOP SECRET // PSYCHOLINGUISTIC SIGINT // NRC AFFECT ANALYSIS ◈
+    </div>
+
+
+    <!-- ── Word input panel ─────────────────────────────────────────────── -->
+    <section class="ca-input-panel" aria-label="Cluster word input">
+
+      <label class="ca-input-label" for="ca-word-input">
+        CLUSTER SIGNAL INPUT — Enter words (comma or newline separated)
+      </label>
+
+      <!--
+        Pre-populated with a demo word set so that analysts can immediately see
+        a result on page load.  clusterAnalyzerMain.js auto-triggers runAndRender()
+        when it detects a non-empty textarea value on DOMContentLoaded.
+      -->
+      <textarea
+        id="ca-word-input"
+        class="ca-word-input"
+        placeholder="obey, authority, terror, trust, control, outrage…"
+        autocomplete="off"
+        spellcheck="false"
+        rows="3"
+        aria-describedby="ca-status-bar"
+      >obey, authority, trust, control, terror, threat</textarea>
+
+      <!--
+        Language selector — controls which NRC lexicon JSON is fetched.
+        The selected value is read by clusterAnalyzerMain.js and forwarded
+        to runAnalysis() as the langCode parameter.
+      -->
+      <div class="ca-lang-row">
+        <label class="ca-lang-label" for="ca-lang-select">LEXICON LANGUAGE</label>
+        <select id="ca-lang-select" class="ca-lang-select" aria-label="Select analysis lexicon language">
+          <option value="en">ENGLISH</option>
+          <option value="ar">ARABIC — عربي</option>
+          <option value="fa">FARSI — فارسی</option>
+          <option value="fr">FRENCH — FRANÇAIS</option>
+          <option value="ja">JAPANESE — 日本語</option>
+          <option value="ko">KOREAN — 한국어</option>
+          <option value="ru">RUSSIAN — РУССКИЙ</option>
+          <option value="zh">CHINESE — 中文</option>
+        </select>
+      </div>
+
+      <div class="ca-input-actions">
+        <button id="ca-analyse-btn" class="ca-analyse-btn" type="button" aria-label="Run psycholinguistic cluster analysis">
+          <span>ANALYSE CLUSTER</span>
+          <span aria-hidden="true">▶▶</span>
+        </button>
+
+        <!-- Inline status / progress feedback — updated by JS -->
+        <span class="ca-status-bar" id="ca-status-bar" aria-live="polite">
+          Enter words above to begin analysis.
+        </span>
+      </div>
+
+    </section><!-- /ca-input-panel -->
+
+
+    <!-- ── HUD editorial alert container ────────────────────────────────── -->
+    <!--
+      Hidden by default (HTML `hidden` attribute).
+      hudAlerts.js / ui.setEditorial() injects a banner here when a compound
+      psychological trigger is detected, then removes the `hidden` attribute.
+      aria-live="assertive" ensures screen readers announce critical alerts.
+    -->
+    <div
+      id="ca-hud-container"
+      class="ca-hud-container"
+      hidden
+      aria-live="assertive"
+      aria-atomic="true"
+    ></div>
+
+
+    <!-- ── Analysis output grid ──────────────────────────────────────────── -->
+    <!--
+      Two-column grid (desktop) / single-column (mobile ≤ 900 px).
+      Both child sections start hidden; JS reveals them after first analysis.
+    -->
+    <div class="ca-analysis-grid">
+
+      <!-- ── Scatter plot card ─────────────────────────────────────────── -->
+      <section
+        id="ca-plot-panel"
+        class="ca-analysis-card"
+        hidden
+        aria-label="Dominant Emotion Scatter Plot"
+      >
+        <div class="ca-card-header">
+          <span class="ca-card-dot" aria-hidden="true"></span>
+          <span class="ca-card-title">DOMINANT EMOTION SCATTER — σ × Σ Matrix</span>
+        </div>
+
+        <div class="ca-card-body">
+          <!-- Fixed-height wrapper; canvas fills via Chart.js responsive mode -->
+          <div class="ca-plot-wrap">
+            <canvas
+              id="ca-plot-canvas"
+              aria-label="Scatter plot of word sigma complexity versus word sum, coloured by dominant NRC emotion"
+            ></canvas>
+          </div>
+
+          <!--
+            Emotion colour legend chips.
+            Populated by clusterAnalyzerMain.js → renderEmotionLegend()
+            after each analysis run.
+          -->
+          <div
+            id="ca-emotion-legend"
+            class="ca-emotion-legend"
+            aria-label="Emotion colour key"
+          ></div>
+        </div>
+      </section><!-- /ca-plot-panel -->
+
+
+      <!-- ── Heatmap table card ─────────────────────────────────────────── -->
+      <section
+        id="ca-table-panel"
+        class="ca-analysis-card"
+        hidden
+        aria-label="Emotion Intensity Heatmap Table"
+      >
+        <div class="ca-card-header">
+          <span class="ca-card-dot" aria-hidden="true"></span>
+          <span class="ca-card-title">HIGH-DENSITY TELEMETRY HEATMAP — 8-D NRC Affect</span>
+        </div>
+
+        <div class="ca-card-body">
+          <!--
+            Table is built and injected here by wh.js → WH.initTable().
+            The outer div provides a consistent reference for JS targeting.
+          -->
+          <div id="ca-table-container"></div>
+        </div>
+      </section><!-- /ca-table-panel -->
+
+    </div><!-- /ca-analysis-grid -->
+
+
+    <!-- ── Page footer ──────────────────────────────────────────────────── -->
+    <footer class="ca-footer" role="contentinfo">
+      <span>NRC EMOTION INTENSITY LEXICON — SIGINT PSYCHOLINGUISTIC ANALYSIS SYSTEM</span>
+    </footer>
+
+  </main><!-- /ca-main -->
+
+
+  <!-- ═══════════════════════════════════════════════════════════════════════
+       SCRIPTS
+       Chart.js MUST load as a plain <script> (UMD bundle) BEFORE the ES
+       module, so that `window.Chart` is available when wh.js executes.
+       ═══════════════════════════════════════════════════════════════════════ -->
+
+  <!-- Chart.js v4 — UMD global build via CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+
+  <!-- Entry-point ES module — imports all other modules transitively -->
+  <script type="module" src="js/clusterAnalyzerMain.js"></script>
+
+</body>
+</html>
