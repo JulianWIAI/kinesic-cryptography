@@ -8,3 +8,8 @@ desktop.ini
 
 # Logs
 *.log
+
+# NRC Lexicon data (not redistributable)
+lexicons/
+data/vad-*.json
+raw/
