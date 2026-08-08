@@ -11,5 +11,6 @@ desktop.ini
 
 # NRC Lexicon data (not redistributable)
 lexicons/
+lexicon/
 data/vad-*.json
 raw/
