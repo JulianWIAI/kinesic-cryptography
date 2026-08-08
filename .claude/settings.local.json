@@ -1,0 +1,32 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(find /Users/student-2526/PycharmProjects/kinesic-cryptography -not -path */.git/* -not -path */.idea/* -not -name .DS_Store)",
+      "Bash(node:*)",
+      "Bash(grep -n '\"\"resolve\"\"' /Users/student-2526/PycharmProjects/kinesic-cryptography/data/vad-en.json)",
+      "Bash(grep -n '\"\"Sicherheit\"\"' /Users/student-2526/PycharmProjects/kinesic-cryptography/data/vad-de.json)",
+      "Bash(python3 -m json.tool /Users/student-2526/PycharmProjects/kinesic-cryptography/data/vad-en.json)",
+      "Bash(python3 -m json.tool /Users/student-2526/PycharmProjects/kinesic-cryptography/data/vad-de.json)",
+      "Bash(python3 -m json.tool /Users/student-2526/PycharmProjects/kinesic-cryptography/data/vad-ar.json)",
+      "Bash(grep -r WH. /Users/student-2526/PycharmProjects/kinesic-cryptography/ --include=*.js --include=*.html -l)",
+      "Bash(grep -r \"AFFECT_LEXICON\\\\|runAnalysis\\\\|setEditorial\\\\|initPlot\\\\|initTable\" /Users/student-2526/PycharmProjects/kinesic-cryptography/ --include=*.js --include=*.html -l)",
+      "Bash(find /Users/student-2526/PycharmProjects/kinesic-cryptography/ -name *.html -o -name *.js)",
+      "Bash(python3 convert_nrc.py --help)",
+      "Bash(python3 convert_nrc.py 8d --help)",
+      "Bash(python3 convert_nrc.py vad --help)",
+      "Bash(__NEW_LINE_da4a8fc3c701620f__ echo:*)",
+      "Bash(python3 convert_nrc.py 8d raw/NRC-AffectIntensity-Lexicon-afrikaans.txt --out lexicons/nrc_8d_afrikaans.json)",
+      "Bash(python3 convert_nrc.py vad raw/NRC-VAD-Lexicon-afrikaans.txt --out lexicons/nrc_vad_afrikaans.json)",
+      "Bash(python3 -c \"import json; data=json.load\\(open\\(''lexicons/nrc_8d_afrikaans.json''\\)\\); print\\(json.dumps\\(data, indent=2, ensure_ascii=False\\)\\)\")",
+      "Bash(python3 -c \"import json; data=json.load\\(open\\(''lexicons/nrc_vad_afrikaans.json''\\)\\); print\\(json.dumps\\(data, indent=2, ensure_ascii=False\\)\\)\")",
+      "Bash(ls \"/Users/student-2526/PycharmProjects/kinesic-cryptography/raw/NRC-EIL \\(8-D Emotions\\)/\")",
+      "Bash(head -3 \"/Users/student-2526/PycharmProjects/kinesic-cryptography/raw/NRC-EIL \\(8-D Emotions\\)/NRC-AffectIntensity-Lexicon-en.txt\")",
+      "Bash(head -3 \"/Users/student-2526/PycharmProjects/kinesic-cryptography/raw/NRC-EIL \\(8-D Emotions\\)/NRC-AffectIntensity-Lexicon-de.txt\")",
+      "Bash(cd /Users/student-2526/PycharmProjects/kinesic-cryptography __NEW_LINE_e130c5ab1d856b8b__ echo \"── lexicons/ \\(EIL 8-D\\) ──\" ls -lh lexicons/nrc_8d_*.json)",
+      "Bash(git restore:*)"
+    ]
+  }
+}
