@@ -19,6 +19,7 @@ const LANG_TAGS = {
   fr: 'fr-FR',
   es: 'es-ES',
   it: 'it-IT',
+  nl: 'nl-NL',
   ja: 'ja-JP',
 };
 

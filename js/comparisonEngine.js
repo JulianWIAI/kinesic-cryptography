@@ -39,7 +39,7 @@ import { extractLetterValues, analyzeWord, runSpectralAnalysis } from './physics
 // ── COMPARISON_LANGS metadata (also in languageDetector.js, re-imported here) ─
 const _LANG_LABELS = {
   en: 'English', de: 'German', fr: 'French',
-  es: 'Spanish', it: 'Italian', ja: 'Japanese',
+  es: 'Spanish', it: 'Italian', nl: 'Dutch', ja: 'Japanese',
 };
 
 /**

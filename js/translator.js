@@ -54,10 +54,12 @@ export const MODEL_REGISTRY = new Map([
   ['en-fr', { modelId: 'Xenova/opus-mt-en-fr', from: 'en', to: 'fr', sizeMB: 90, label: 'English → French'  }],
   ['en-es', { modelId: 'Xenova/opus-mt-en-es', from: 'en', to: 'es', sizeMB: 90, label: 'English → Spanish' }],
   ['en-it', { modelId: 'Xenova/opus-mt-en-it', from: 'en', to: 'it', sizeMB: 90, label: 'English → Italian' }],
+  ['en-nl', { modelId: 'Xenova/opus-mt-en-nl', from: 'en', to: 'nl', sizeMB: 90, label: 'English → Dutch'   }],
   ['de-en', { modelId: 'Xenova/opus-mt-de-en', from: 'de', to: 'en', sizeMB: 90, label: 'German → English'  }],
   ['fr-en', { modelId: 'Xenova/opus-mt-fr-en', from: 'fr', to: 'en', sizeMB: 90, label: 'French → English'  }],
   ['es-en', { modelId: 'Xenova/opus-mt-es-en', from: 'es', to: 'en', sizeMB: 90, label: 'Spanish → English' }],
   ['it-en', { modelId: 'Xenova/opus-mt-it-en', from: 'it', to: 'en', sizeMB: 90, label: 'Italian → English' }],
+  ['nl-en', { modelId: 'Xenova/opus-mt-nl-en', from: 'nl', to: 'en', sizeMB: 90, label: 'Dutch → English'   }],
 ]);
 
 // ── M2M-100 multilingual model (used for all Japanese paths) ─────────────────

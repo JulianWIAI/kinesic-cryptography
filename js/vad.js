@@ -34,6 +34,7 @@ const VAD_PATHS = {
   es: 'data/vad-es.json',
   fr: 'data/vad-fr.json',
   it: 'data/vad-it.json',
+  nl: 'data/vad-nl.json',
   ar: 'data/vad-ar.json',
   zh: 'data/vad-zh.json',
   ja: 'data/vad-ja.json',

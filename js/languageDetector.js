@@ -24,6 +24,8 @@ const _ES_CHARS  = /[ñ¿¡Ñ]/i;
 // Italian: àèìòù are the distinctive ones (not shared with French as strongly)
 const _IT_STRONG = /[àèìòùÀÈÌÒÙ]/i;
 const _IT_CHARS  = /[àèéìíîòóùúÀÈÉÌÍÎÒÓÙÚ]/i;
+// Dutch: ij digraph and ë are the clearest signals not shared with other languages
+const _NL_IJ = /ij|IJ/;
 
 // ── Romanized Japanese keywords (no kanji) ───────────────────────────────────
 // These look like Latin text but are actually Japanese — catch before trigrams.
@@ -58,6 +60,12 @@ const _KNOWN_WORDS = new Map([
   // Spanish
   ['hola','es'],['adios','es'],['buenos','es'],['gracias','es'],
   ['amigo','es'],['amiga','es'],['mucho','es'],['nada','es'],
+  // Dutch
+  ['hallo','nl'],['dag','nl'],['goedemorgen','nl'],['goedemiddag','nl'],
+  ['goedenavond','nl'],['doei','nl'],['doeg','nl'],['bedankt','nl'],
+  ['alsjeblieft','nl'],['alstublieft','nl'],['welkom','nl'],['gezellig','nl'],
+  ['lekker','nl'],['mooi','nl'],['huis','nl'],['water','nl'],['brood','nl'],
+  ['fiets','nl'],['straat','nl'],['vriendelijk','nl'],
 ]);
 
 // ── Trigram profiles ──────────────────────────────────────────────────────────
@@ -83,6 +91,11 @@ const _PROFILES = {
     ['del',2],['chi',2],['ono',2],['nno',2],
     ['lla',2],['llo',2],['nte',1],['ere',1],['cci',2],['ggi',2],
   ],
+  nl: [
+    ['ijk',3],['zij',3],['een',3],['van',3],['het',3],['oor',2],
+    ['aar',2],['ijk',2],['ven',2],['den',2],['gen',2],['ing',2],
+    ['ijk',2],['ver',1],['bij',2],['uit',2],['aan',2],['sch',1],
+  ],
   en: [
     ['the',4],['ing',3],['and',3],['ion',2],['ent',2],['tion',2],
     ['for',2],['are',2],['his',1],['not',1],['you',1],['was',1],
@@ -103,7 +116,7 @@ function _trigramScore(text, profile) {
   return score;
 }
 
-const _LABELS = { en: 'English', de: 'German', fr: 'French', es: 'Spanish', it: 'Italian' };
+const _LABELS = { en: 'English', de: 'German', fr: 'French', es: 'Spanish', it: 'Italian', nl: 'Dutch' };
 
 /**
  * Detect the most likely input language from text content.
@@ -134,6 +147,7 @@ export function detectInputLanguage(text) {
   if (_DE_CHARS.test(t)) return { lang: 'de', label: 'German',  confidence: 0.9 };
   if (_ES_CHARS.test(t)) return { lang: 'es', label: 'Spanish', confidence: 0.9 };
   if (_FR_STRONG.test(t)) return { lang: 'fr', label: 'French', confidence: 0.88 };
+  if (_NL_IJ.test(t))   return { lang: 'nl', label: 'Dutch',   confidence: 0.85 };
 
   // Italian-specific accents (only if French strong chars absent)
   if (_IT_STRONG.test(t) && !_FR_CHARS.test(t)) {
@@ -191,5 +205,6 @@ export const COMPARISON_LANGS = [
   { code: 'fr', label: 'French',   flag: '🇫🇷' },
   { code: 'es', label: 'Spanish',  flag: '🇪🇸' },
   { code: 'it', label: 'Italian',  flag: '🇮🇹' },
+  { code: 'nl', label: 'Dutch',    flag: '🇳🇱' },
   { code: 'ja', label: 'Japanese', flag: '🇯🇵' },
 ];
