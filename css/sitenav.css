@@ -1,0 +1,56 @@
+/* ============================================================
+   SITENAV — Unified Tool Navigation Bar
+   Appears on all three pages (index, cluster-analyzer, comparison)
+   as a tab strip between the page header and main content.
+   ============================================================ */
+
+.tool-tabs {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  background: var(--clr-surface);
+  border-bottom: 1px solid var(--clr-border);
+  padding: 0 1.25rem;
+  overflow-x: auto;
+  scrollbar-width: none;        /* Firefox */
+  -ms-overflow-style: none;
+}
+.tool-tabs::-webkit-scrollbar { display: none; } /* Chrome/Safari */
+
+.tool-tab {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.65rem 1rem;
+  font-family: var(--font-mono, 'Space Mono', 'Courier New', monospace);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--clr-text-muted);
+  text-decoration: none;
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+  transition: color 0.15s, border-color 0.15s;
+  position: relative;
+  top: 1px;           /* sits on top of .tool-tabs border-bottom */
+}
+.tool-tab:hover {
+  color: var(--clr-text);
+}
+
+/* Active tab: highlighted with accent colour and underline */
+.tool-tab.active {
+  color: var(--clr-accent);
+  border-bottom-color: var(--clr-accent);
+}
+
+.tool-tab-icon {
+  font-size: 0.75rem;
+  opacity: 0.7;
+}
+
+/* Narrow screens: compact icon-only labels */
+@media (max-width: 480px) {
+  .tool-tab { padding: 0.6rem 0.65rem; font-size: 0.6rem; }
+}

@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Multilingual Comparison — Somatic Cipher Decoder</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/comparison.css">
+  <link rel="stylesheet" href="css/sitenav.css">
+
+  <!-- Chart.js (UMD global — same version as index.html) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+
+  <!-- Kuroshiro (Japanese → Romaji) — same CDN setup as main page -->
+  <script src="https://cdn.jsdelivr.net/npm/kuroshiro@1.2.0/dist/kuroshiro.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/kuroshiro-analyzer-kuromoji@1.1.0/dist/kuroshiro-analyzer-kuromoji.min.js"></script>
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="header-brand">
+        <span class="brand-prefix" aria-hidden="true">//&nbsp;</span>
+        <h1 class="site-title">Multilingual Comparison</h1>
+      </div>
+      <p class="site-subtitle">Cross-Language Psycholinguistic Signal Analysis</p>
+    </div>
+    <div class="header-right">
+      <div class="header-status" aria-hidden="true">
+        <span class="status-dot"></span>
+        <span class="status-label">SYSTEM ONLINE</span>
+      </div>
+      <!-- Navigation handled by the shared tool-tabs bar below the header -->
+    </div>
+  </header>
+
+  <!-- ── Site-wide tool navigation tab bar ─────────────────── -->
+  <script type="module" src="js/sitenav.js"></script>
+
+  <main class="main-content cmp-page" id="main-content">
+
+    <!-- ── Input Panel ──────────────────────────────────── -->
+    <section class="cmp-input-panel" aria-label="Comparison input">
+
+      <!-- Text input + analyse button -->
+      <div class="cmp-input-row">
+        <textarea
+          id="cmp-input"
+          class="cmp-textarea"
+          placeholder="Enter a word or sentence…  e.g.  hello"
+          aria-label="Text to compare across languages"
+          rows="2"
+        ></textarea>
+        <div class="cmp-controls">
+          <button id="cmp-analyse-btn" class="cmp-btn cmp-btn--primary" type="button">
+            &#9654;&nbsp; ANALYSE
+          </button>
+          <button id="cmp-clear-btn" class="cmp-btn" type="button">
+            &#10005;&nbsp; CLEAR
+          </button>
+        </div>
+      </div>
+
+      <!-- Mode + column count + TTS speed -->
+      <div class="cmp-mode-row">
+        <span class="cmp-mode-label">MODE</span>
+        <div class="cmp-toggle-group" role="group" aria-label="Analysis mode">
+          <button class="cmp-toggle-btn active" data-mode="word"     type="button">WORD</button>
+          <button class="cmp-toggle-btn"         data-mode="sentence" type="button">SENTENCE</button>
+        </div>
+
+        <span class="cmp-mode-label" style="margin-left:1rem">COLUMNS</span>
+        <div class="cmp-toggle-group" role="group" aria-label="Column count">
+          <button class="cmp-toggle-btn active" data-cols="4" type="button">4</button>
+          <button class="cmp-toggle-btn"         data-cols="6" type="button">6</button>
+        </div>
+
+        <!-- TTS playback speed — applies to all speak buttons -->
+        <span class="cmp-mode-label" style="margin-left:1rem">&#9654; SPEED</span>
+        <div class="cmp-toggle-group" role="group" aria-label="Speech playback speed">
+          <button class="cmp-toggle-btn" data-rate="0.7"  type="button" title="Slow — good for language learning">0.7×</button>
+          <button class="cmp-toggle-btn active" data-rate="1.0"  type="button" title="Normal speed">1×</button>
+          <button class="cmp-toggle-btn" data-rate="2.0"  type="button" title="Double speed">2×</button>
+        </div>
+
+        <span id="cmp-detected-label" class="cmp-detected" aria-live="polite"></span>
+
+        <span class="cmp-mode-label" style="margin-left:1rem">SOURCE</span>
+        <select id="cmp-src-override" class="cmp-src-select" aria-label="Override detected source language" title="Override auto-detected input language">
+          <option value="">AUTO</option>
+          <option value="en">English</option>
+          <option value="de">German</option>
+          <option value="fr">French</option>
+          <option value="es">Spanish</option>
+          <option value="it">Italian</option>
+          <option value="ja">Japanese</option>
+        </select>
+      </div>
+
+      <!-- Language pills -->
+      <div class="cmp-lang-row" role="group" aria-label="Select languages to compare">
+        <!-- Pills are injected by JS -->
+      </div>
+
+      <!-- Download progress (shown while models load) -->
+      <div id="cmp-progress-area" class="cmp-progress-area" aria-live="polite" hidden></div>
+
+      <!-- Status bar -->
+      <div class="cmp-status-bar" aria-live="polite" aria-atomic="true">
+        <span id="cmp-status-dot" class="cmp-status-dot"></span>
+        <span id="cmp-status-text">SELECT LANGUAGES AND ENTER TEXT TO BEGIN</span>
+      </div>
+
+    </section>
+
+    <!-- ── Comparison Grid ──────────────────────────────── -->
+    <div id="cmp-grid" class="cmp-grid cols-4" aria-live="polite">
+      <!-- Columns rendered by comparisonLayout.js -->
+    </div>
+
+  </main>
+
+  <script type="module">
+    import { COMPARISON_LANGS, detectInputLanguage } from './js/languageDetector.js';
+    import { runComparison }                          from './js/comparisonEngine.js';
+    import { renderComparison, destroyComparison }    from './js/comparisonLayout.js';
+    import { getRequiredModels }                      from './js/translator.js';
+    import { initKuroshiro, isKuroshiroReady }        from './js/pipeline.js';
+    import { setRate }                                from './js/tts.js';
+
+    // ── State ─────────────────────────────────────────────────────────────────
+    let _mode        = 'word';
+    let _cols        = 4;
+    let _selectedLangs = new Set(['en', 'de', 'fr', 'ja']); // default selection
+    let _running     = false;
+    let _srcOverride = null; // null = auto-detect
+
+    // ── DOM refs ──────────────────────────────────────────────────────────────
+    const $input        = document.getElementById('cmp-input');
+    const $analyseBtn   = document.getElementById('cmp-analyse-btn');
+    const $clearBtn     = document.getElementById('cmp-clear-btn');
+    const $grid         = document.getElementById('cmp-grid');
+    const $statusDot    = document.getElementById('cmp-status-dot');
+    const $statusText   = document.getElementById('cmp-status-text');
+    const $detectedLbl  = document.getElementById('cmp-detected-label');
+    const $langRow      = document.querySelector('.cmp-lang-row');
+    const $progressArea = document.getElementById('cmp-progress-area');
+    const $srcOverride  = document.getElementById('cmp-src-override');
+
+    // ── Build language pills ──────────────────────────────────────────────────
+    for (const lang of COMPARISON_LANGS) {
+      const pill = document.createElement('button');
+      pill.className = 'cmp-lang-pill' + (_selectedLangs.has(lang.code) ? ' selected' : '');
+      pill.type = 'button';
+      pill.dataset.lang = lang.code;
+      pill.innerHTML = `<span>${lang.flag}</span><span>${lang.label}</span>`;
+      pill.addEventListener('click', () => {
+        if (_selectedLangs.has(lang.code)) {
+          if (_selectedLangs.size <= 2) return; // keep at least 2
+          _selectedLangs.delete(lang.code);
+          pill.classList.remove('selected');
+        } else {
+          if (_selectedLangs.size >= 6) return; // max 6
+          _selectedLangs.add(lang.code);
+          pill.classList.add('selected');
+        }
+        _updateDetectedLabel();
+      });
+      $langRow.appendChild(pill);
+    }
+
+    // ── Mode toggle ───────────────────────────────────────────────────────────
+    document.querySelectorAll('.cmp-toggle-group [data-mode]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('[data-mode]').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        _mode = btn.dataset.mode;
+      });
+    });
+
+    // ── Column count toggle ───────────────────────────────────────────────────
+    document.querySelectorAll('.cmp-toggle-group [data-cols]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('[data-cols]').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        _cols = parseInt(btn.dataset.cols, 10);
+        $grid.className = `cmp-grid cols-${_cols}`;
+      });
+    });
+
+    // ── Source language override ──────────────────────────────────────────────
+    $srcOverride.addEventListener('change', () => {
+      _srcOverride = $srcOverride.value || null;
+      if (_srcOverride) {
+        const label = $srcOverride.options[$srcOverride.selectedIndex].text;
+        $detectedLbl.innerHTML = `SOURCE: <strong>${label}</strong> (manual)`;
+      } else {
+        _updateDetectedLabel();
+      }
+    });
+
+    // ── TTS speed toggle ─────────────────────────────────────────────────────
+    document.querySelectorAll('.cmp-toggle-group [data-rate]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('[data-rate]').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        setRate(parseFloat(btn.dataset.rate));
+      });
+    });
+
+    // ── Live language detection as user types ─────────────────────────────────
+    let _detectTimer = null;
+    $input.addEventListener('input', () => {
+      clearTimeout(_detectTimer);
+      _detectTimer = setTimeout(_updateDetectedLabel, 350);
+    });
+
+    function _updateDetectedLabel() {
+      const text = $input.value.trim();
+      if (!text) { $detectedLbl.innerHTML = ''; return; }
+      const { lang, label, confidence } = detectInputLanguage(text);
+      const pct = Math.round(confidence * 100);
+      $detectedLbl.innerHTML = `DETECTED: <strong>${label}</strong> (${pct}%)`;
+    }
+
+    // ── Progress event listener ───────────────────────────────────────────────
+    const _progressMap = new Map(); // modelId → ratio
+
+    document.addEventListener('model-progress', e => {
+      const { modelId, ratio } = e.detail;
+      _progressMap.set(modelId, ratio);
+      _renderProgress();
+    });
+
+    function _renderProgress() {
+      if (_progressMap.size === 0) {
+        $progressArea.hidden = true;
+        return;
+      }
+      $progressArea.hidden = false;
+      $progressArea.innerHTML = '';
+      for (const [modelId, ratio] of _progressMap) {
+        const item = document.createElement('div');
+        item.className = 'cmp-progress-item';
+        item.innerHTML = `
+          <span>${modelId}</span>
+          <div class="cmp-progress-bar-wrap">
+            <div class="cmp-progress-bar-fill" style="width:${Math.round(ratio*100)}%"></div>
+          </div>
+          <span>${Math.round(ratio * 100)}%</span>
+        `;
+        $progressArea.appendChild(item);
+        if (ratio >= 1) {
+          setTimeout(() => { _progressMap.delete(modelId); _renderProgress(); }, 1500);
+        }
+      }
+    }
+
+    // ── Status helpers ────────────────────────────────────────────────────────
+    function _setStatus(text, state = '') {
+      $statusText.textContent = text;
+      $statusDot.className = 'cmp-status-dot' + (state ? ` ${state}` : '');
+    }
+
+    // ── Analyse ───────────────────────────────────────────────────────────────
+    async function _analyse() {
+      if (_running) return;
+      const text = $input.value.trim();
+      if (!text) { _setStatus('NO INPUT — ENTER TEXT FIRST', 'error'); return; }
+      if (_selectedLangs.size < 2) { _setStatus('SELECT AT LEAST 2 LANGUAGES', 'error'); return; }
+
+      _running = true;
+      $analyseBtn.disabled = true;
+      $analyseBtn.textContent = '⟳  RUNNING…';
+
+      const langs = [..._selectedLangs];
+
+      // ── Initialise Kuroshiro for Japanese romanisation ──────────────────
+      if (langs.includes('ja') && !isKuroshiroReady()) {
+        _setStatus('LOADING JAPANESE DICTIONARY…', 'active');
+        try {
+          await initKuroshiro(msg => _setStatus(msg, 'active'));
+        } catch (err) {
+          _setStatus(`JAPANESE DICT FAILED: ${err.message} — continuing without romaji`, 'error');
+        }
+      }
+
+      _setStatus(`TRANSLATING & ANALYSING ${langs.length} LANGUAGES…`, 'active');
+
+      try {
+        const results = await runComparison(text, langs, _mode, _srcOverride);
+        renderComparison(results, $grid);
+        _setStatus(`ANALYSIS COMPLETE — ${langs.length} LANGUAGES`, 'success');
+      } catch (err) {
+        console.error('[comparison] Analysis failed:', err);
+        _setStatus(`ERROR: ${err.message}`, 'error');
+      } finally {
+        _running = false;
+        $analyseBtn.disabled = false;
+        $analyseBtn.innerHTML = '&#9654;&nbsp; ANALYSE';
+      }
+    }
+
+    $analyseBtn.addEventListener('click', _analyse);
+    $input.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) _analyse();
+    });
+
+    $clearBtn.addEventListener('click', () => {
+      $input.value = '';
+      $detectedLbl.innerHTML = '';
+      $srcOverride.value = '';
+      _srcOverride = null;
+      destroyComparison();
+      $grid.innerHTML = '';
+      _setStatus('CLEARED');
+    });
+  </script>
+
+</body>
+</html>

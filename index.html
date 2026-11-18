@@ -14,6 +14,7 @@
   <link rel="stylesheet" href="css/legend.css">
   <link rel="stylesheet" href="css/guide.css">
   <link rel="stylesheet" href="css/pds.css">
+  <link rel="stylesheet" href="css/sitenav.css">
 </head>
 <body>
 
@@ -30,16 +31,16 @@
         <span class="status-dot"></span>
         <span class="status-label">SYSTEM ONLINE</span>
       </div>
-      <a href="cluster-analyzer.html" class="help-guide-btn" aria-label="Open Psycholinguistic Cluster Analyzer">
-        <span class="help-guide-btn-icon" aria-hidden="true">&#9643;</span>
-        CLUSTER ANALYZER
-      </a>
+      <!-- Navigation handled by the shared tool-tabs bar below the header -->
       <button id="help-guide-btn" class="help-guide-btn" type="button" aria-haspopup="dialog" aria-controls="help-drawer" aria-label="Open Analyst Guide">
         <span class="help-guide-btn-icon" aria-hidden="true">&#9432;</span>
         ANALYST GUIDE
       </button>
     </div>
   </header>
+
+  <!-- ── Site-wide tool navigation tab bar ─────────────────── -->
+  <script type="module" src="js/sitenav.js"></script>
 
   <!-- ── SIGINT Dossier Print Header (screen: hidden; print: visible) ── -->
   <div class="dossier-print-header" aria-hidden="true">

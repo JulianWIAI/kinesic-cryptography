@@ -33,6 +33,7 @@ const VAD_PATHS = {
   de: 'data/vad-de.json',
   es: 'data/vad-es.json',
   fr: 'data/vad-fr.json',
+  it: 'data/vad-it.json',
   ar: 'data/vad-ar.json',
   zh: 'data/vad-zh.json',
   ja: 'data/vad-ja.json',
@@ -164,6 +165,10 @@ export async function loadVadLexicon(langCode) {
  * @returns {string} Language code: 'en'|'de'|'es'|'fr'|'ar'|'zh'|'ja'|'ko'
  */
 export function getVadLangCode(text, stateLanguage) {
+  // ── 0. Direct ISO code passthrough (used by comparison engine) ───────────
+  // If stateLanguage is already a known ISO-639-1 code, use it directly.
+  if (VAD_PATHS[stateLanguage]) return stateLanguage;
+
   // ── 1. Honour explicit language setting for non-ambiguous scripts ─────────
   if (stateLanguage === 'arabic')   return 'ar';
   if (stateLanguage === 'chinese')  return 'zh';

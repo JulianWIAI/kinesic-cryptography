@@ -76,7 +76,7 @@ const _lexiconFetchInFlight = new Map();
 /**
  * Fetch (or return from cache) the NRC 8-D emotion lexicon for a language.
  *
- * File resolved from: ./lexicons/nrc_8d_{langCode}.json
+ * File resolved from: ./lexicon/nrc_8d_{langCode}.json
  * Expected JSON shape: { "<word>": { anger, fear, anticipation, disgust,
  *                                    surprise, trust, joy, sadness }, … }
  *
@@ -98,7 +98,7 @@ export async function loadLexicon(langCode) {
   }
 
   // ── 3. Start a new fetch ──────────────────────────────────────────────────
-  const url = `./lexicons/nrc_8d_${langCode}.json`;
+  const url = `./lexicon/nrc_8d_${langCode}.json`;
 
   const fetchPromise = fetch(url)
     .then(response => {
