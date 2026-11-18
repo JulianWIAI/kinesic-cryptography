@@ -1,6 +1,6 @@
-# Somatic Cipher Decoder — v6.0
+# Somatic Cipher Decoder — v7.0
 
-A pure client-side research tool that treats language as a **physical frequency signal**. It decodes alphanumeric text into visual dashboards of facial articulation, somatic posture, Egyptian hieroglyphic etymology, and Greek physics variables — then runs real-time oscilloscope waveforms, performs full spectral analysis (FFT), clusters semantic word groups into geometric scatter fields, maps words through the NRC VAD ousiometric transformation, runs multilingual 8-dimensional NRC emotion intensity analysis, and exports the entire analysis as a classified SIGINT dossier — all with zero backend dependencies.
+A pure client-side research tool that treats language as a **physical frequency signal**. It decodes alphanumeric text into visual dashboards of facial articulation, somatic posture, Egyptian hieroglyphic etymology, and Greek physics variables — then runs real-time oscilloscope waveforms, performs full spectral analysis (FFT), clusters semantic word groups into geometric scatter fields, maps words through the NRC VAD ousiometric transformation, runs multilingual 8-dimensional NRC emotion intensity analysis, and cross-compares psycholinguistic profiles across up to 6 languages simultaneously — all with zero backend dependencies.
 
 ---
 
@@ -119,6 +119,63 @@ Three animated horizontal progress bars showing the aggregate PDS signature acro
 | **POWER** | Neon green gradient | — |
 | **DANGER** | Red gradient | Flashes when aggregate Danger ≥ 0.65 |
 | **STRUCTURE** | White gradient | Flickers when aggregate Structure < 0.25 |
+
+---
+
+### Multilingual Comparison Mode
+
+A standalone analysis page (`comparison.html`) that takes any word or sentence, auto-detects the input language, translates it into up to 6 languages, and renders the full psycholinguistic analysis side-by-side in a comparison grid.
+
+#### Translation engine
+
+Offline in-browser translation powered by [Transformers.js (Xenova)](https://github.com/xenova/transformers.js) using quantized Hugging Face models — downloaded once and cached permanently by the browser. No API key, no server, no internet connection after the first model download.
+
+| Language pair | Model | Size |
+|---|---|---|
+| English → German | `Xenova/opus-mt-en-de` | ~90 MB |
+| English → French | `Xenova/opus-mt-en-fr` | ~90 MB |
+| English → Spanish | `Xenova/opus-mt-en-es` | ~90 MB |
+| English → Italian | `Xenova/opus-mt-en-it` | ~90 MB |
+| Any ↔ Japanese | `Xenova/m2m100_418M` (Meta M2M-100) | ~420 MB |
+| Non-English → English | Reverse opus-mt model per language | ~90 MB each |
+
+Non-English inputs pivot through English first (source → EN via opus-mt, then EN → target). Japanese is handled end-to-end by M2M-100, which produces significantly better general-purpose translations than the OPUS-corpus opus-mt models.
+
+#### Language detection
+
+Automatic input language detection with a manual override dropdown:
+
+| Signal | Languages |
+|---|---|
+| Japanese Unicode ranges (Hiragana/Katakana/CJK) | Japanese |
+| German umlauts / ß | German |
+| Spanish ñ / ¡ / ¿ | Spanish |
+| French ç / œ | French |
+| Italian àèìòù (without French chars) | Italian |
+| Romanized Japanese dictionary (`sayonara`, `konnichiwa`, …) | Japanese |
+| Known-word dictionary (`durst`, `bella`, `ciao`, `bonjour`, …) | German / Italian / French / Spanish |
+| Trigram scoring (multi-word inputs) | All |
+| Default fallback | English |
+
+A **SOURCE** dropdown next to the detected label lets users override the auto-detected language when detection is wrong.
+
+#### Comparison grid
+
+Each language column displays:
+
+| Section | Content |
+|---|---|
+| **Header** | Language flag, name, original or translated text, romanization (Japanese), speak button |
+| **VAD bars** | Valence / Arousal / Dominance from NRC lexicon |
+| **PDS bars** | Power / Danger / Structure (Ousiometric transform) |
+| **Threat Matrix** | Chart.js scatter — Power × Danger with apex zone |
+| **Emotion Radar** | 8-axis NRC emotion intensity radar |
+| **Oscilloscope** | Micro-wave character-level waveform |
+| **FFT Spectrum** | Power spectrum bins 1–32 (DC skipped), normalized |
+
+#### Text-to-Speech
+
+Each column header has a speak button (▶ / ■ toggle) that reads the translated text using the browser's Web Speech API. Voice selection prioritises Neural TTS voices (Windows 11 quality). A **speed toggle** (0.7× / 1× / 2×) applies globally across all columns — slow mode is useful for language learning.
 
 ---
 
@@ -361,13 +418,24 @@ python3 convert_nrc.py batch --raw-dir raw --out-dir lexicons
 
 ### Cluster Analyzer (separate page)
 
-1. Click **CLUSTER ANALYZER** in the main dashboard header
+1. Click **CLUSTER ANALYZER** in the navigation tab bar
 2. Select a **LEXICON LANGUAGE** from the dropdown (EN / AR / FA / FR / JA / KO / RU / ZH)
 3. Enter words in the textarea — comma or newline separated
 4. Press **ANALYSE CLUSTER** or use **Ctrl+Enter**
 5. Read the **Dominant Emotion Scatter** and **Heatmap Table**
 6. Watch for the **HUD alert banner** — fires when Systemic Coercion or Volatile Populism is detected
-7. Use **← MAIN DASHBOARD** to return
+
+### Multilingual Comparison (separate page)
+
+1. Click **COMPARISON** in the navigation tab bar
+2. Select the languages to compare using the pill buttons (2–6 languages)
+3. Set the analysis **MODE** (WORD or SENTENCE)
+4. Type or paste text into the input box — the detected language appears live
+5. If detection is wrong, change the **SOURCE** dropdown to the correct language
+6. Press **ANALYSE** or **Ctrl+Enter**
+7. On first use with Japanese or a new language pair, a consent dialog prompts you to approve the model download (~90–420 MB, cached permanently)
+8. Use the **▶ SPEED** toggle (0.7× / 1× / 2×) and the per-column speak buttons to hear each translation
+9. Use **COLUMNS** (4 / 6) to adjust grid density
 
 ---
 
@@ -463,7 +531,7 @@ This project uses **ES6 Modules** (`type="module"`), which require an HTTP serve
 1. Install the [Live Server](https://marketplace.visualstudio.com/items?itemName=ritwickdey.LiveServer) extension
 2. Right-click `index.html` → **Open with Live Server**
 3. The app opens at `http://127.0.0.1:5500`
-4. Navigate to `cluster-analyzer.html` for the 8-D Emotion Analyzer
+4. Use the **tab bar** at the top to navigate between Decoder, Cluster Analyzer, and Comparison
 
 **Alternative: Python**
 
@@ -485,6 +553,7 @@ kinesic-cryptography/
 │
 ├── index.html                   # Main dashboard — all decoder sections, PDS panel
 ├── cluster-analyzer.html        # Standalone 8-D Emotion Cluster Analyzer page
+├── comparison.html              # Multilingual Comparison page (v7.0)
 ├── convert_nrc.py               # Data pipeline — NRC TSV → JSON converter (Python 3)
 │
 ├── css/
@@ -499,9 +568,11 @@ kinesic-cryptography/
 │   │                            #   keyframes: pds-danger-flash, pds-flicker,
 │   │                            #   pds-apex-pulse, pds-dot-pulse
 │   ├── cluster-analyzer.css     # Cluster Analyzer page — input panel, language select,
-│   │                            #   HUD editorial alerts (ca-editorial-flash keyframe),
-│   │                            #   analysis grid, scatter plot wrap, emotion legend chips,
-│   │                            #   heatmap table
+│   │                            #   HUD editorial alerts, analysis grid, scatter plot,
+│   │                            #   emotion legend chips, heatmap table
+│   ├── comparison.css           # Comparison page — grid layout, language columns,
+│   │                            #   speak button, model progress bars, speed toggles
+│   ├── sitenav.css              # Shared tool navigation tab bar (all three pages)
 │   ├── legend.css               # Floating Linguistic Architecture Legend (papyrus theme)
 │   ├── guide.css                # Tooltip system (#tip-popup, .tip-btn) and
 │   │                            #   Analyst Guide slide-out drawer
@@ -513,6 +584,33 @@ kinesic-cryptography/
 │   │                            #   cluster parse/decode/render, spectral integration,
 │   │                            #   language selection, PDS panel wiring
 │   │
+│   │   ── Site Navigation ───────────────────────────────────
+│   ├── sitenav.js               # Auto-injects shared tool tab bar on all pages;
+│   │                            #   highlights active tab by pathname matching
+│   │
+│   │   ── Multilingual Comparison ──────────────────────────
+│   ├── languageDetector.js      # Input language detection:
+│   │                            #   Japanese Unicode ranges, diacritic shortcuts,
+│   │                            #   romanized-Japanese dictionary, known-word map,
+│   │                            #   trigram scoring; exports detectInputLanguage,
+│   │                            #   COMPARISON_LANGS
+│   ├── modelManager.js          # One-time per-model consent dialog (localStorage),
+│   │                            #   model-progress CustomEvent emitter
+│   ├── translator.js            # Offline translation via Transformers.js (Xenova):
+│   │                            #   opus-mt per pair for Latin languages,
+│   │                            #   M2M-100 418M for all Japanese paths;
+│   │                            #   pivot routing (non-EN → EN → target)
+│   ├── comparisonEngine.js      # Comparison orchestrator: detect → translate →
+│   │                            #   processInput → VAD → PDS → 8D → spectral;
+│   │                            #   returns ComparisonResult[] (one per language)
+│   ├── comparisonLayout.js      # Grid renderer: one column per language,
+│   │                            #   VAD/PDS bars, Threat Matrix, Emotion Radar,
+│   │                            #   Oscilloscope, FFT Spectrum charts (window.Chart)
+│   ├── tts.js                   # Web Speech API wrapper:
+│   │                            #   speak(text, langCode, onStart, onEnd),
+│   │                            #   Neural voice selection, global rate (setRate/getRate),
+│   │                            #   stopSpeaking, isSpeaking, ttsSupported
+│   │
 │   │   ── Localization ─────────────────────────────────────
 │   ├── pipeline.js              # Global Localization Bridge (8 modes):
 │   │                            #   detectLanguage (Unicode heuristic for 6 scripts),
@@ -523,62 +621,40 @@ kinesic-cryptography/
 │   │
 │   │   ── NRC VAD / Ousiometrics ─────────────────────────────
 │   ├── vad.js                   # NRC VAD lexicon integration:
-│   │                            #   VAD_PATHS (8 languages: en de es fr ar zh ja ko),
+│   │                            #   VAD_PATHS (9 languages: en de es fr it ar zh ja ko),
 │   │                            #   loadVadLexicon (lazy fetch + in-flight dedup cache),
-│   │                            #   getVadLangCode (Unicode + stateLanguage routing),
-│   │                            #   _tokenize (5 strategies: Latin, Arabic, CJK,
-│   │                            #   Japanese kana/kanji, Korean hangul),
+│   │                            #   getVadLangCode (ISO code passthrough + Unicode routing),
 │   │                            #   analyzeVad (text → matched VAD word array)
 │   ├── ousiometrics.js          # PDS transformation (Dodds et al. arXiv:2110.06847):
-│   │                            #   calculateOusiometrics(v,a,d) → {power,danger,structure},
 │   │                            #   computePdsWords, computeAggregatePds,
 │   │                            #   detectApexThreats, APEX_THRESHOLD = 0.65
-│   ├── pdsPanel.js              # PDS panel renderer:
-│   │                            #   renderPdsPanel(text, stateLanguage) — async orchestrator,
-│   │                            #   _renderThreatMatrix (Chart.js scatter + apex zone plugin),
-│   │                            #   _renderTelemetry (animated progress bars),
-│   │                            #   _renderApexAlert, destroyPdsPanel
+│   ├── pdsPanel.js              # PDS panel renderer for main dashboard
 │   │
 │   │   ── NRC 8-D Emotion / Cluster Analyzer ─────────────────
-│   ├── affectLexicon.js         # Shared emotion constants:
-│   │                            #   EMOTION_KEYS, EMOTION_ABBR, EMOTION_COLORS,
-│   │                            #   EMOTION_RGBA, DEFAULT_COLOR, NEUTRAL_THRESHOLD
+│   ├── affectLexicon.js         # Shared emotion constants
 │   ├── analysisEngine.js        # 8-D analysis pipeline:
-│   │                            #   loadLexicon(langCode) — async fetch + dual-cache,
-│   │                            #   parseWordInput(rawInput) → string[],
-│   │                            #   runAnalysis(words, langCode) → Promise<ResultObject[]>
-│   ├── wh.js                    # Cluster Analyzer visualizations (WH namespace):
-│   │                            #   WH.initPlot — scatter plot coloured by dominant emotion
-│   │                            #     + T1/T3 threshold line plugin,
-│   │                            #   WH.initTable — 8-column rgba heatmap table,
-│   │                            #   canvas registry (Map) to prevent Chart.js reuse errors
-│   ├── hudAlerts.js             # Compound trigger detection:
-│   │                            #   calculateAverages(results) → aggregate metrics,
-│   │                            #   detectTriggers(results) → alert configs array,
-│   │                            #   ui.setEditorial — flashing HUD banner renderer
-│   ├── clusterAnalyzerMain.js   # Cluster Analyzer entry point (no exports):
-│   │                            #   DOMContentLoaded wiring, language select read,
-│   │                            #   async runAndRender, Ctrl+Enter shortcut, auto-run
+│   │                            #   loadLexicon(langCode), runAnalysis(words, langCode)
+│   ├── wh.js                    # Cluster Analyzer visualizations (WH namespace)
+│   ├── hudAlerts.js             # Compound trigger detection (Systemic Coercion,
+│   │                            #   Volatile Populism)
+│   ├── clusterAnalyzerMain.js   # Cluster Analyzer entry point
 │   │
 │   │   ── Physics & Math ───────────────────────────────────
 │   ├── physics.js               # FFT (Radix-2 Cooley-Tukey, N=256, Hann window),
-│   │                            #   analyzeWord, aggregateWindow, getMicroOscilloscope,
-│   │                            #   runSpectralAnalysis, getGlobalEnvelope
-│   ├── classifier.js            # Unified tier + archetype surface; ARCHETYPE_NAMES map
+│   │                            #   analyzeWord, runSpectralAnalysis, getMicroOscilloscope
+│   ├── classifier.js            # Unified tier + archetype surface
 │   ├── letterMap.js             # Canonical A–Z / Ä Ö Ü value + category lookup
-│   ├── complexity.js            # Word sum, σ, complexity tier (T1/T2/T3), letter count
+│   ├── complexity.js            # Word sum, σ, complexity tier (T1/T2/T3)
 │   ├── quersumme.js             # Digital root + nine Archetype objects
 │   ├── categoricalAnalysis.js   # Category breakdown, sovereignty/somatic/resonant scores
 │   │
 │   │   ── Visualisation ─────────────────────────────────────
 │   ├── palette.js               # 14-colour CLUSTER_COLORS palette
-│   ├── charts.js                # Chart.js renderers: radar, scatter, envelope,
-│   │                            #   micro wave, word scatter, cluster scatter, Balkendiagramm
+│   ├── charts.js                # Chart.js renderers (main dashboard)
 │   ├── waveform.js              # Real-time Wavelength Telemetry oscilloscope
 │   │
 │   │   ── UI Overlays ──────────────────────────────────────
-│   ├── legend.js                # Linguistic Architecture Legend — tab switching,
-│   │                            #   minimize/maximize toggle
+│   ├── legend.js                # Linguistic Architecture Legend
 │   ├── helpDrawer.js            # Analyst Guide drawer + global tooltip system
 │   │
 │   │   ── Decoder ──────────────────────────────────────────
@@ -586,25 +662,27 @@ kinesic-cryptography/
 │   ├── decoder.js               # Input → DecodedCharacter array
 │   └── dictionary.js            # Somatic data ledger — face, body, egyptian, greek
 │
-├── lexicons/                    # NRC 8-D Emotion Intensity JSON (Cluster Analyzer)
+├── lexicons/                    # NRC 8-D Emotion Intensity JSON (not in repo — generate via convert_nrc.py)
 │   ├── nrc_8d_en.json           # English  — 5,891 words
 │   ├── nrc_8d_ar.json           # Arabic   — 4,878 words
 │   ├── nrc_8d_de.json           # German   — 4,967 words
 │   ├── nrc_8d_es.json           # Spanish  — 4,992 words
 │   ├── nrc_8d_fa.json           # Farsi    — 4,678 words
 │   ├── nrc_8d_fr.json           # French   — 5,083 words
+│   ├── nrc_8d_it.json           # Italian  — 5,047 words
 │   ├── nrc_8d_ja.json           # Japanese — 4,895 words
 │   ├── nrc_8d_ko.json           # Korean   — 4,722 words
 │   ├── nrc_8d_ru.json           # Russian  — 4,979 words
 │   └── nrc_8d_zh.json           # Chinese  — 4,684 words
 │
-├── data/                        # NRC VAD Lexicon JSON (PDS Engine)
+├── data/                        # NRC VAD Lexicon JSON (not in repo — generate via convert_nrc.py)
 │   ├── vad-en.json              # English  — 19,971 words
 │   ├── vad-ar.json              # Arabic   — 14,839 words
 │   ├── vad-de.json              # German   — 15,478 words
 │   ├── vad-es.json              # Spanish  — 15,289 words
 │   ├── vad-fa.json              # Farsi    — 14,092 words
 │   ├── vad-fr.json              # French   — 15,555 words
+│   ├── vad-it.json              # Italian  — 15,487 words
 │   ├── vad-ja.json              # Japanese — 15,828 words
 │   ├── vad-ko.json              # Korean   — 14,694 words
 │   ├── vad-ru.json              # Russian  — 15,368 words
@@ -633,13 +711,15 @@ kinesic-cryptography/
 - **Vanilla HTML / CSS / JavaScript** — no frameworks, no build tools, no backend
 - **ES6 Modules** — fully modular with `import`/`export`
 - **[Chart.js v4](https://www.chartjs.org/)** — UMD global via CDN; radar, scatter, line, bar, waveform, and custom plugin charts
+- **[Transformers.js v2 (Xenova)](https://github.com/xenova/transformers.js)** — offline in-browser translation via WASM; Opus-MT quantized models for Latin-script language pairs; Meta M2M-100 418M for Japanese; models downloaded once and cached by the browser's Cache API
+- **[Web Speech API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Speech_API)** — built-in browser TTS; Neural voice selection (Windows 11 quality); per-column speak buttons with 0.7× / 1× / 2× speed control
 - **[Kuroshiro v1](https://github.com/hexenq/kuroshiro) + [kuroshiro-analyzer-kuromoji](https://github.com/hexenq/kuroshiro-analyzer-kuromoji)** — UMD globals via jsDelivr; Japanese → Romaji
 - **[pinyin-pro v3](https://github.com/zh-lx/pinyin-pro)** — ES module via esm.sh; Chinese → Pinyin
-- **NRC VAD Lexicon** (Mohammad, 2018) — 10 languages; lazy-loaded JSON; ousiometric PDS transformation per Dodds et al. arXiv:2110.06847
-- **NRC Emotion Intensity Lexicon** (Mohammad, 2018) — 10 languages; lazy-loaded JSON; 8-dimensional affect vectors
+- **NRC VAD Lexicon** (Mohammad, 2018) — 11 languages (added Italian); lazy-loaded JSON; ousiometric PDS transformation per Dodds et al. arXiv:2110.06847
+- **NRC Emotion Intensity Lexicon** (Mohammad, 2018) — 11 languages (added Italian); lazy-loaded JSON; 8-dimensional affect vectors
 - **`convert_nrc.py`** — Python 3.8+ data pipeline; no third-party dependencies; converts NRC TSV dumps to frontend JSON
 - **Pure-JS FFT** — Radix-2 Cooley-Tukey in `physics.js`; no Web Audio API required
-- **Built-in transliteration** — Cyrillic (66-entry map), Arabic/Farsi (NFKC + consonant map), Korean (Hangul decomposition formula), French/Japanese/Korean VAD routing via Unicode heuristics
+- **Built-in transliteration** — Cyrillic (66-entry map), Arabic/Farsi (NFKC + consonant map), Korean (Hangul decomposition formula)
 - **Dual in-flight dedup caches** — both `vad.js` and `analysisEngine.js` use `Map`-based promise registries to prevent redundant parallel fetches
 - **CSS Custom Properties** — centralised design tokens for all colours, spacing, typography
 - **`window.print()` + `@media print`** — SIGINT dossier export; no third-party PDF library
