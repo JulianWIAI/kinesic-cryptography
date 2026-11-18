@@ -136,6 +136,7 @@ Offline in-browser translation powered by [Transformers.js (Xenova)](https://git
 | English → French | `Xenova/opus-mt-en-fr` | ~90 MB |
 | English → Spanish | `Xenova/opus-mt-en-es` | ~90 MB |
 | English → Italian | `Xenova/opus-mt-en-it` | ~90 MB |
+| English → Dutch   | `Xenova/opus-mt-en-nl` | ~90 MB |
 | Any ↔ Japanese | `Xenova/m2m100_418M` (Meta M2M-100) | ~420 MB |
 | Non-English → English | Reverse opus-mt model per language | ~90 MB each |
 
@@ -152,8 +153,9 @@ Automatic input language detection with a manual override dropdown:
 | Spanish ñ / ¡ / ¿ | Spanish |
 | French ç / œ | French |
 | Italian àèìòù (without French chars) | Italian |
+| Dutch `ij` digraph (`vrijheid`, `zijn`, `rijden`, …) | Dutch |
 | Romanized Japanese dictionary (`sayonara`, `konnichiwa`, …) | Japanese |
-| Known-word dictionary (`durst`, `bella`, `ciao`, `bonjour`, …) | German / Italian / French / Spanish |
+| Known-word dictionary (`durst`, `bella`, `ciao`, `bonjour`, `gezellig`, …) | German / Italian / French / Spanish / Dutch |
 | Trigram scoring (multi-word inputs) | All |
 | Default fallback | English |
 
@@ -621,7 +623,7 @@ kinesic-cryptography/
 │   │
 │   │   ── NRC VAD / Ousiometrics ─────────────────────────────
 │   ├── vad.js                   # NRC VAD lexicon integration:
-│   │                            #   VAD_PATHS (9 languages: en de es fr it ar zh ja ko),
+│   │                            #   VAD_PATHS (10 languages: en de es fr it nl ar zh ja ko),
 │   │                            #   loadVadLexicon (lazy fetch + in-flight dedup cache),
 │   │                            #   getVadLangCode (ISO code passthrough + Unicode routing),
 │   │                            #   analyzeVad (text → matched VAD word array)
@@ -670,6 +672,7 @@ kinesic-cryptography/
 │   ├── nrc_8d_fa.json           # Farsi    — 4,678 words
 │   ├── nrc_8d_fr.json           # French   — 5,083 words
 │   ├── nrc_8d_it.json           # Italian  — 5,047 words
+│   ├── nrc_8d_nl.json           # Dutch    — 5,028 words
 │   ├── nrc_8d_ja.json           # Japanese — 4,895 words
 │   ├── nrc_8d_ko.json           # Korean   — 4,722 words
 │   ├── nrc_8d_ru.json           # Russian  — 4,979 words
@@ -683,6 +686,7 @@ kinesic-cryptography/
 │   ├── vad-fa.json              # Farsi    — 14,092 words
 │   ├── vad-fr.json              # French   — 15,555 words
 │   ├── vad-it.json              # Italian  — 15,487 words
+│   ├── vad-nl.json              # Dutch    — 15,843 words
 │   ├── vad-ja.json              # Japanese — 15,828 words
 │   ├── vad-ko.json              # Korean   — 14,694 words
 │   ├── vad-ru.json              # Russian  — 15,368 words
@@ -715,8 +719,8 @@ kinesic-cryptography/
 - **[Web Speech API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Speech_API)** — built-in browser TTS; Neural voice selection (Windows 11 quality); per-column speak buttons with 0.7× / 1× / 2× speed control
 - **[Kuroshiro v1](https://github.com/hexenq/kuroshiro) + [kuroshiro-analyzer-kuromoji](https://github.com/hexenq/kuroshiro-analyzer-kuromoji)** — UMD globals via jsDelivr; Japanese → Romaji
 - **[pinyin-pro v3](https://github.com/zh-lx/pinyin-pro)** — ES module via esm.sh; Chinese → Pinyin
-- **NRC VAD Lexicon** (Mohammad, 2018) — 11 languages (added Italian); lazy-loaded JSON; ousiometric PDS transformation per Dodds et al. arXiv:2110.06847
-- **NRC Emotion Intensity Lexicon** (Mohammad, 2018) — 11 languages (added Italian); lazy-loaded JSON; 8-dimensional affect vectors
+- **NRC VAD Lexicon** (Mohammad, 2018) — 12 languages (EN DE FR ES IT NL AR ZH JA KO FA RU); lazy-loaded JSON; ousiometric PDS transformation per Dodds et al. arXiv:2110.06847
+- **NRC Emotion Intensity Lexicon** (Mohammad, 2018) — 12 languages; lazy-loaded JSON; 8-dimensional affect vectors
 - **`convert_nrc.py`** — Python 3.8+ data pipeline; no third-party dependencies; converts NRC TSV dumps to frontend JSON
 - **Pure-JS FFT** — Radix-2 Cooley-Tukey in `physics.js`; no Web Audio API required
 - **Built-in transliteration** — Cyrillic (66-entry map), Arabic/Farsi (NFKC + consonant map), Korean (Hangul decomposition formula)
